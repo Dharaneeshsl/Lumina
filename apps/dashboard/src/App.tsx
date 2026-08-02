@@ -43,22 +43,16 @@ export default function App() {
 
       {/* Navigation Header */}
       <header className="site-header">
-        <div className="brand-header-left" style={{ marginLeft: "16px" }}>
+        <div className="brand-header-left" style={{ display: "inline-flex", alignItems: "flex-start", gap: "8px", marginLeft: "16px" }}>
+          <img
+            src={logoImage}
+            alt="Lumino Logo"
+            className="brand-logo-img"
+            style={{ width: "38px", height: "38px", objectFit: "contain", flexShrink: 0, marginTop: "0px" }}
+          />
           <div className="brand-logo-wrapper">
-            <div className="brand-logo" style={{ display: "inline-flex", alignItems: "center" }}>
-              <img
-                src={logoImage}
-                alt="L"
-                className="brand-logo-img"
-                style={{
-                  width: "36px",
-                  height: "36px",
-                  objectFit: "contain",
-                  marginRight: "-2px",
-                  verticalAlign: "middle"
-                }}
-              />
-              um
+            <div className="brand-logo">
+              Lum
               <span className="logo-letter-i-wrapper">
                 ı
                 <svg

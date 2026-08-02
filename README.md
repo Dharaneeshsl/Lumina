@@ -2,9 +2,9 @@
 
 <br />
 
-<h1 align="center" style="display: flex; align-items: center; justify-content: center;">
-  <img src="apps/dashboard/src/assets/logo.svg" alt="L" width="44" height="44" style="vertical-align: middle; display: inline-block; margin-right: -2px;" />
-  <span>umino</span>
+<h1 align="center" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+  <img src="apps/dashboard/src/assets/logo.svg" alt="Lumino Logo" width="40" height="40" style="vertical-align: middle; display: inline-block;" />
+  <span>Lumino</span>
 </h1>
 
 ### The Verified Campus & Analytics Intelligence Platform
