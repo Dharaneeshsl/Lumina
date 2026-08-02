@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import {prisma} from "../plugins/prisma"
-import { resend } from "../plugins/resend"
+import {prisma} from "../plugins/plugins.prisma"
+import { resend } from "../plugins/plugins.resend"
 
 // auth instance resposible for all the auth features
 

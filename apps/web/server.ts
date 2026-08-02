@@ -5,6 +5,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { auth } from "@lumina/auth";
 import { toNodeHandler } from "better-auth/node";
+import { profileRouter } from "./features/profile/profile.routes.ts";
+
 
 const app = express();
 
@@ -20,7 +22,9 @@ app.use(cors({
   credentials: true,
 }));
 
+
 app.all("/api/auth/*path", toNodeHandler(auth));
+app.use("/api/profile", profileRouter);
 
 
 

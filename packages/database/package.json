@@ -1,6 +1,6 @@
 {
-  "name": "@lumina/types",
-  "module": "src/index.ts",
+  "name": "@repo/database",
+  "module": "./src/index.ts",
   "type": "module",
   "private": true,
   "exports" : {
