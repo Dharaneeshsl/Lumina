@@ -1,0 +1,54 @@
+# EditorConfig — https://editorconfig.org
+# Ensures consistent coding style across all editors and IDEs.
+
+root = true
+
+# ── Defaults (all files) ───────────────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 100
+
+# ── TypeScript / JavaScript ───────────────────────────────────────────────────
+[*.{ts,tsx,js,jsx,mjs,cjs}]
+indent_size = 2
+
+# ── JSON ──────────────────────────────────────────────────────────────────────
+[*.json]
+indent_size = 2
+
+# ── YAML ──────────────────────────────────────────────────────────────────────
+[*.{yml,yaml}]
+indent_size = 2
+
+# ── CSS ───────────────────────────────────────────────────────────────────────
+[*.css]
+indent_size = 2
+
+# ── Markdown ──────────────────────────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# ── Makefiles need tabs ───────────────────────────────────────────────────────
+[Makefile]
+indent_style = tab
+
+# ── Shell scripts ─────────────────────────────────────────────────────────────
+[*.sh]
+indent_size = 2
+end_of_line = lf
+
+# ── Prisma ────────────────────────────────────────────────────────────────────
+[*.prisma]
+indent_size = 2
+
+# ── Lock files — don't touch these ───────────────────────────────────────────
+[{bun.lock,package-lock.json,yarn.lock,pnpm-lock.yaml}]
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
