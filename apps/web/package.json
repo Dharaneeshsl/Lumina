@@ -1,11 +1,22 @@
 {
   "name": "web",
   "private": true,
+  "scripts": {
+    "dev:auth": "bun run server.ts"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/express": "^5.0.6"
   },
   "dependencies": {
-    "@lumina/auth": "workspace:*"
+    "@lumina/auth": "workspace:*",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/dotenv": "^8.2.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
   },
   "peerDependencies": {
     "typescript": "^5"

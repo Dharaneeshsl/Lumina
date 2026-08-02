@@ -12,10 +12,37 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you for signing up, ${name || "student"}!`);
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/sign-up/email", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, rememberMe: true }),
+      });
+      const data = (await response.json()) as { message?: string };
+
+      if (!response.ok) {
+        throw new Error(data.message ?? "Unable to create your account.");
+      }
+
+      onGoToLogin?.();
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Unable to create your account.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,8 +111,10 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
               </label>
             </div>
 
-            <button type="submit" className="signup-submit-btn">
-              Signup
+            {error && <p className="signup-error" role="alert">{error}</p>}
+
+            <button type="submit" className="signup-submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? "Creating account..." : "Signup"}
             </button>
           </form>
 
