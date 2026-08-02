@@ -8,6 +8,9 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "better-auth": "^latest"
+    "@types/dotenv": "^8.2.3",
+    "better-auth": "^latest",
+    "dotenv": "^17.4.2",
+    "resend": "^6.18.1"
   }
 }

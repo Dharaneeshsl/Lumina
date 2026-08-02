@@ -1,19 +1,11 @@
 import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
-import { PrismaClient } from "../../../database/generated/prisma/client";
+import {prisma} from "../plugins/prisma"
+import { resend } from "../plugins/resend"
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+// auth instance resposible for all the auth features
 
-const adapter = new PrismaPg(pool);
-
-export const prisma = new PrismaClient({
-  adapter,
-});
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
@@ -29,6 +21,28 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+
+    async sendResetPassword({ user, url }) {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM!,
+        to: user.email,
+        subject: "Reset your password",
+        html: `Click <a href="${url}">here</a> to reset your password.`,
+      });
+    },
+  },
+
+  emailVerification: {
+    sendOnSignUp: true,
+
+    async sendVerificationEmail({ user, url }) {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM!,
+        to: user.email,
+        subject: "Verify your email",
+        html: `Click <a href="${url}">here</a> to verify your email.`,
+      });
+    },
   },
 
   session: {

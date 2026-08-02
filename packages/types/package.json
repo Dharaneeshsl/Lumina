@@ -1,15 +1,15 @@
 {
-  "name": "auth",
-  "module": "index.ts",
+  "name": "@lumina/types",
+  "module": "src/index.ts",
   "type": "module",
   "private": true,
+  "export" : {
+    "." : "./src/index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "better-auth": "^1.6.25"
   }
 }

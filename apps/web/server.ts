@@ -23,7 +23,6 @@ app.use(cors({
 app.all("/api/auth/*path", toNodeHandler(auth));
 
 
-// health check route
 
 app.get("/ok" , (req : Request, res: Response) => {
     res.status(200).json({ message: "OK" });
