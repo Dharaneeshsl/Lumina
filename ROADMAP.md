@@ -1,120 +1,129 @@
-# Lumina Product Roadmap
+<div align="center">
 
-> **Last Updated**: August 2026  
-> This is a living document. Priorities may shift based on customer feedback, market conditions, and engineering capacity. Subscribe to our [GitHub Discussions](https://github.com/luminohq/lumina/discussions) for real-time roadmap updates.
+<img src="https://github.com/user-attachments/assets/b7fcf33d-5510-4cc0-80fb-d7b893eb4159" alt="Lumino Logo" width="140"/>
 
----
+<br/>
 
-## How We Prioritize
+# Lumino
 
-Every item on this roadmap is evaluated against four criteria:
+### Enterprise Infrastructure for Connected Campuses
 
-1. **Customer impact** — How many users does this affect? How severe is the pain?
-2. **Strategic alignment** — Does this advance our mission of effortless data intelligence?
-3. **Engineering effort** — How long will this take to build well?
-4. **Revenue potential** — Does this unlock a new market segment or pricing tier?
+> **Verified Identity • Communities • Clubs • Events • Placements • Mentorship • Campus Services**
 
-We actively welcome feedback on our priorities. If something here does not reflect your needs, please open a [GitHub Discussion](https://github.com/luminohq/lumina/discussions) or email **product@luminohq.com**.
+*Building the trusted digital ecosystem for the next generation of universities.*
 
----
+<br/>
 
-## ✅ Recently Shipped (Q2 2026)
+<p>
+  <img src="https://img.shields.io/badge/Status-Active%20Development-16A34A?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Open%20Source-MIT-2563EB?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Architecture-Production%20Ready-7C3AED?style=for-the-badge"/>
+</p>
 
-| Feature | Notes |
-|---|---|
-| ✅ Real-time WebSocket chart updates | Dashboards now refresh live — no more F5 |
-| ✅ PostgreSQL native connector v2 | 10x query performance improvement |
-| ✅ Organization teams & roles | Granular permissions per workspace |
-| ✅ Slack notification integration | Alert delivery to any Slack channel |
-| ✅ CSV/Excel data import | Drag-and-drop file ingestion UI |
-| ✅ Dashboard version history | Full diff view with restore capability |
-| ✅ Two-factor authentication (TOTP) | TOTP authenticator app support |
-| ✅ Row-Level Security (RLS) | Dynamic data filtering by user context |
-| ✅ Embed SDK v1 | Embed charts into third-party applications |
-| ✅ React Email templates | Beautiful, consistent transactional emails |
+<p>
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black"/>
+  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Turborepo-EF4444?style=flat-square&logo=turborepo&logoColor=white"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Better%20Auth-16A34A?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white"/>
+  <img src="https://img.shields.io/badge/AWS-232F3E?style=flat-square&logo=amazonaws&logoColor=FF9900"/>
+  <img src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white"/>
+</p>
 
----
+<p>
+  <img src="https://img.shields.io/badge/Multi--Tenant-22C55E?style=flat-square"/>
+  <img src="https://img.shields.io/badge/RBAC-Implemented-2563EB?style=flat-square"/>
+  <img src="https://img.shields.io/badge/WebSockets-Realtime-7C3AED?style=flat-square"/>
+  <img src="https://img.shields.io/badge/REST%20API-Versioned-0EA5E9?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Auth-Verified-16A34A?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Notifications-Live-E11D48?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Monorepo-Turbo-6D28D9?style=flat-square"/>
+  <img src="https://img.shields.io/badge/CI/CD-Passing-success?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Cloud-Native-blue?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Security-Enterprise-red?style=flat-square"/>
+</p>
 
-## 🚧 In Progress (Q3 2026)
+<br/>
 
-| Feature | Status | Target |
-|---|---|---|
-| **Lumina AI Co-pilot v2** — NLQ with multi-step reasoning | 🔨 In development | Sep 2026 |
-| **Anomaly detection engine** — ML-based outlier alerts | 🔨 In development | Aug 2026 |
-| **Self-hosted Docker bundle** — single `docker compose up` | 🔨 In development | Sep 2026 |
-| **Stripe billing integration** — usage-based billing | 🔨 In development | Aug 2026 |
-| **MySQL connector** — native MySQL 8+ support | 🔨 In development | Aug 2026 |
-| **WebAuthn passkeys** — passwordless login | 🔬 In design | Sep 2026 |
-| **API key management UI** — self-serve API key rotation | 🔬 In design | Sep 2026 |
-| **Funnel chart type** — conversion funnel visualization | ✏️ Scoped | Sep 2026 |
+<p align="center">
+  <a href="#-overview"><strong>Overview</strong></a> •
+  <a href="#-features"><strong>Features</strong></a> •
+  <a href="#-architecture"><strong>Architecture</strong></a> •
+  <a href="#-getting-started"><strong>Getting Started</strong></a> •
+  <a href="#-roadmap"><strong>Roadmap</strong></a> •
+  <a href="#-contributing"><strong>Contributing</strong></a>
+</p>
 
----
-
-## 📋 Planned (Q4 2026)
-
-| Feature | Priority | Notes |
-|---|---|---|
-| **Native mobile apps** (React Native) | 🔴 High | iOS and Android, all dashboard features |
-| **Data transformation layer** | 🔴 High | dbt-compatible YAML-based transforms |
-| **Multi-cloud replication** | 🟡 Medium | Disaster recovery, geo-redundancy |
-| **Snowflake connector** | 🔴 High | Most requested enterprise connector |
-| **BigQuery connector** | 🔴 High | Native Google Cloud integration |
-| **MongoDB connector** | 🟡 Medium | Document store querying and visualization |
-| **Scheduled exports** | 🟡 Medium | Automated PDF/CSV report delivery |
-| **Executive dashboard templates** | 🟢 Low | Pre-built CFO, CMO, CTO dashboard packs |
-| **Keyboard shortcuts** | 🟢 Low | Power user productivity improvements |
-| **Dark mode** | 🟡 Medium | System-aware automatic dark/light switching |
-| **SSO — SAML 2.0** | 🔴 High | Enterprise SSO support |
-| **SSO — Microsoft Entra** | 🔴 High | Azure AD integration |
-| **Full audit log UI** | 🟡 Medium | Searchable audit trail in the dashboard |
+</div>
 
 ---
 
-## 🔭 Future Vision (2027 and Beyond)
+# Overview
 
-These are longer-horizon ideas we are actively thinking about but have not yet committed to:
+Lumino is a production-grade, multi-tenant platform designed to become the digital infrastructure for modern college communities. It unifies verified identities, campus organizations, student engagement, career development, mentorship, and essential campus services within a secure and scalable ecosystem, enabling institutions to operate from a single, trusted platform instead of fragmented applications.
 
-| Idea | Description |
-|---|---|
-| **Lumina AI Agents** | Autonomous agents that monitor KPIs and take configurable actions (send alerts, create tickets, update records) |
-| **Lumina Marketplace** | Community-built connectors, dashboard templates, and AI prompt packs |
-| **HIPAA Certification** | Full HIPAA compliance for healthcare and life sciences customers |
-| **Edge-native deployment** | Cloudflare Workers-based deployment for ultra-low latency |
-| **Lumina CLI v2** | Full-featured CLI for managing every aspect of your Lumina workspace |
-| **Terraform provider** | Manage Lumina resources declaratively as infrastructure-as-code |
-| **dbt integration** | First-class support for dbt models, tests, and docs as data sources |
-| **Data catalog** | Browse, search, and annotate all your data assets in one place |
-| **Column-level lineage** | Trace every calculated metric back to its raw source column |
-| **Query versioning** | Git-like version control for your saved queries |
-| **Collaborative query editor** | Real-time, multiplayer SQL editor with presence indicators |
-| **Native Jupyter integration** | Import and display Jupyter notebook outputs as Lumina charts |
-| **Multi-tenancy support** | Built-in multi-tenant architecture for agencies and white-label resellers |
+Built around a modular architecture, Lumino provides role-based access control, real-time communication, intelligent notifications, event management, placement workflows, club administration, campus marketplaces, and community collaboration through a unified experience. Every service is independently extensible while remaining seamlessly integrated, allowing institutions to adopt only the capabilities they need without sacrificing performance, security, or maintainability.
+
+From a single campus deployment to a nationwide academic network, Lumino is engineered for horizontal scalability, fault-tolerant services, and production-grade reliability. Its architecture emphasizes security, extensibility, and developer productivity, providing universities with a modern foundation to digitize campus operations while delivering a fast, intuitive, and trusted experience for students, faculty, alumni, and administrators.
 
 ---
 
-## 🙅 Explicitly Not on the Roadmap
+## Key Highlights
 
-The following items have been requested but we have decided not to build them (at least for now):
+- 🏫 Multi-Tenant College Architecture
+- 🔐 Verified Digital Identity & Role-Based Access Control
+- 👥 Communities, Clubs & Student Organizations
+- 📅 Event & Registration Management
+- 💼 Placement & Internship Portal
+- 🤝 Alumni & Mentorship Network
+- 💬 Real-Time Messaging & Notifications
+- 🛒 Campus Marketplace & Lost & Found
+- 📊 Administrative Dashboards & Analytics
+- ⚡ Production-Ready, Modular & Scalable Infrastructure
 
-| Feature | Reason |
-|---|---|
-| **On-premise/air-gapped installation** | Engineering and support overhead is too high at our current scale. We offer self-hosted Docker instead. |
-| **Python SDK** | Our TypeScript SDK covers the vast majority of use cases. We may revisit if demand grows significantly. |
-| **Built-in ETL pipeline builder** | This would compete with specialized tools (Airbyte, Fivetran) where they have a clear advantage. We integrate with them instead. |
-| **Spreadsheet editor inside Lumina** | We integrate with Google Sheets and Excel. Building a spreadsheet editor is a massive product in itself. |
+---
+<img width="1700" height="1015" alt="Screenshot 2026-08-02 at 5 08 02 PM" src="https://github.com/user-attachments/assets/b9d1ec09-2e49-4cea-85fb-94baaf7a8bd2" />
+
+ ---
+
+# 🎯 Who Is Lumino For?
+
+Lumino is designed for educational institutions that want to replace fragmented campus tools with a single, secure, and scalable digital ecosystem. Rather than relying on disconnected messaging platforms, spreadsheets, and multiple third-party applications, Lumino centralizes communication, collaboration, administration, and student services into one production-ready platform.
+
+Lumino is a great fit if you:
+
+- 🏫 Want a unified platform for students, faculty, alumni, and administrators
+- 🔐 Need verified digital identities with secure role-based access control
+- 👥 Manage campus communities, clubs, departments, or student organizations
+- 📅 Organize campus events, registrations, and announcements at scale
+- 💼 Need a dedicated placement, internship, and career ecosystem
+- 🤝 Want to connect students with alumni and mentors
+- 💬 Require real-time communication and notifications across the institution
+- 🛒 Want to provide campus services such as marketplaces, lost & found, and community resources
+- 📈 Need an architecture capable of supporting thousands of concurrent users across multiple institutions
+
+Lumino may not be the right fit if your institution only needs a simple notice board, static website, or basic messaging application.
 
 ---
 
-## How to Influence the Roadmap
+# 🚀 When Should You Use Lumino?
 
-Your input directly shapes what we build. Here is how to make your voice heard:
+Use Lumino when your institution has outgrown disconnected tools and requires a centralized, production-grade platform to manage campus operations efficiently.
 
-1. **👍 React to GitHub issues** — upvoting signals demand to our product team
-2. **💬 Join GitHub Discussions** — detailed conversations about specific features
-3. **📧 Email product@luminohq.com** — for enterprise feature requests or strategic feedback
-4. **💬 Discord** — join `#feature-requests` in our [Discord community](https://discord.gg/lumina)
-5. **📞 Schedule a call** — enterprise customers can book a product review call via their account manager
+Lumino is built for:
 
----
+- 🎓 Universities and colleges managing large student communities
+- 🏢 Multi-campus institutions requiring centralized administration
+- 🌐 Organizations building verified digital communities for education
+- 📊 Institutions seeking real-time engagement and operational visibility
+- 🔄 Campuses replacing multiple standalone systems with a unified platform
+- 🔒 Environments where identity verification, security, and role-based permissions are critical
+- ⚡ Large-scale deployments requiring reliability, scalability, and maintainability
+- 🚀 Institutions preparing for long-term digital transformation
 
-*Lumina · Built with love · [luminohq.com](https://luminohq.com)*
+Whether supporting a single college or expanding to a nationwide academic network, Lumino provides the infrastructure required to build trusted, scalable, and connected campus communities.
