@@ -11,10 +11,24 @@
   "devDependencies": {
     "@types/node": "^26.1.2",
     "@types/pg": "^8.20.3",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
     "prettier": "^3.7.4",
     "prisma": "^7.9.1",
     "turbo": "^2.10.8",
     "typescript": "5.9.2"
+  },
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5"
+  },
+  "resolutions": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5"
   },
   "engines": {
     "node": ">=18"
@@ -32,6 +46,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "better-auth": "^1.6.25",
     "dotenv": "^17.4.2",
     "pg": "^8.22.0"
   }

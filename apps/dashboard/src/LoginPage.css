@@ -1,0 +1,183 @@
+/* Login Page Styles matching exact reference image */
+.login-container {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  background-color: #ffffff;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+/* Floating Back Button */
+.login-back-btn {
+  position: absolute;
+  top: 24px;
+  left: 28px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.login-back-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: translateX(-2px);
+}
+
+/* Left Form Column */
+.login-left-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 48px;
+  box-sizing: border-box;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 440px;
+}
+
+.login-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #475569;
+  margin-top: 0;
+  margin-bottom: 32px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.label-with-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.forgot-password-link {
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.login-submit-btn {
+  width: 100%;
+  height: 48px;
+  background-color: #33532b;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.login-submit-btn:hover {
+  background-color: #26401f;
+}
+
+.login-submit-btn:active {
+  transform: scale(0.99);
+}
+
+/* Divider */
+.login-divider {
+  display: flex;
+  align-items: center;
+  margin: 28px 0;
+}
+
+/* Footer Text */
+.login-footer-text {
+  text-align: center;
+  font-size: 14px;
+  color: #475569;
+  margin: 0;
+}
+
+.signup-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+}
+
+.signup-link-btn:hover {
+  text-decoration: underline;
+}
+
+/* Right Image Column */
+.login-right-col {
+  flex: 1;
+  padding: 16px 16px 16px 0;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.login-image-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+  background-color: #f1f5f9;
+}
+
+.login-monstera-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .login-container {
+    flex-direction: column;
+  }
+  .login-right-col {
+    display: none;
+  }
+  .login-left-col {
+    padding: 80px 24px 40px 24px;
+  }
+}

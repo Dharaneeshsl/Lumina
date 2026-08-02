@@ -7,10 +7,643 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum UserRole {
+  STUDENT
+  FACULTY
+  ALUMNI
+  CLUB_ADMIN
+  COMMUNITY_MODERATOR
+  COLLEGE_ADMIN
+  SUPER_ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum Provider {
+  EMAIL
+  GOOGLE
+}
+
+enum DeviceType {
+  WEB
+  ANDROID
+  IOS
+  DESKTOP
+}
+
+enum Visibility {
+  PUBLIC
+  COLLEGE
+  FRIENDS
+  PRIVATE
+}
+
+model College {
+  id          String       @id @default(cuid())
+  name        String
+  shortName   String?
+  domain      String       @unique
+  logo        String?
+  website     String?
+  city        String?
+  state       String?
+  country     String?
+  departments Department[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  communities Community[]
+  clubs       Club[]
+
+  @@index([domain])
+}
+
+model Department {
   id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
+  name      String
+  code      String?
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id])
+  users     User[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([collegeId, name])
+}
+
+model User {
+  id                     String                  @id @default(cuid())
+  email                  String                  @unique
+  username               String                  @unique
+  phone                  String?                 @unique
+  password               String?
+  provider               Provider                @default(EMAIL)
+  role                   UserRole                @default(STUDENT)
+  status                 UserStatus              @default(PENDING)
+  emailVerified          Boolean                 @default(false)
+  phoneVerified          Boolean                 @default(false)
+  twoFactorEnabled       Boolean                 @default(false)
+  collegeId              String?
+  departmentId           String?
+  college                College?                @relation(fields: [collegeId], references: [id])
+  department             Department?             @relation(fields: [departmentId], references: [id])
+  profile                Profile?
+  sessions               Session[]
+  devices                Device[]
+  refreshTokens          RefreshToken[]
+  otps                   OTP[]
+  verification           Verification?
+  loginHistory           LoginHistory[]
+  posts                  Post[]
+  comments               Comment[]
+  likes                  Like[]
+  notifications          Notification[]
+  sentFriendRequests     FriendRequest[]         @relation("Sent")
+  receivedFriendRequests FriendRequest[]         @relation("Received")
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  conversations          Conversation[]
+  conversationMembers    ConversationMember[]
+  messages               Message[]
+  messageReactions       MessageReaction[]
+  messageReads           MessageRead[]
+  communityMembers       CommunityMember[]
+  communityPosts         CommunityPost[]
+  clubMembers            ClubMember[]
+  events                 Event[]
+  eventRegistrations     EventRegistration[]
+  studyGroups            StudyGroup[]
+  studyGroupMembers      StudyGroupMember[]
+  marketplaceListings    MarketplaceListing[]
+  wishlists              Wishlist[]
+  internshipApplications InternshipApplication[]
+
+  @@index([collegeId])
+  @@index([departmentId])
+}
+
+model Profile {
+  id                String     @id @default(cuid())
+  userId            String     @unique
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName         String
+  lastName          String
+  bio               String?
+  about             String?
+  profilePicture    String?
+  coverImage        String?
+  gender            Gender?
+  dob               DateTime?
+  hometown          String?
+  location          String?
+  cgpa              Float?
+  semester          Int?
+  year              Int?
+  batch             String?
+  rollNumber        String?
+  skills            String[]
+  interests         String[]
+  languages         String[]
+  github            String?
+  linkedin          String?
+  portfolio         String?
+  leetcode          String?
+  codeforces        String?
+  hackerrank        String?
+  profileVisibility Visibility @default(PUBLIC)
+  hideEmail         Boolean    @default(false)
+  hidePhone         Boolean    @default(false)
+  hideCgpa          Boolean    @default(false)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Verification {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentIdImage       String?
+  faceImage            String?
+  collegeEmailVerified Boolean            @default(false)
+  studentIdVerified    Boolean            @default(false)
+  faceVerified         Boolean            @default(false)
+  alumniVerified       Boolean            @default(false)
+  facultyVerified      Boolean            @default(false)
+  status               VerificationStatus @default(PENDING)
+  verifiedBy           String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Device {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  deviceType DeviceType
+  lastActive DateTime
+  createdAt  DateTime   @default(now())
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  code      String
+  email     String?
+  phone     String?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  ip        String?
+  location  String?
+  device    String?
+  success   Boolean
+  createdAt DateTime @default(now())
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+model FriendRequest {
+  id         String              @id @default(cuid())
+  senderId   String
+  receiverId String
+  sender     User                @relation("Sent", fields: [senderId], references: [id])
+  receiver   User                @relation("Received", fields: [receiverId], references: [id])
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+
+  @@unique([senderId, receiverId])
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  PDF
+  POLL
+  CODE
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  type      PostType
+  content   String?
+  images    String[]
+  videos    String[]
+  anonymous Boolean   @default(false)
+  comments  Comment[]
+  likes     Like[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  postId    String
+  userId    String
+  parentId  String?
+  post      Post      @relation(fields: [postId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  parent    Comment?  @relation("Replies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("Replies")
+  content   String
+  createdAt DateTime  @default(now())
+}
+
+model Like {
+  id     String @id @default(cuid())
+  userId String
+  postId String
+  user   User   @relation(fields: [userId], references: [id])
+  post   Post   @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+}
+
+enum NotificationType {
+  FRIEND_REQUEST
+  MESSAGE
+  LIKE
+  COMMENT
+  EVENT
+  CLUB
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  read      Boolean          @default(false)
+  type      NotificationType
+  createdAt DateTime         @default(now())
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+  GIF
+  STICKER
+  SYSTEM
+}
+
+model Conversation {
+  id          String               @id @default(cuid())
+  name        String?
+  image       String?
+  type        ConversationType
+  description String?
+  members     ConversationMember[]
+  messages    Message[]
+  createdById String
+  createdBy   User                 @relation(fields: [createdById], references: [id])
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([createdById])
+}
+
+model ConversationMember {
+  id             String       @id @default(cuid())
+  conversationId String
+  userId         String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isAdmin        Boolean      @default(false)
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String            @id @default(cuid())
+  conversationId String
+  senderId       String
+  replyToId      String?
+  conversation   Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User              @relation(fields: [senderId], references: [id])
+  replyTo        Message?          @relation("Reply", fields: [replyToId], references: [id])
+  replies        Message[]         @relation("Reply")
+  type           MessageType
+  content        String?
+  edited         Boolean           @default(false)
+  deleted        Boolean           @default(false)
+  attachments    Attachment[]
+  reactions      MessageReaction[]
+  reads          MessageRead[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([conversationId])
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  url       String
+  mimeType  String
+  size      Int
+}
+
+model MessageReaction {
+  id        String  @id @default(cuid())
+  messageId String
+  userId    String
+  emoji     String
+  message   Message @relation(fields: [messageId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId, emoji])
+}
+
+model MessageRead {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+}
+
+enum CommunityType {
+  COLLEGE
+  DEPARTMENT
+  HOSTEL
+  INTEREST
+  STARTUP
+  CODING
+}
+
+model Community {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  banner      String?
+  type        CommunityType
+  collegeId   String?
+  college     College?          @relation(fields: [collegeId], references: [id])
+  members     CommunityMember[]
+  posts       CommunityPost[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model CommunityMember {
+  id          String    @id @default(cuid())
+  communityId String
+  userId      String
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id])
+  isModerator Boolean   @default(false)
+  joinedAt    DateTime  @default(now())
+
+  @@unique([communityId, userId])
+}
+
+model CommunityPost {
+  id          String    @id @default(cuid())
+  communityId String
+  authorId    String
+  title       String?
+  content     String?
+  community   Community @relation(fields: [communityId], references: [id])
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+enum ClubRole {
+  MEMBER
+  CORE_MEMBER
+  SECRETARY
+  PRESIDENT
+  FACULTY
+}
+
+model Club {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  logo        String?
+  banner      String?
+  collegeId   String
+  college     College      @relation(fields: [collegeId], references: [id])
+  members     ClubMember[]
+  events      Event[]
+  createdAt   DateTime     @default(now())
+}
+
+model ClubMember {
+  id       String   @id @default(cuid())
+  clubId   String
+  userId   String
+  role     ClubRole
+  joinedAt DateTime @default(now())
+  club     Club     @relation(fields: [clubId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([clubId, userId])
+}
+
+enum EventType {
+  WORKSHOP
+  HACKATHON
+  SEMINAR
+  FEST
+  WEBINAR
+  OTHER
+}
+
+model Event {
+  id          String              @id @default(cuid())
+  title       String
+  description String?
+  coverImage  String?
+  startTime   DateTime
+  endTime     DateTime
+  venue       String?
+  clubId      String?
+  organizerId String
+  organizer   User                @relation(fields: [organizerId], references: [id])
+  club        Club?               @relation(fields: [clubId], references: [id])
+  attendees   EventRegistration[]
+  createdAt   DateTime            @default(now())
+}
+
+model EventRegistration {
+  id        String  @id @default(cuid())
+  eventId   String
+  userId    String
+  checkedIn Boolean @default(false)
+  qrCode    String?
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model StudyGroup {
+  id          String             @id @default(cuid())
+  name        String
+  subject     String
+  semester    Int
+  description String?
+  ownerId     String
+  owner       User               @relation(fields: [ownerId], references: [id])
+  members     StudyGroupMember[]
+  createdAt   DateTime           @default(now())
+}
+
+model StudyGroupMember {
+  id           String     @id @default(cuid())
+  studyGroupId String
+  userId       String
+  studyGroup   StudyGroup @relation(fields: [studyGroupId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([studyGroupId, userId])
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD
+  HIDDEN
+}
+
+enum ListingCategory {
+  BOOK
+  CYCLE
+  ELECTRONICS
+  HOSTEL
+  FURNITURE
+  OTHER
+}
+
+model MarketplaceListing {
+  id          String          @id @default(cuid())
+  sellerId    String
+  seller      User            @relation(fields: [sellerId], references: [id])
+  title       String
+  description String?
+  price       Float
+  category    ListingCategory
+  status      ListingStatus   @default(ACTIVE)
+  images      String[]
+  createdAt   DateTime        @default(now())
+  wishlists   Wishlist[]
+}
+
+model Wishlist {
+  id        String             @id @default(cuid())
+  listingId String
+  userId    String
+  listing   MarketplaceListing @relation(fields: [listingId], references: [id])
+  user      User               @relation(fields: [userId], references: [id])
+
+  @@unique([listingId, userId])
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String
+  logo        String?
+  website     String?
+  internships Internship[]
+}
+
+model Internship {
+  id           String                  @id @default(cuid())
+  companyId    String
+  company      Company                 @relation(fields: [companyId], references: [id])
+  title        String
+  description  String?
+  location     String?
+  stipend      Float?
+  applications InternshipApplication[]
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  INTERVIEW
+  REJECTED
+  OFFERED
+}
+
+model InternshipApplication {
+  id           String            @id @default(cuid())
+  internshipId String
+  userId       String
+  resumeUrl    String?
+  status       ApplicationStatus @default(APPLIED)
+  internship   Internship        @relation(fields: [internshipId], references: [id])
+  user         User              @relation(fields: [userId], references: [id])
+
+  @@unique([internshipId, userId])
 }

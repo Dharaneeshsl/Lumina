@@ -1,0 +1,104 @@
+/* Global Design System & Variables */
+:root {
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Color System - LinkedIn Blue Palette */
+  --primary: #0A66C2;
+  --primary-hover: #004182;
+  --primary-light: #E8F3FF;
+  --accent-purple: #0077B5;
+  --accent-violet: #0A66C2;
+
+  --bg-page: #faf8f5;
+  --bg-section: #F8FAFC;
+  --bg-card: #FFFFFF;
+
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-placeholder: #9CA3AF;
+
+  --border-color: #E5E7EB;
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  --gradient-hero: linear-gradient(135deg, #0A66C2 0%, #0077B5 50%, #005E93 100%);
+  --gradient-badge: linear-gradient(135deg, rgba(10, 102, 194, 0.08) 0%, rgba(0, 119, 181, 0.08) 100%);
+
+  --shadow-soft: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 16px 32px -4px rgba(10, 102, 194, 0.15);
+  --shadow-floating: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+
+  --radius-card: 20px;
+  --radius-button: 10px;
+  --radius-pill: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }

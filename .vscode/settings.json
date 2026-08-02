@@ -1,17 +1,20 @@
 {
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "always"
-    },
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "files.exclude": {
-      "**/.turbo": true,
-      "**/node_modules": true
-    },
-    "search.exclude": {
-      "**/.turbo": true,
-      "**/node_modules": true
-    },
-    "editor.tabSize": 2,
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "files.exclude": {
+    "**/.turbo": true,
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/.turbo": true,
+    "**/node_modules": true
+  },
+  "editor.tabSize": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
   }
+}
