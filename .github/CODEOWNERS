@@ -1,0 +1,11 @@
+# Default review ownership. Replace with individual GitHub usernames or teams
+# before enabling required reviews in branch protection.
+* @luminohq/core
+
+# Security-sensitive and production-impacting paths.
+/packages/auth/ @luminohq/security
+/packages/database/ @luminohq/security
+/apps/web/middleware.ts @luminohq/security
+/.github/workflows/ @luminohq/platform
+/docker-compose.yml @luminohq/platform
+/vercel.json @luminohq/platform

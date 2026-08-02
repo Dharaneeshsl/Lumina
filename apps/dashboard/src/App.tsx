@@ -2,6 +2,7 @@ import { useState } from "react";
 import SideRays from "./SideRays";
 import SignupPage from "./SignupPage";
 import LoginPage from "./LoginPage";
+import logoImage from "./assets/logo.svg";
 import "./App.css";
 
 export default function App() {
@@ -42,44 +43,58 @@ export default function App() {
 
       {/* Navigation Header */}
       <header className="site-header">
-        <div className="brand-logo-wrapper">
-          <div className="brand-logo">
-            Lum
-            <span className="logo-letter-i-wrapper">
-              ı
-              <svg
-                className="graduation-cap-dot-icon"
-                viewBox="0 0 24 24"
+        <div className="brand-header-left" style={{ marginLeft: "16px" }}>
+          <div className="brand-logo-wrapper">
+            <div className="brand-logo" style={{ display: "inline-flex", alignItems: "center" }}>
+              <img
+                src={logoImage}
+                alt="L"
+                className="brand-logo-img"
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  objectFit: "contain",
+                  marginRight: "-2px",
+                  verticalAlign: "middle"
+                }}
+              />
+              um
+              <span className="logo-letter-i-wrapper">
+                ı
+                <svg
+                  className="graduation-cap-dot-icon"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18C5 17.18 8 21 12 21C16 21 19 17.18 19 17.18V13.18L12 17L5 13.18Z" />
+                </svg>
+              </span>
+              no
+            </div>
+            {/* Underline with Arrow-Like Tip */}
+            <svg
+              className="brand-logo-underline"
+              viewBox="0 0 135 14"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M 2 7 Q 60 12 116 7"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              {/* Sharp Arrowhead Tip */}
+              <path
+                d="M 110 2.5 L 124 7 L 110 11.5 L 113.5 7 Z"
                 fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18C5 17.18 8 21 12 21C16 21 19 17.18 19 17.18V13.18L12 17L5 13.18Z" />
-              </svg>
-            </span>
-            no
+              />
+            </svg>
           </div>
-          {/* Underline with Arrow-Like Tip */}
-          <svg
-            className="brand-logo-underline"
-            viewBox="0 0 135 14"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M 2 7 Q 60 12 116 7"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            {/* Sharp Arrowhead Tip */}
-            <path
-              d="M 110 2.5 L 124 7 L 110 11.5 L 113.5 7 Z"
-              fill="currentColor"
-            />
-          </svg>
         </div>
 
-        <nav>
+        <nav className="site-nav">
           <ul className="nav-menu">
             <li>
               <a href="#home" className="nav-link">

@@ -74,7 +74,7 @@ button {
   max-width: 1320px;
   width: 100%;
   margin: 0 auto;
-  padding: 28px 48px 16px 48px;
+  padding: 28px 48px 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -102,7 +102,7 @@ button {
 .brand-logo-underline {
   width: 100%;
   height: 12px;
-  margin-top: -2px;
+  margin-top: 1px;
   color: #0f0f0f;
   overflow: visible;
   pointer-events: none;
@@ -118,11 +118,20 @@ button {
   width: 14px;
   height: 14px;
   position: absolute;
-  top: 0px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-12deg);
-  color: var(--color-brand-primary);
+  top: -1px;
+  left: 65%;
+  transform: translateX(-50%) rotate(15deg);
+  color: #0f0f0f;
   pointer-events: none;
+}
+
+.site-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .nav-menu {

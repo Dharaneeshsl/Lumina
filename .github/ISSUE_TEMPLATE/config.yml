@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/luminohq/lumina/security/advisories/new
+    about: Please report security vulnerabilities privately.
+  - name: Product ideas and questions
+    url: https://github.com/luminohq/lumina/discussions
+    about: Start a discussion for feature ideas, feedback, or support questions.
