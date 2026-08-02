@@ -1,0 +1,58 @@
+{
+  "version": 2,
+  "buildCommand": "turbo run build",
+  "devCommand": "turbo run dev",
+  "installCommand": "bun install",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["iad1"],
+  "env": {
+    "DATABASE_URL": "@lumina-database-url",
+    "DIRECT_URL": "@lumina-direct-url",
+    "REDIS_URL": "@lumina-redis-url",
+    "BETTER_AUTH_SECRET": "@lumina-auth-secret",
+    "BETTER_AUTH_URL": "@lumina-auth-url",
+    "RESEND_API_KEY": "@lumina-resend-api-key",
+    "OPENAI_API_KEY": "@lumina-openai-api-key"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/docs",
+      "destination": "https://docs.luminohq.com",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ]
+}
