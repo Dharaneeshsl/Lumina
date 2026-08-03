@@ -2,7 +2,7 @@
   "name": "web",
   "private": true,
   "scripts": {
-    "dev:auth": "bun run server.ts"
+    "dev": "bun --hot --no-clear-screen server.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -10,6 +10,7 @@
     "@types/multer": "^2.2.0"
   },
   "dependencies": {
+    "@lumina/env": "workspace:*",
     "@lumina/storage" : "workspace:*",
     "@lumina/auth": "workspace:*",
     "@lumina/types": "workspace:*",

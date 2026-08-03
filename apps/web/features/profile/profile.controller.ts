@@ -24,18 +24,19 @@ export async function getMyProfile(req: Request, res: Response) {
 }
 
 export async function updateMyProfile(req: Request, res: Response) {
+
   try {
-    const { user } = req as AuthenticatedRequest
-    const userId = user.id
+    const { user } = req as AuthenticatedRequest;
+    const userId = user.id;
 
-    const profile = await profileService.updateMyProfile(userId, req.body)
+    const profile = await profileService.updateMyProfile(userId, req.body);
 
-    return res.json(profile)
+    return res.json(profile);
   } catch (err) {
-    console.error(err)
     return res.status(500).json({
-      message: 'Failed to update profile',
-    })
+      message: "Failed to update profile",
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 }
 
@@ -59,66 +60,60 @@ export async function getProfileByUsername(req: Request<UsernameParams>, res: Re
 
 export const uploadProfilePicture = async (req: Request, res: Response) => {
   try {
-    const { user } = req as AuthenticatedRequest;
+    const { user } = req as AuthenticatedRequest
 
-    const result = await profileService.uploadProfilePicture(
-      user.id,
-      req.file!
-    );
+    const result = await profileService.uploadProfilePicture(user.id, req.file!)
 
-    return res.status(200).json(result);
+    return res.status(200).json(result)
   } catch (err) {
-    console.error(err);
+    console.error(err)
     return res.status(500).json({
-      message: "Failed to upload profile picture",
-    });
+      message: 'Failed to upload profile picture',
+    })
   }
-};
+}
 
 export const deleteProfilePicture = async (req: Request, res: Response) => {
   try {
-    const { user } = req as AuthenticatedRequest;
+    const { user } = req as AuthenticatedRequest
 
-    const result = await profileService.deleteProfilePicture(user.id);
+    const result = await profileService.deleteProfilePicture(user.id)
 
-    return res.status(200).json(result);
+    return res.status(200).json(result)
   } catch (err) {
-    console.error(err);
+    console.error(err)
     return res.status(500).json({
-      message: "Failed to delete profile picture",
-    });
+      message: 'Failed to delete profile picture',
+    })
   }
-};
+}
 
 export const uploadCoverImage = async (req: Request, res: Response) => {
   try {
-    const { user } = req as AuthenticatedRequest;
+    const { user } = req as AuthenticatedRequest
 
-    const result = await profileService.uploadCoverImage(
-      user.id,
-      req.file!
-    );
+    const result = await profileService.uploadCoverImage(user.id, req.file!)
 
-    return res.status(200).json(result);
+    return res.status(200).json(result)
   } catch (err) {
-    console.error(err);
+    console.error(err)
     return res.status(500).json({
-      message: "Failed to upload cover image",
-    });
+      message: 'Failed to upload cover image',
+    })
   }
-};
+}
 
 export const deleteCoverImage = async (req: Request, res: Response) => {
   try {
-    const { user } = req as AuthenticatedRequest;
+    const { user } = req as AuthenticatedRequest
 
-    const result = await profileService.deleteCoverImage(user.id);
+    const result = await profileService.deleteCoverImage(user.id)
 
-    return res.status(200).json(result);
+    return res.status(200).json(result)
   } catch (err) {
-    console.error(err);
+    console.error(err)
     return res.status(500).json({
-      message: "Failed to delete cover image",
-    });
+      message: 'Failed to delete cover image',
+    })
   }
-};
+}

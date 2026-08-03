@@ -7,8 +7,11 @@ export async function getMyProfile(userId: string) {
 
 export async function updateMyProfile(
   userId: string,
-  data: Record<string, unknown>
+  data: Record<string, any>
 ) {
+   if(data.dob) {
+    data.dob = new Date(data.dob);
+   }
   return repository.updateProfile(userId, data);
 }
 

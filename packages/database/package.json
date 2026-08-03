@@ -3,8 +3,15 @@
   "module": "./src/index.ts",
   "type": "module",
   "private": true,
-  "exports" : {
-    "." : "./src/index.ts"
+  "scripts": {
+    "generate": "prisma generate",
+    "dev": "prisma generate --watch"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@lumina/env": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest"

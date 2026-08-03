@@ -2,9 +2,11 @@
   "name": "lumina",
   "private": true,
   "scripts": {
-    "dev:web": "bun apps/web/server.ts",
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=./apps/* --filter=@repo/database --env-mode=loose --ui=stream --output-logs=full",
+    "dev:setup": "bun run --filter @repo/database generate",
+    "dev:web": "turbo run dev --filter=web... --env-mode=loose --ui=stream --output-logs=full",
+    "dev:dashboard": "turbo run dev --filter=dashboard --env-mode=loose --ui=stream --output-logs=full",
     "lint": "turbo run lint",
     "test": "bun --cwd tests test",
     "test:integration": "bun --cwd tests test:integration",

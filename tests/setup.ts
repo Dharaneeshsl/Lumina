@@ -1,3 +1,4 @@
+import '@lumina/env'
 import { installResendFetchMock } from './integration/helpers/auth'
 
 if (!process.env.TEST_DATABASE_URL) {

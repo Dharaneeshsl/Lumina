@@ -6,6 +6,7 @@ const repoRoot = fileURLToPath(new URL('..', import.meta.url))
 
 export default {
   root: '..',
+  envDir: repoRoot,
   resolve: {
     alias: [
       { find: '@auth/index', replacement: path.resolve(repoRoot, 'packages/auth/src/index.ts') },

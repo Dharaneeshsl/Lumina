@@ -1,11 +1,31 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
-  "ui": "tui",
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "TEST_DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "SERVER_PORT",
+    "CORS_ORIGIN",
+    "RESEND_API_KEY",
+    "RESEND_FROM",
+    "VITE_AUTH_SERVER_URL",
+    "AWS_*",
+    "S3_*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"]
+    },
+    "generate": {
+      "cache": false
+    },
+    "@repo/database#generate": {
+      "inputs": ["prisma/**", "prisma.config.ts"],
+      "outputs": ["generated/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -13,9 +33,15 @@
     "check-types": {
       "dependsOn": ["^check-types"]
     },
-    "dev": {
+    "//#dev:setup": {
       "cache": false,
-      "persistent": true
+      "outputs": ["packages/database/generated/**"]
+    },
+    "dev": {
+      "dependsOn": ["//#dev:setup"],
+      "cache": false,
+      "persistent": true,
+      "outputLogs": "full"
     }
   }
 }

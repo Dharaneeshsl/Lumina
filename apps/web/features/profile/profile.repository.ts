@@ -22,16 +22,19 @@ export async function findByUsername(username: string) {
 }
 
 export async function updateProfile(userId: string, data: any) {
-  return prisma.profile.upsert({
-    where: {
-      userId,
-    },
-    update: data,
-    create: {
-      userId,
-      ...data,
-    },
-  })
+  try {
+    return await prisma.profile.upsert({
+      where: { userId },
+      update: data,
+      create: {
+        userId,
+        ...data,
+      },
+    })
+  } catch (error) {
+    console.error('Prisma Error:', error)
+    throw error
+  }
 }
 
 export const updateProfilePicture = async (

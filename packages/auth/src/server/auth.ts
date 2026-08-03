@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "@lumina/env";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import {prisma} from "../plugins/plugins.prisma"
