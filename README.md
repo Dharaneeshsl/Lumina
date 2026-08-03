@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/b7fcf33d-5510-4cc0-80fb-d7b893eb4159" alt="Lumino Logo" width="140"/>
+<img src="https://github.com/user-attachments/assets/09eccc1f-ec2e-48a9-96e9-cdba8f56eae8" alt="Lumino Logo" width="140"/>
 
 <br/>
 
