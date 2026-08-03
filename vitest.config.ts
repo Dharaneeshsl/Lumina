@@ -32,7 +32,7 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**', '**/.turbo/**', '**/e2e/**'],
 
     // Global test setup — runs before each test file
-    setupFiles: ['./scripts/test-setup.ts'],
+    setupFiles: ['./tests/setup.ts'],
 
     // Coverage configuration
     coverage: {
@@ -76,6 +76,7 @@ export default defineConfig({
     retry: process.env.CI ? 1 : 0,
 
     // Reporter — verbose in CI, minimal locally
+    //@ts-ignore
     reporter: process.env.CI ? 'verbose' : 'default',
   },
 })

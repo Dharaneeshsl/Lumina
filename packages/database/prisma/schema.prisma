@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  
 }
 
 model College {
@@ -102,7 +103,9 @@ model Profile {
   bio               String?
   about             String?
   profilePicture    String?
+  profilePictureKey String?
   coverImage        String?
+  coverImageKey     String?
   gender            Gender?
   dob               DateTime?
   hometown          String?

@@ -1,11 +1,11 @@
-import { prisma } from "@repo/database"
+import { prisma } from '@repo/database'
 
 export async function findByUserId(userId: string) {
   return prisma.profile.findUnique({
     where: {
       userId,
     },
-  });
+  })
 }
 
 export async function findByUsername(username: string) {
@@ -18,13 +18,10 @@ export async function findByUsername(username: string) {
     include: {
       user: true,
     },
-  });
+  })
 }
 
-export async function updateProfile(
-  userId: string,
-  data: any
-) {
+export async function updateProfile(userId: string, data: any) {
   return prisma.profile.upsert({
     where: {
       userId,
@@ -34,5 +31,73 @@ export async function updateProfile(
       userId,
       ...data,
     },
-  });
+  })
+}
+
+export const updateProfilePicture = async (
+  userId: string,
+
+  profileImageUrl: string | any,
+
+  profileImageKey: string | any
+) => {
+  return prisma.profile.update({
+    where: {
+      userId,
+    },
+
+    data: {
+      profilePicture: profileImageUrl,
+
+      profilePictureKey: profileImageKey,
+    },
+  })
+}
+
+export const removeProfilePicture = async (userId: string) => {
+  return prisma.profile.update({
+    where: {
+      userId,
+    },
+
+    data: {
+      profilePicture: null,
+
+      profilePictureKey: null,
+    },
+  })
+}
+
+export const updateCoverImage = async (
+  userId: string,
+
+  coverImageUrl: string,
+
+  coverImageKey: string
+) => {
+  return prisma.profile.update({
+    where: {
+      userId,
+    },
+
+    data: {
+      coverImage: coverImageUrl,
+
+      coverImageKey: coverImageKey,
+    },
+  })
+}
+
+export const removeCoverImage = async (userId: string) => {
+  return prisma.profile.update({
+    where: {
+      userId,
+    },
+
+    data: {
+      coverImage: null,
+
+      coverImageKey: null,
+    },
+  })
 }

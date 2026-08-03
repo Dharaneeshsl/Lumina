@@ -1,0 +1,25 @@
+{
+  "name": "@lumina/storage",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.1.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@lumina/types" : "workspace:*",
+    "@aws-sdk/client-s3": "^3.1101.0",
+    "dotenv": "^17.4.2",
+    "multer": "^2.2.0",
+    "sharp": "^0.35.3",
+    "uuid": "^14.0.1"
+  }
+}
