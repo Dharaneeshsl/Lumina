@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { auth } from "@lumina/auth";
 import { toNodeHandler } from "better-auth/node";
 import { profileRouter } from "./features/profile/profile.routes.ts";
+import friendsRouter from "./features/friends/friends.routes.ts";
 
 
 const app = express();
@@ -25,6 +26,7 @@ app.use(cors({
 
 app.all("/api/auth/*path", toNodeHandler(auth));
 app.use("/api/profile", profileRouter);
+app.use("/api/friends", friendsRouter);
 
 
 
