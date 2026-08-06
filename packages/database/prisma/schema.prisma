@@ -250,18 +250,48 @@ model FriendRequest {
 }
 
 model Post {
-  id        String    @id @default(cuid())
-  authorId  String
-  type      PostType
-  content   String?
-  images    String[]
-  videos    String[]
-  anonymous Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  comments  Comment[]
-  likes     Like[]
-  author    User      @relation(fields: [authorId], references: [id])
+  id          String          @id @default(cuid())
+  authorId    String
+  content     String?
+  visibility  Visibility      @default(PUBLIC)
+  anonymous   Boolean         @default(false)
+  location    String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+  author      User            @relation(fields: [authorId], references: [id])
+  media       PostMedia[]
+  comments    Comment[]
+  likes       Like[]
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([visibility])
+}
+
+model PostMedia {
+  id         String        @id @default(cuid())
+  postId     String
+  type       MediaType
+  url        String
+  key        String
+  mimeType   String
+  size       Int
+  width      Int?
+  height     Int?
+  duration   Int?
+  order      Int
+  createdAt  DateTime      @default(now())
+
+  post       Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([postId, order])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
 }
 
 model Comment {
@@ -604,14 +634,6 @@ enum FriendRequestStatus {
   CANCELLED
 }
 
-enum PostType {
-  TEXT
-  IMAGE
-  VIDEO
-  PDF
-  POLL
-  CODE
-}
 
 enum NotificationType {
   FRIEND_REQUEST

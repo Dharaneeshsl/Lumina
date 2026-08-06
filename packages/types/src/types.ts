@@ -32,3 +32,14 @@ export interface UploadFileOptions {
   fileName?: string;
 }
 
+export interface CreatePostInput {
+  userId: string;
+  body: {
+    content?: string;
+    visibility: "PUBLIC" | "COLLEGE" | "FRIENDS" | "PRIVATE";
+    anonymous?: boolean;
+    location?: string;
+  };
+  files: any[];
+}
+
