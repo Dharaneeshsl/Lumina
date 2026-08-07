@@ -263,7 +263,12 @@ model Post {
   media       PostMedia[]
   comments    Comment[]
   likes       Like[]
-
+  likeCount  Int @default(0)
+  commentCount Int @default(0)
+  viewCount Int @default(0)
+  shareCount Int @default(0)
+  saveCount Int @default(0)
+  
   @@index([authorId])
   @@index([createdAt])
   @@index([visibility])

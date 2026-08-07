@@ -67,3 +67,29 @@ export const findPostById = async (
     },
   });
 };
+
+export const findLike = (
+  tx: Prisma.TransactionClient,
+  userId: string,
+  postId: string
+) => {
+  return tx.like.findUnique({
+      where: {
+          userId_postId: {
+              userId,
+              postId,
+          },
+      },
+  });
+};
+
+export const getLikeCount = async (
+  tx: Prisma.TransactionClient,
+  postId: string
+) => {
+    return tx.like.count({
+      where: {
+        postId,
+      },
+    });
+  };

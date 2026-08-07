@@ -19,7 +19,7 @@ profileRouter.get("/test", (req, res) => {
 profileRouter.get("/me", requireAuth, getMyProfile);
 profileRouter.patch("/me", requireAuth, updateMyProfile);
 profileRouter.get("/:username", getProfileByUsername);
-profileRouter.patch("/avatar" , requireAuth , upload.single("image") , uploadProfilePicture );
+profileRouter.patch("/avatar" , requireAuth , upload.single("image") , uploadProfilePicture);
 profileRouter.delete("/avatar" , requireAuth, deleteProfilePicture);
 profileRouter.patch("/cover" , requireAuth ,  upload.single("image") , uploadCoverImage);
 profileRouter.delete("/cover" , requireAuth , deleteCoverImage)
