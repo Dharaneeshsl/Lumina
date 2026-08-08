@@ -1,5 +1,9 @@
 {
   "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.requireConfig": true,
+  "prettier.configPath": ".prettierrc",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
@@ -13,7 +17,21 @@
     "**/node_modules": true
   },
   "editor.tabSize": 2,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   }

@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 model College {
@@ -89,7 +88,7 @@ model User {
   department             Department?             @relation(fields: [departmentId], references: [id])
   verification           Verification?
   wishlists              Wishlist[]
-
+  savedPosts             SavedPost[]
   @@index([collegeId])
   @@index([departmentId])
 }
@@ -250,45 +249,60 @@ model FriendRequest {
 }
 
 model Post {
-  id          String          @id @default(cuid())
-  authorId    String
-  content     String?
-  visibility  Visibility      @default(PUBLIC)
-  anonymous   Boolean         @default(false)
-  location    String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  deletedAt   DateTime?
-  author      User            @relation(fields: [authorId], references: [id])
-  media       PostMedia[]
-  comments    Comment[]
-  likes       Like[]
-  likeCount  Int @default(0)
-  commentCount Int @default(0)
-  viewCount Int @default(0)
-  shareCount Int @default(0)
-  saveCount Int @default(0)
-  
+  id           String      @id @default(cuid())
+  authorId     String
+  content      String?
+  visibility   Visibility  @default(PUBLIC)
+  anonymous    Boolean     @default(false)
+  location     String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime?
+  author       User        @relation(fields: [authorId], references: [id])
+  media        PostMedia[]
+  comments     Comment[]
+  likes        Like[]
+  likeCount    Int         @default(0)
+  commentCount Int         @default(0)
+  viewCount    Int         @default(0)
+  shareCount   Int         @default(0)
+  saveCount    Int         @default(0)
+  savedBy SavedPost[]
+
   @@index([authorId])
   @@index([createdAt])
   @@index([visibility])
 }
 
-model PostMedia {
-  id         String        @id @default(cuid())
-  postId     String
-  type       MediaType
-  url        String
-  key        String
-  mimeType   String
-  size       Int
-  width      Int?
-  height     Int?
-  duration   Int?
-  order      Int
-  createdAt  DateTime      @default(now())
+model SavedPost {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
 
-  post       Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId, createdAt])
+  @@index([postId])
+}
+
+model PostMedia {
+  id        String    @id @default(cuid())
+  postId    String
+  type      MediaType
+  url       String
+  key       String
+  mimeType  String
+  size      Int
+  width     Int?
+  height    Int?
+  duration  Int?
+  order     Int
+  createdAt DateTime  @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([postId, order])
@@ -300,16 +314,23 @@ enum MediaType {
 }
 
 model Comment {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
+  content   String
   postId    String
   userId    String
   parentId  String?
-  content   String
-  createdAt DateTime  @default(now())
-  parent    Comment?  @relation("Replies", fields: [parentId], references: [id])
-  replies   Comment[] @relation("Replies")
-  post      Post      @relation(fields: [postId], references: [id])
-  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
 }
 
 model Like {
@@ -330,7 +351,16 @@ model Notification {
   read      Boolean          @default(false)
   type      NotificationType
   createdAt DateTime         @default(now())
-  user      User             @relation(fields: [userId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum NotificationType {
+  COMMENT
+  LIKE
+  SHARE
+  FOLLOW
+  FRIEND_REQUEST
 }
 
 model Conversation {
@@ -570,6 +600,7 @@ model Internship {
   applications InternshipApplication[]
 }
 
+
 model InternshipApplication {
   id           String            @id @default(cuid())
   internshipId String
@@ -637,17 +668,6 @@ enum FriendRequestStatus {
   ACCEPTED
   REJECTED
   CANCELLED
-}
-
-
-enum NotificationType {
-  FRIEND_REQUEST
-  MESSAGE
-  LIKE
-  COMMENT
-  EVENT
-  CLUB
-  SYSTEM
 }
 
 enum ConversationType {

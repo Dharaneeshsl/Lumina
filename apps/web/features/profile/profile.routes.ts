@@ -9,11 +9,12 @@ import {
   deleteProfilePicture
 } from "./profile.controller";
 import { requireAuth  , upload} from "../../middleware";
+import { MSG_PROFILE_ROUTER_WORKS } from "@lumina/constants";
 
 export const profileRouter = Router();
 
 profileRouter.get("/test", (req, res) => {
-  res.json({ message: "profile router works" });
+  res.json({ message: MSG_PROFILE_ROUTER_WORKS });
 });
 
 profileRouter.get("/me", requireAuth, getMyProfile);

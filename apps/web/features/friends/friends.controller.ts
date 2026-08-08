@@ -1,6 +1,17 @@
 import type { Request, Response } from "express";
 import * as friendsService from "./friends.service";
 import type { AuthenticatedRequest } from "@lumina/types";
+import {
+  MSG_FAILED_TO_SEND_FRIEND_REQUEST,
+  MSG_FAILED_TO_ACCEPT_FRIEND_REQUEST,
+  MSG_FAILED_TO_REJECT_FRIEND_REQUEST,
+  MSG_FAILED_TO_CANCEL_FRIEND_REQUEST,
+  MSG_FAILED_TO_REMOVE_FRIEND,
+  MSG_FAILED_TO_FETCH_FRIENDS,
+  MSG_FAILED_TO_FETCH_INCOMING_REQUESTS,
+  MSG_FAILED_TO_FETCH_OUTGOING_REQUESTS,
+  MSG_FAILED_TO_FETCH_MUTUAL_FRIENDS,
+} from "@lumina/constants";
 
 export async function sendFriendRequest(req: Request, res: Response) {
   try {
@@ -16,7 +27,7 @@ export async function sendFriendRequest(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to send friend request",
+      message: MSG_FAILED_TO_SEND_FRIEND_REQUEST,
     });
   }
 }
@@ -34,7 +45,7 @@ export async function acceptFriendRequest(req: Request, res: Response) {
   } catch (err) {
     console.error(err);
     return res.status(500).json({
-      message: "Failed to accept friend request",
+      message: MSG_FAILED_TO_ACCEPT_FRIEND_REQUEST,
       error: err instanceof Error ? err.message : String(err),
     });
   }
@@ -54,7 +65,7 @@ export async function rejectFriendRequest(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to reject friend request",
+      message: MSG_FAILED_TO_REJECT_FRIEND_REQUEST,
     });
   }
 }
@@ -73,7 +84,7 @@ export async function cancelFriendRequest(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to cancel friend request",
+      message: MSG_FAILED_TO_CANCEL_FRIEND_REQUEST,
     });
   }
 }
@@ -92,7 +103,7 @@ export async function unfriend(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to remove friend",
+      message: MSG_FAILED_TO_REMOVE_FRIEND,
     });
   }
 }
@@ -108,7 +119,7 @@ export async function getMyFriends(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to fetch friends",
+      message: MSG_FAILED_TO_FETCH_FRIENDS,
     });
   }
 }
@@ -124,7 +135,7 @@ export async function getIncomingRequests(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to fetch incoming requests",
+      message: MSG_FAILED_TO_FETCH_INCOMING_REQUESTS,
     });
   }
 }
@@ -140,7 +151,7 @@ export async function getOutgoingRequests(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to fetch outgoing requests",
+      message: MSG_FAILED_TO_FETCH_OUTGOING_REQUESTS,
     });
   }
 }
@@ -159,7 +170,7 @@ export async function getMutualFriends(req: Request, res: Response) {
     console.error(err);
 
     return res.status(500).json({
-      message: "Failed to fetch mutual friends",
+      message: MSG_FAILED_TO_FETCH_MUTUAL_FRIENDS,
     });
   }
 }

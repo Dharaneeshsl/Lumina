@@ -1,5 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import { auth } from "@lumina/auth";
+import {
+  MSG_ONLY_IMAGE_AND_VIDEO_MIME_TYPES_ALLOWED,
+  MSG_ONLY_IMAGE_MIME_TYPES_ALLOWED,
+  MSG_UNAUTHORIZED,
+} from "@lumina/constants";
 import multer from "multer";
 
 export async function requireAuth(
@@ -14,7 +19,7 @@ export async function requireAuth(
 
     if (!session) {
       return res.status(401).json({
-        message: "Unauthorized",
+        message: MSG_UNAUTHORIZED,
       });
     }
 
@@ -23,7 +28,7 @@ export async function requireAuth(
     next();
   } catch {
     return res.status(401).json({
-      message: "Unauthorized",
+      message: MSG_UNAUTHORIZED,
     });
   }
 }
@@ -48,7 +53,7 @@ const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only JPG, JPEG, PNG, and WEBP images are allowed."));
+    cb(new Error(MSG_ONLY_IMAGE_MIME_TYPES_ALLOWED));
   }
 };
 
@@ -58,7 +63,7 @@ const postMediaFileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
     return;
   }
 
-  cb(new Error("Only JPG, JPEG, PNG, WEBP images and MP4, WEBM, MOV videos are allowed."));
+  cb(new Error(MSG_ONLY_IMAGE_AND_VIDEO_MIME_TYPES_ALLOWED));
 };
 
 const allowedMimeTypes = imageMimeTypes;

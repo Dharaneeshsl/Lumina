@@ -1,5 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/prettierrc",
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
   "semi": false,
   "singleQuote": true,
   "tabWidth": 2,
@@ -10,9 +11,20 @@
   "bracketSameLine": false,
   "arrowParens": "always",
   "endOfLine": "lf",
+  "singleAttributePerLine": true,
   "proseWrap": "preserve",
   "htmlWhitespaceSensitivity": "css",
   "embeddedLanguageFormatting": "auto",
+  "importOrder": [
+    "<BUILTIN_MODULES>",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "<TYPES>",
+    "<TYPES_RELATIVE>",
+    "",
+    "<RELATIVE_MODULES>"
+  ],
+  "importOrderTypeScriptVersion": "5.0.0",
   "overrides": [
     {
       "files": "*.md",

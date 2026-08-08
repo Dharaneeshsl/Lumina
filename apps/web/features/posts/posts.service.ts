@@ -1,14 +1,15 @@
-import * as postsRepository from './posts.repository'
-import { uploadFile } from '@lumina/storage'
-import { prisma } from '@repo/database'
-import type { CreatePostInput } from '@lumina/types'
 import {
+  assertValidVideoDuration,
   getImageDimensions,
   getVideoMetadata,
-  assertValidVideoDuration,
   MAX_IMAGE_SIZE_BYTES,
   MAX_VIDEO_SIZE_BYTES,
 } from './post.helper'
+import * as postsRepository from './posts.repository'
+import { uploadFile } from '@lumina/storage'
+import { prisma } from '@repo/database'
+
+import type { CreatePostInput } from '@lumina/types'
 
 export const createPost = async ({ userId, body, files }: CreatePostInput) => {
   const { content, visibility, anonymous = false, location } = body
@@ -102,9 +103,7 @@ export const createPost = async ({ userId, body, files }: CreatePostInput) => {
 
 export const toggleLike = async (userId: string, postId: string) => {
   return prisma.$transaction(async (tx) => {
-
     const existing = await postsRepository.findLike(tx, userId, postId)
-
     if (existing) {
       await tx.like.delete({
         where: { id: existing.id },
@@ -147,7 +146,104 @@ export const toggleLike = async (userId: string, postId: string) => {
 }
 export const getLikeCount = async (postId: string) => {
   return prisma.$transaction(async (tx) => {
-    const count = await postsRepository.getLikeCount(tx, postId);
-    return count;
-  });
-};
+    const count = await postsRepository.getLikeCount(tx, postId)
+    return count
+  })
+}
+
+export const createComment = async ({
+  postId,
+  userId,
+  content,
+  parentId,
+}: {
+  postId: string
+  userId: string
+  content: string
+  parentId?: string | null
+}) => {
+  const post = await postsRepository.findPostWithAuthor(prisma as any, postId)
+
+  if (!post) {
+    throw new Error('POST_NOT_FOUND')
+  }
+
+  if (parentId) {
+    const parentComment = await postsRepository.findCommentById(prisma as any, parentId)
+
+    if (!parentComment) {
+      throw new Error('PARENT_COMMENT_NOT_FOUND')
+    }
+
+    if (parentComment.postId !== postId) {
+      throw new Error('INVALID_PARENT_COMMENT')
+    }
+  }
+
+  const comment = await postsRepository.createComment({
+    tx: prisma as any,
+    postId,
+    userId,
+    content,
+    parentId,
+  })
+
+  if (post.authorId !== userId) {
+    await postsRepository.createCommentNotification({
+      tx: prisma as any,
+      postAuthorId: post.authorId as string,
+    })
+  }
+
+  return comment
+}
+
+export const toggleSavePost = async ({
+  postId,
+  userId,
+}: {
+  postId: string
+  userId: string
+}) => {
+
+  const post = await postsRepository.findPostById(prisma as any, postId)
+
+  if (!post) {
+    throw new Error('POST_NOT_FOUND')
+  }
+
+  const existing = await postsRepository.findSavedPost(
+    prisma,
+    userId,
+    postId
+  )
+
+  if (existing) {
+    await postsRepository.deleteSavedPost(
+      prisma as any,
+      userId,
+      postId
+    )
+
+    return {
+      saved: false,
+    }
+  }
+
+  await postsRepository.createSavedPost(
+    prisma,
+    userId,
+    postId
+  )
+
+  return {
+    saved: true,
+  }
+}
+
+export const getMySavedPosts = async (userId: string) => {
+  return postsRepository.findSavedPostsByUser(
+    prisma as any,
+    userId
+  )
+}

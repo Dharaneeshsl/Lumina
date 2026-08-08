@@ -1,17 +1,14 @@
-import { prisma } from "@repo/database";
+import { prisma } from '@repo/database'
 
 export async function findUserById(userId: string) {
   return prisma.user.findUnique({
     where: {
       id: userId,
     },
-  });
+  })
 }
 
-export async function findFriendRequest(
-  senderId: string,
-  receiverId: string
-) {
+export async function findFriendRequest(senderId: string, receiverId: string) {
   return prisma.friendRequest.findFirst({
     where: {
       OR: [
@@ -25,19 +22,16 @@ export async function findFriendRequest(
         },
       ],
     },
-  });
+  })
 }
 
-export async function createFriendRequest(
-  senderId: string,
-  receiverId: string
-) {
+export async function createFriendRequest(senderId: string, receiverId: string) {
   return prisma.friendRequest.create({
     data: {
       senderId,
       receiverId,
     },
-  });
+  })
 }
 
 export async function findFriendRequestById(requestId: string) {
@@ -45,12 +39,12 @@ export async function findFriendRequestById(requestId: string) {
     where: {
       id: requestId,
     },
-  });
+  })
 }
 
 export async function updateFriendRequestStatus(
   requestId: string,
-  status: "PENDING" | "ACCEPTED" | "REJECTED" | "CANCELLED"
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
 ) {
   return prisma.friendRequest.update({
     where: {
@@ -59,16 +53,13 @@ export async function updateFriendRequestStatus(
     data: {
       status,
     },
-  });
+  })
 }
 
-export async function findAcceptedFriendship(
-  userId: string,
-  friendId: string
-) {
+export async function findAcceptedFriendship(userId: string, friendId: string) {
   return prisma.friendRequest.findFirst({
     where: {
-      status: "ACCEPTED",
+      status: 'ACCEPTED',
       OR: [
         {
           senderId: userId,
@@ -80,7 +71,7 @@ export async function findAcceptedFriendship(
         },
       ],
     },
-  });
+  })
 }
 
 export async function deleteFriendship(requestId: string) {
@@ -88,13 +79,13 @@ export async function deleteFriendship(requestId: string) {
     where: {
       id: requestId,
     },
-  });
+  })
 }
 
 export async function getMyFriends(userId: string) {
   return prisma.friendRequest.findMany({
     where: {
-      status: "ACCEPTED",
+      status: 'ACCEPTED',
       OR: [
         {
           senderId: userId,
@@ -117,16 +108,16 @@ export async function getMyFriends(userId: string) {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
-  });
+  })
 }
 
 export async function getIncomingRequests(userId: string) {
   return prisma.friendRequest.findMany({
     where: {
       receiverId: userId,
-      status: "PENDING",
+      status: 'PENDING',
     },
     include: {
       sender: {
@@ -136,16 +127,16 @@ export async function getIncomingRequests(userId: string) {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
-  });
+  })
 }
 
 export async function getOutgoingRequests(userId: string) {
   return prisma.friendRequest.findMany({
     where: {
       senderId: userId,
-      status: "PENDING",
+      status: 'PENDING',
     },
     include: {
       receiver: {
@@ -155,18 +146,15 @@ export async function getOutgoingRequests(userId: string) {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
-  });
+  })
 }
 
-export async function getMutualFriends(
-  userId: string,
-  otherUserId: string
-) {
+export async function getMutualFriends(userId: string, otherUserId: string) {
   const myFriends = await prisma.friendRequest.findMany({
     where: {
-      status: "ACCEPTED",
+      status: 'ACCEPTED',
       OR: [
         {
           senderId: userId,
@@ -176,11 +164,11 @@ export async function getMutualFriends(
         },
       ],
     },
-  });
+  })
 
   const otherFriends = await prisma.friendRequest.findMany({
     where: {
-      status: "ACCEPTED",
+      status: 'ACCEPTED',
       OR: [
         {
           senderId: otherUserId,
@@ -190,19 +178,15 @@ export async function getMutualFriends(
         },
       ],
     },
-  });
+  })
 
   const myFriendIds = new Set(
-    myFriends.map((friend) =>
-      friend.senderId === userId ? friend.receiverId : friend.senderId
-    )
-  );
+    myFriends.map((friend) => (friend.senderId === userId ? friend.receiverId : friend.senderId))
+  )
 
   const mutualFriendIds = otherFriends
-    .map((friend) =>
-      friend.senderId === otherUserId ? friend.receiverId : friend.senderId
-    )
-    .filter((id) => myFriendIds.has(id));
+    .map((friend) => (friend.senderId === otherUserId ? friend.receiverId : friend.senderId))
+    .filter((id) => myFriendIds.has(id))
 
   return prisma.user.findMany({
     where: {
@@ -213,5 +197,5 @@ export async function getMutualFriends(
     include: {
       profile: true,
     },
-  });
+  })
 }

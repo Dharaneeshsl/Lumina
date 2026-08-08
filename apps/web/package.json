@@ -12,6 +12,7 @@
   "dependencies": {
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@lumina/auth": "workspace:*",
+    "@lumina/constants": "workspace:*",
     "@lumina/env": "workspace:*",
     "@lumina/storage": "workspace:*",
     "@lumina/types": "workspace:*",
@@ -30,6 +31,7 @@
     "image-size": "^2.0.2",
     "mediainfo.js": "^0.3.7",
     "multer": "^2.2.0",
+    "stream-chat": "^9.50.2",
     "zod": "^4.4.3"
   },
   "peerDependencies": {

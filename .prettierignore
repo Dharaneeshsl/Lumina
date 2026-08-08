@@ -1,0 +1,10 @@
+node_modules
+.turbo
+dist
+build
+coverage
+.next
+*.min.js
+*.min.css
+bun.lock
+package-lock.json
