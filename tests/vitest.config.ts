@@ -13,13 +13,13 @@ export default {
       { find: '@auth', replacement: path.resolve(repoRoot, 'packages/auth/src') },
       {
         find: '@profile',
-        replacement: path.resolve(repoRoot, 'apps/web/features/profile'),
+        replacement: path.resolve(repoRoot, 'apps/api/modules/profile'),
       },
       {
         find: '@db/client',
-        replacement: path.resolve(repoRoot, 'packages/database/src/client.ts'),
+        replacement: path.resolve(repoRoot, 'packages/db/src/client.ts'),
       },
-      { find: '@db', replacement: path.resolve(repoRoot, 'packages/database/src') },
+      { find: '@db', replacement: path.resolve(repoRoot, 'packages/db/src') },
       { find: '@test', replacement: path.resolve(repoRoot, 'tests') },
     ],
   },

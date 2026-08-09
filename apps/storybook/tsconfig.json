@@ -1,0 +1,4 @@
+{
+  "extends": "@lumina/typescript-config/react.json",
+  "include": ["src"]
+}

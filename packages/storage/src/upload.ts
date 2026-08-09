@@ -2,7 +2,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import { s3 } from "./s3";
 import { getBucketName, getRegion } from "./utils";
-import type { UploadFileOptions } from "@lumina/types";
+import type { UploadFileOptions } from "@lumina/contracts";
 
 export async function uploadFile({
   buffer,

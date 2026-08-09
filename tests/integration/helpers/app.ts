@@ -1,7 +1,7 @@
 import express from 'express'
 import { toNodeHandler } from 'better-auth/node'
 import { auth } from '@auth/index'
-import { profileRouter } from '@profile/profile.routes'
+import { profileRouter } from '@profile/profile.router'
 
 export function createTestApp() {
   const app = express()

@@ -18,8 +18,8 @@
     "noImplicitOverride": true,
     "paths": {
       "@auth/*": ["packages/auth/src/*"],
-      "@profile/*": ["apps/web/features/profile/*"],
-      "@db/*": ["packages/database/src/*"],
+      "@profile/*": ["apps/api/modules/profile/*"],
+      "@db/*": ["packages/db/src/*"],
       "@test/*": ["tests/*"]
     },
     "types": ["vitest/globals", "node"]
@@ -28,6 +28,7 @@
     "apps/**/*.ts",
     "apps/**/*.tsx",
     "packages/**/*.ts",
+    "workers/**/*.ts",
     "tests/**/*.ts"
   ],
   "exclude": ["**/dist/**", "**/coverage/**", "**/node_modules/**"]

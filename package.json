@@ -3,10 +3,10 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --filter=./apps/* --filter=@repo/database --env-mode=loose --ui=stream --output-logs=full",
-    "dev:setup": "bun run --filter @repo/database generate",
-    "dev:web": "turbo run dev --filter=web... --env-mode=loose --ui=stream --output-logs=full",
-    "dev:dashboard": "turbo run dev --filter=dashboard --env-mode=loose --ui=stream --output-logs=full",
+    "dev": "turbo run dev --filter=./apps/* --filter=@lumina/db --env-mode=loose --ui=stream --output-logs=full",
+    "dev:setup": "bun run --filter @lumina/db generate",
+    "dev:api": "turbo run dev --filter=api... --env-mode=loose --ui=stream --output-logs=full",
+    "dev:web": "turbo run dev --filter=web --env-mode=loose --ui=stream --output-logs=full",
     "lint": "turbo run lint",
     "test": "bun --cwd tests test",
     "test:integration": "bun --cwd tests test:integration",
@@ -14,7 +14,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "check-types": "turbo run check-types",
-    "worker:leetcode": "bun apps/web/config/leetcode.worker.ts"
+    "worker:leetcode": "bun workers/leetcode/src/index.ts"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
@@ -55,7 +55,9 @@
   "workspaces": [
     "tests",
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "tooling/*",
+    "workers/*"
   ],
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

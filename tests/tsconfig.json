@@ -19,8 +19,8 @@
     "ignoreDeprecations": "6.0",
     "paths": {
       "@auth/*": ["../packages/auth/src/*"],
-      "@profile/*": ["../apps/web/features/profile/*"],
-      "@db/*": ["../packages/database/src/*"],
+      "@profile/*": ["../apps/api/modules/profile/*"],
+      "@db/*": ["../packages/db/src/*"],
       "@test/*": ["./*"]
     },
     "types": ["vitest/globals", "node"]

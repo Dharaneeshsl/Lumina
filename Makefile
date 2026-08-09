@@ -103,7 +103,7 @@ db-studio:
 
 docker-up:
 	docker compose up -d
-	@echo "✓ Services started. Dashboard: http://localhost:5173  Web: http://localhost:3000"
+	@echo "✓ Services started. Web UI: http://localhost:5173  API: http://localhost:3000"
 
 docker-down:
 	docker compose down

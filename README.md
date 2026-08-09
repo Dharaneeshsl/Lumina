@@ -241,10 +241,10 @@ graph TB
 
 | Principle | Implementation |
 |-----------|----------------|
-| **Modular features** | Each domain lives in `features/` with controller → service → repository |
+| **Modular modules** | Each domain lives in `modules/` with handler → service → repo |
 | **Durable + fast reads** | PostgreSQL is source of truth; Redis powers hot paths like leaderboards |
 | **Async by default** | Long-running work (LeetCode sync, media processing) goes through BullMQ |
-| **Type-safe end-to-end** | TypeScript everywhere, shared types in `@lumina/types` |
+| **Type-safe end-to-end** | TypeScript everywhere, shared types in `@lumina/contracts` |
 | **Cloud-native** | Docker Compose locally, Vercel + managed Postgres/Redis in production |
 
 ### Monorepo Structure
@@ -252,18 +252,35 @@ graph TB
 ```
 lumina/
 ├── apps/
-│   ├── web/                  # Express API server (Bun runtime)
-│   │   ├── features/         # Domain modules (profile, posts, chat, leaderboard, leetcode)
+│   ├── api/                  # Express API server (Bun runtime)
+│   │   ├── modules/          # Domain modules (profile, posts, chat, leaderboard, leetcode)
 │   │   ├── cron/             # Scheduled jobs (daily LeetCode sync)
-│   │   └── config/           # Redis, BullMQ queue & worker
-│   └── dashboard/            # React frontend (Vite + Three.js)
+│   │   └── config/           # Redis + BullMQ queues
+│   ├── web/                  # React product UI (Vite + Three.js)
+│   ├── admin/                # Internal console (stub)
+│   ├── docs/                 # Docs app (stub)
+│   └── storybook/            # Design-system explorer (stub)
 ├── packages/
-│   ├── database/             # Prisma schema, migrations, client
+│   ├── db/                   # Prisma schema, migrations, client (@lumina/db)
 │   ├── auth/                 # Better Auth configuration
 │   ├── storage/              # S3/R2 file upload utilities
 │   ├── constants/            # Shared message constants
-│   ├── types/                # Shared TypeScript types
-│   └── env/                  # Environment variable validation
+│   ├── contracts/            # Shared TypeScript types
+│   ├── env/                  # Environment variable validation
+│   ├── design-system/        # UI primitives
+│   ├── shared/               # Cross-cutting helpers
+│   ├── validators/           # Validation schemas
+│   ├── observability/        # Logging
+│   ├── kv/                   # Cache layer
+│   ├── transactional/        # Emails
+│   ├── realtime/             # Notifications
+│   ├── sdk/                  # Public SDK (stub)
+│   ├── analytics/            # Analytics (stub)
+│   └── api-client/           # HTTP client (stub)
+├── tooling/                  # Shared eslint / tsconfig / prettier
+├── workers/leetcode/         # BullMQ LeetCode worker
+├── infra/                    # Docker + CI stubs
+├── internal/scripts/         # Seed and internal scripts
 ├── tests/                    # Integration & unit tests (Vitest)
 ├── docker-compose.yml        # Local Postgres + Redis + services
 └── turbo.json                # Turborepo pipeline config
@@ -277,7 +294,7 @@ lumina/
 
 | Technology | Role |
 |------------|------|
-| **React 18** | UI framework for the dashboard app |
+| **React 18** | UI framework for the web app |
 | **Vite 8** | Lightning-fast dev server and production bundler |
 | **Three.js + React Three Fiber** | 3D visuals and interactive UI elements |
 | **TypeScript** | Full type safety across the frontend |
@@ -358,20 +375,20 @@ make db-migrate
 ### 5. Run the platform
 
 ```bash
-# All apps (API + dashboard)
+# All apps (API + web)
 make dev
 
 # API only
-bun run dev:web
+bun run dev:api
 
-# Dashboard only
-bun run dev:dashboard
+# Web UI only
+bun run dev:web
 ```
 
 | Service | Default URL |
 |---------|-------------|
 | API Server | `http://localhost:3000` |
-| Dashboard | `http://localhost:5173` |
+| Web UI | `http://localhost:5173` |
 | Prisma Studio | `make db-studio` |
 
 ### Useful commands

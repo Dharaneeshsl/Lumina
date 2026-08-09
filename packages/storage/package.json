@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@lumina/env": "workspace:*",
-    "@lumina/types" : "workspace:*",
+    "@lumina/contracts": "workspace:*",
     "@aws-sdk/client-s3": "^3.1101.0",
     "dotenv": "^17.4.2",
     "multer": "^2.2.0",

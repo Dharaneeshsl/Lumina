@@ -97,7 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **@lumina/ui** — initial shared component library
 - **@lumina/database** — Prisma schema and database client package
 - **@lumina/auth** — authentication utilities package
-- **@lumina/types** — shared TypeScript types
+- **@lumina/contracts** — shared TypeScript types
 - **@lumina/utils** — shared utility functions
 - **GitHub Actions CI** — lint, typecheck, and test on every PR
 

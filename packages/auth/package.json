@@ -8,7 +8,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@repo/database": "workspace:*",
+    "@lumina/db": "workspace:*",
     "@lumina/env": "workspace:*",
     "@types/dotenv": "^8.2.3",
     "better-auth": "^latest",
