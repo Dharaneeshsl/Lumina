@@ -87,7 +87,7 @@ From a single campus deployment to a nationwide academic network, Lumino is engi
 - ⚡ Production-Ready, Modular & Scalable Infrastructure
 
 ---
-<img width="1700" height="1015" alt="Screenshot 2026-08-02 at 5 08 02 PM" src="https://github.com/user-attachments/assets/b9d1ec09-2e49-4cea-85fb-94baaf7a8bd2" />
+<img width="1703" height="982" alt="Screenshot 2026-08-09 at 10 10 03 PM" src="https://github.com/user-attachments/assets/b588f2dd-84e5-41c0-aadb-febc1c07c59f" />
 
  ---
 
