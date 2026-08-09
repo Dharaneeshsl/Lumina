@@ -89,46 +89,63 @@ model User {
   verification           Verification?
   wishlists              Wishlist[]
   savedPosts             SavedPost[]
+
   @@index([collegeId])
   @@index([departmentId])
 }
 
 model Profile {
-  id                String     @id @default(cuid())
-  userId            String     @unique
-  firstName         String
-  lastName          String
-  bio               String?
-  about             String?
-  profilePicture    String?
-  profilePictureKey String?
-  coverImage        String?
-  coverImageKey     String?
-  gender            Gender?
-  dob               DateTime?
-  hometown          String?
-  location          String?
-  cgpa              Float?
-  semester          Int?
-  year              Int?
-  batch             String?
-  rollNumber        String?
-  skills            String[]
-  interests         String[]
-  languages         String[]
-  github            String?
-  linkedin          String?
-  portfolio         String?
-  leetcode          String?
-  codeforces        String?
-  hackerrank        String?
-  profileVisibility Visibility @default(PUBLIC)
-  hideEmail         Boolean    @default(false)
-  hidePhone         Boolean    @default(false)
-  hideCgpa          Boolean    @default(false)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String              @id @default(cuid())
+  userId             String              @unique
+  firstName          String
+  lastName           String
+  bio                String?
+  about              String?
+  profilePicture     String?
+  profilePictureKey  String?
+  coverImage         String?
+  coverImageKey      String?
+  gender             Gender?
+  dob                DateTime?
+  hometown           String?
+  location           String?
+  cgpa               Float?
+  semester           Int?
+  year               Int?
+  batch              String?
+  rollNumber         String?
+  skills             String[]
+  interests          String[]
+  languages          String[]
+  github             String?
+  linkedin           String?
+  portfolio          String?
+  leetcodeUrl        String?
+  leetcodeUsername   String?
+  leetcodeRating     Int?
+  leetcodeSolved     Int?
+  leetcodeEasy       Int?
+  leetcodeMedium     Int?
+  leetcodeHard       Int?
+  leetcodeGlobalRank Int?
+  leetcodeUpdatedAt  DateTime?
+  leetcodeSyncStatus LeetcodeSyncStatus?
+  leetcodeSyncError  String?
+  codeforces         String?
+  hackerrank         String?
+  profileVisibility  Visibility          @default(PUBLIC)
+  hideEmail          Boolean             @default(false)
+  hidePhone          Boolean             @default(false)
+  hideCgpa           Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([leetcodeRating])
+  @@index([leetcodeSolved])
+  @@index([leetcodeUsername])
+  @@index([leetcodeSyncStatus])
+  @@index([leetcodeUpdatedAt])
 }
 
 model Verification {
@@ -267,7 +284,7 @@ model Post {
   viewCount    Int         @default(0)
   shareCount   Int         @default(0)
   saveCount    Int         @default(0)
-  savedBy SavedPost[]
+  savedBy      SavedPost[]
 
   @@index([authorId])
   @@index([createdAt])
@@ -301,8 +318,7 @@ model PostMedia {
   duration  Int?
   order     Int
   createdAt DateTime  @default(now())
-
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([postId, order])
@@ -600,7 +616,6 @@ model Internship {
   applications InternshipApplication[]
 }
 
-
 model InternshipApplication {
   id           String            @id @default(cuid())
   internshipId String
@@ -733,4 +748,10 @@ enum ApplicationStatus {
   INTERVIEW
   REJECTED
   OFFERED
+}
+
+enum LeetcodeSyncStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

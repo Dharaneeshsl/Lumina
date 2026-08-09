@@ -2,7 +2,6 @@ import { useState } from "react";
 import SideRays from "./SideRays";
 import SignupPage from "./SignupPage";
 import LoginPage from "./LoginPage";
-import logoImage from "./assets/logo.svg";
 import "./App.css";
 
 export default function App() {
@@ -30,26 +29,20 @@ export default function App() {
     <div className="page-wrapper">
       {/* Background SideRays WebGL rays in sleek gray theme */}
       <SideRays
-        rayColor1="#71717A"
-        rayColor2="#A1A1AA"
+        rayColor1="#DFD3C3"
+        rayColor2="#F8EDE3"
         speed={1.8}
         intensity={0.8}
         spread={3.5}
         origin="top-right"
         saturation={0.0}
-        opacity={0.3}
+        opacity={0.2}
         className="side-rays-bg"
       />
 
       {/* Navigation Header */}
       <header className="site-header">
-        <div className="brand-header-left" style={{ display: "inline-flex", alignItems: "flex-start", gap: "8px", marginLeft: "16px" }}>
-          <img
-            src={logoImage}
-            alt="Lumino Logo"
-            className="brand-logo-img"
-            style={{ width: "38px", height: "38px", objectFit: "contain", flexShrink: 0, marginTop: "0px" }}
-          />
+        <div className="brand-header-left">
           <div className="brand-logo-wrapper">
             <div className="brand-logo">
               Lum
@@ -194,7 +187,7 @@ export default function App() {
           >
             <path
               d="M 75 12 Q 35 32 8 18"
-              stroke="#27272a"
+              stroke="#18181b"
               strokeWidth="2.2"
               strokeLinecap="round"
             />

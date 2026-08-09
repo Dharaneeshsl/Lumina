@@ -3,33 +3,36 @@
   --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Color System - LinkedIn Blue Palette */
-  --primary: #0A66C2;
-  --primary-hover: #004182;
-  --primary-light: #E8F3FF;
-  --accent-purple: #0077B5;
-  --accent-violet: #0A66C2;
+  /* Accent palette — used sparingly */
+  --color-cream: #F8EDE3;
+  --color-sand: #DFD3C3;
+  --color-taupe: #D0B8A8;
+  --color-plum: #7D6E83;
 
-  --bg-page: #faf8f5;
-  --bg-section: #F8FAFC;
-  --bg-card: #FFFFFF;
+  --primary: #7D6E83;
+  --primary-hover: #6b5d72;
+  --primary-light: #F8EDE3;
 
-  --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --text-placeholder: #9CA3AF;
+  --bg-page: #F8EDE3;
+  --bg-section: #ffffff;
+  --bg-card: #ffffff;
 
-  --border-color: #E5E7EB;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-placeholder: #a1a1aa;
+
+  --border-color: #e4e4e7;
 
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-info: #3B82F6;
 
-  --gradient-hero: linear-gradient(135deg, #0A66C2 0%, #0077B5 50%, #005E93 100%);
-  --gradient-badge: linear-gradient(135deg, rgba(10, 102, 194, 0.08) 0%, rgba(0, 119, 181, 0.08) 100%);
+  --gradient-hero: linear-gradient(135deg, #7D6E83 0%, #D0B8A8 100%);
+  --gradient-badge: linear-gradient(135deg, rgba(125, 110, 131, 0.06) 0%, rgba(208, 184, 168, 0.08) 100%);
 
   --shadow-soft: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
-  --shadow-hover: 0 16px 32px -4px rgba(10, 102, 194, 0.15);
+  --shadow-hover: 0 16px 32px -4px rgba(15, 23, 42, 0.1);
   --shadow-floating: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
 
   --radius-card: 20px;
@@ -76,11 +79,11 @@ button {
   background: var(--bg-page);
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #d4d4d8;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #a1a1aa;
 }
 
 /* Animations */

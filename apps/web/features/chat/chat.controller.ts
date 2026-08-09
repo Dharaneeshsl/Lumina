@@ -29,7 +29,7 @@ export async function getChatToken(req: Request & AuthenticatedRequest, res: Res
   }
 }
 
-export const createConversation = async (req: AuthenticatedRequest, res: Response) => {
+export const createOneToOneConversation = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user.id
 
@@ -42,7 +42,7 @@ export const createConversation = async (req: AuthenticatedRequest, res: Respons
       })
     }
 
-    const conversation = await chatService.createConversation({
+    const conversation = await chatService.createOneToOneConversation({
       userId,
       otherUserId,
     })
@@ -78,7 +78,6 @@ export const createConversation = async (req: AuthenticatedRequest, res: Respons
 export const getMyConversations = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user.id
-
     const conversations = await chatService.getMyConversations(userId)
 
     return res.status(200).json({

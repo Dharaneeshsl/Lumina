@@ -1,6 +1,6 @@
 import { streamClient } from './chat.config'
+import { getChannelId } from './chat.helper'
 import * as chatRepository from './chat.repository'
-
 
 export const generateChatToken = async (userId: string) => {
   const user = await chatRepository.findUserById(userId)
@@ -12,12 +12,12 @@ export const generateChatToken = async (userId: string) => {
   await streamClient.upsertUser({
     id: user.id,
     name: user.username ?? '',
-    image: user.avatar ?? undefined,
+    image: user.image ?? undefined,
   })
 
   return streamClient.createToken(user.id)
 }
-export const createConversation = async ({
+export const createOneToOneConversation = async ({
   userId,
   otherUserId,
 }: {
@@ -42,23 +42,23 @@ export const createConversation = async ({
     throw new Error('USER_NOT_FOUND')
   }
 
-  // Sync both users to Stream
   await streamClient.upsertUsers([
     {
       id: currentUser.id,
       name: currentUser.username ?? '',
-      image: currentUser.avatar ?? undefined,
+      image: currentUser.image ?? undefined,
     },
     {
       id: otherUser.id,
       name: otherUser.username ?? '',
-      image: otherUser.avatar ?? undefined,
+      image: otherUser.image ?? undefined,
     },
   ])
 
-  const channelId = [userId, otherUserId].sort().join('-')
+  const channelId = getChannelId(userId, otherUserId)
 
   const channel = streamClient.channel('messaging', channelId, {
+    created_by_id: userId,
     members: [userId, otherUserId],
   })
 
@@ -67,6 +67,7 @@ export const createConversation = async ({
   return {
     channelId,
     type: 'messaging',
+    created_by_id: userId,
     members: [userId, otherUserId],
   }
 }

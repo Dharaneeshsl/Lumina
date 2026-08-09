@@ -4,9 +4,14 @@
   --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
   --font-serif: "Newsreader", "Playfair Display", Georgia, serif;
 
-  --bg-page: #ffffff;
+  --color-cream: #F8EDE3;
+  --color-sand: #DFD3C3;
+  --color-taupe: #D0B8A8;
+  --color-plum: #7D6E83;
+
+  --bg-page: #F8EDE3;
   --color-brand-primary: #18181b;
-  --color-brand-secondary: #3f3f46;
+  --color-brand-secondary: #52525b;
 }
 
 * {
@@ -21,6 +26,7 @@ body {
   color: #0f0f0f;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
@@ -41,7 +47,7 @@ button {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #faf8f5;
+  background-color: var(--color-cream);
   padding-bottom: 80px;
   overflow: hidden;
 }
@@ -80,7 +86,13 @@ button {
   justify-content: space-between;
 }
 
-/* Lumino Logo with Graduation Cap as Dot of "i" and Pen-Tip Underline */
+/* Lumino wordmark */
+.brand-header-left {
+  display: inline-flex;
+  align-items: flex-start;
+  margin-left: 16px;
+}
+
 .brand-logo-wrapper {
   display: inline-flex;
   flex-direction: column;
@@ -149,7 +161,7 @@ button {
 }
 
 .nav-link:hover {
-  color: var(--color-brand-primary);
+  color: var(--color-plum);
 }
 
 /* Black & White Social Icons */
@@ -175,7 +187,7 @@ button {
 }
 
 .header-signin-btn {
-  background-color: #33532b;
+  background-color: var(--color-plum);
   color: #ffffff;
   font-size: 13.5px;
   font-weight: 600;
@@ -184,12 +196,12 @@ button {
   border: none;
   cursor: pointer;
   margin-left: 8px;
-  box-shadow: 0 2px 8px rgba(51, 83, 43, 0.2);
+  box-shadow: 0 2px 8px rgba(125, 110, 131, 0.2);
   transition: all 0.2s ease;
 }
 
 .header-signin-btn:hover {
-  background-color: #27401f;
+  background-color: #6b5d72;
   transform: translateY(-1px);
 }
 
@@ -219,11 +231,10 @@ button {
 }
 
 .hero-title-highlight-college {
-  color: #33532b;
+  color: var(--color-plum);
   font-weight: 300;
 }
 
-/* Subtitle - Bigger */
 .hero-subtitle {
   font-size: clamp(1.15rem, 2.2vw, 1.35rem);
   font-weight: 400;
@@ -242,7 +253,7 @@ button {
 }
 
 .btn-primary-join {
-  background-color: #33532b;
+  background-color: var(--color-plum);
   color: #ffffff;
   font-size: 16px;
   font-weight: 600;
@@ -250,12 +261,12 @@ button {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(51, 83, 43, 0.25);
+  box-shadow: 0 4px 14px rgba(125, 110, 131, 0.2);
   transition: all 0.2s ease;
 }
 
 .btn-primary-join:hover {
-  background-color: #27401f;
+  background-color: #6b5d72;
   transform: translateY(-1px);
 }
 
@@ -411,55 +422,19 @@ button {
   position: relative;
 }
 
-.yellow-book-badge {
-  background-color: #ffc743;
-  color: #18181b;
-  transform: rotate(-8deg);
-}
-
-.blue-grad-badge {
-  background-color: #38bdf8;
+.yellow-book-badge,
+.blue-grad-badge,
+.amber-pencil-badge,
+.green-flask-badge,
+.rose-scroll-badge,
+.purple-bulb-badge {
+  background-color: var(--color-taupe);
   color: #ffffff;
   transform: rotate(6deg);
 }
 
-.amber-pencil-badge {
-  background-color: #fef3c7;
-  color: #b45309;
-  border-color: #fde68a;
-}
-
-.green-flask-badge {
-  background-color: #d1fae5;
-  color: #047857;
-  border-color: #a7f3d0;
-}
-
-.rose-scroll-badge {
-  background-color: #ffe4e6;
-  color: #be123c;
-  border-color: #fecdd3;
-}
-
-.purple-bulb-badge {
-  background-color: #f3e8ff;
-  color: #6b21a8;
-  border-color: #e9d5ff;
-}
-
-.floating-badge-mini {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  position: absolute;
-}
-
 .gray-check-badge {
-  background-color: #71717a;
+  background-color: var(--color-plum);
   right: -8px;
   bottom: -4px;
   border: 1.5px solid #ffffff;

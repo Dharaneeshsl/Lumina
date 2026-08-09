@@ -43,3 +43,17 @@ export interface CreatePostInput {
   files: any[];
 }
 
+export interface LeaderboardEntry {
+  rank: number
+  userId: string
+  solvedCount: number
+  username: string | null
+  name: string | null
+  profilePicture: string | null
+  leetcodeUsername: string | null
+  easySolved: number | null
+  mediumSolved: number | null
+  hardSolved: number | null
+  leetcodeRating: number | null
+  lastSyncedAt: Date | null
+}

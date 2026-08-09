@@ -12,15 +12,13 @@ export async function updateMyProfile(
    if(data.dob) {
     data.dob = new Date(data.dob);
    }
-  return repository.updateProfile(userId, data);
+  return repository.updateProfile(userId, {...data, leetcodeUsername: data.leetcodeUsername || null});
 }
-
 export async function getProfileByUsername(
   username: string
 ) {
   return repository.findByUsername(username);
 }
-
 export const uploadProfilePicture = async (
   userId: string,
   file: Express.Multer.File
@@ -28,7 +26,6 @@ export const uploadProfilePicture = async (
   if (!file) {
     throw new Error("Profile picture is required.");
   }
-
   const user = await repository.findByUserId(userId);
   if (!user) {
     throw new Error("User not found.");
@@ -37,7 +34,6 @@ export const uploadProfilePicture = async (
   if (user.profilePictureKey) {
     await deleteFile(user.profilePictureKey);
   }
-
   const uploaded = await uploadFile({
     buffer: file.buffer,
     mimeType: file.mimetype,
@@ -64,7 +60,6 @@ export const deleteProfilePicture = async (userId: string) => {
   if (user.profilePictureKey) {
     await deleteFile(user.profilePictureKey);
   }
-
   return repository.removeProfilePicture(userId);
 };
 
@@ -75,16 +70,13 @@ export const uploadCoverImage = async (
   if (!file) {
     throw new Error("Cover image is required.");
   }
-
   const user = await repository.findByUserId(userId);
   if (!user) {
     throw new Error("User not found.");
   }
-
   if (user.coverImageKey) {
     await deleteFile(user.coverImageKey);
   }
-
   const uploaded = await uploadFile({
     buffer: file.buffer,
     mimeType: file.mimetype,
@@ -107,10 +99,8 @@ export const deleteCoverImage = async (userId: string) => {
   if (!user) {
     throw new Error("User not found.");
   }
-
   if (user.coverImageKey) {
     await deleteFile(user.coverImageKey);
   }
-
   return repository.removeCoverImage(userId);
 };

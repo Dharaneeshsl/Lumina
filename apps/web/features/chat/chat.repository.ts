@@ -8,11 +8,10 @@ export const findUserById = async (userId: string) => {
     select: {
       id: true,
       username: true,
-      avatar: true,
+      image: true,
     },
   })
 }
-
 export const findUsersByIds = async (userIds: string[]) => {
   return prisma.user.findMany({
     where: {
@@ -23,7 +22,7 @@ export const findUsersByIds = async (userIds: string[]) => {
     select: {
       id: true,
       username: true,
-      avatar: true,
+      image : true,
     },
   })
 }

@@ -29,6 +29,7 @@ export async function updateProfile(userId: string, data: any) {
       create: {
         userId,
         ...data,
+        leetcodeUsername: data.leetcodeUsername || null,
       },
     })
   } catch (error) {
@@ -39,19 +40,15 @@ export async function updateProfile(userId: string, data: any) {
 
 export const updateProfilePicture = async (
   userId: string,
-
   profileImageUrl: string | any,
-
   profileImageKey: string | any
 ) => {
   return prisma.profile.update({
     where: {
       userId,
     },
-
     data: {
       profilePicture: profileImageUrl,
-
       profilePictureKey: profileImageKey,
     },
   })
@@ -62,10 +59,8 @@ export const removeProfilePicture = async (userId: string) => {
     where: {
       userId,
     },
-
     data: {
       profilePicture: null,
-
       profilePictureKey: null,
     },
   })
@@ -73,19 +68,15 @@ export const removeProfilePicture = async (userId: string) => {
 
 export const updateCoverImage = async (
   userId: string,
-
   coverImageUrl: string,
-
   coverImageKey: string
 ) => {
   return prisma.profile.update({
     where: {
       userId,
     },
-
     data: {
       coverImage: coverImageUrl,
-
       coverImageKey: coverImageKey,
     },
   })
@@ -99,7 +90,6 @@ export const removeCoverImage = async (userId: string) => {
 
     data: {
       coverImage: null,
-
       coverImageKey: null,
     },
   })
