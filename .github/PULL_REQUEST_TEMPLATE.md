@@ -1,48 +1,43 @@
-## Pull Request
+## What changed?
 
-### Summary
-<!-- A concise description of what this PR does and why. -->
+<!-- Summarize the user-facing and technical changes. -->
 
-### Type of change
-- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
-- [ ] ✨ New feature (non-breaking change that adds functionality)
-- [ ] 💥 Breaking change (fix or feature that changes existing behavior)
-- [ ] 📖 Documentation update
-- [ ] 🎨 Style / formatting (no logic change)
-- [ ] ♻️ Refactor (no feature / bug change)
-- [ ] ⚡ Performance improvement
-- [ ] 🧪 Test update
-- [ ] 🔧 Build / tooling / dependency update
+## Why was this change required?
 
-### Related Issues
-<!-- Link issues this PR closes or relates to -->
-Closes #
-Related to #
+<!-- Link the problem, incident, or product requirement that motivated it. -->
 
-### How was this tested?
-- [ ] Unit tests added / updated
-- [ ] Integration tests added / updated
-- [ ] Manually tested locally
-- [ ] E2E tests added / updated
+## Implementation details
 
-**Steps to test manually:**
-1.
-2.
-3.
+<!-- Call out key design choices, migrations, configuration, or trade-offs. -->
 
-### Screenshots / recordings (if applicable)
-<!-- For UI changes, always include before/after screenshots or a screen recording -->
+## Testing performed
 
-### Checklist
-- [ ] My code follows the style guidelines in [CONTRIBUTING.md](../CONTRIBUTING.md)
-- [ ] I have performed a self-review of my own code
-- [ ] I have added or updated tests to cover my changes
-- [ ] New and existing tests pass locally (`bun run test`)
-- [ ] TypeScript compiles without errors (`bun run check-types`)
-- [ ] Linting passes (`bun run lint`)
-- [ ] I have updated documentation if needed
-- [ ] My changes do not introduce new console warnings or errors
-- [ ] I have added comments to hard-to-understand code sections
+<!-- List automated and manual checks. Include commands and relevant results. -->
+- [ ] Tests added or updated
+- [ ] `bun run test`
+- [ ] `bun run lint`
+- [ ] `bun run check-types`
+- [ ] Manual testing (describe below)
 
-### Additional context
-<!-- Any other context, design decisions, or trade-offs reviewers should know about -->
+## Potential risks
+
+<!-- Describe operational, performance, security, rollout, or rollback risks. -->
+
+## Breaking changes
+
+<!-- Write "None" or describe migration and communication requirements. -->
+
+## Screenshots / logs if applicable
+
+<!-- Include before/after screenshots for UI changes and sanitized logs for operational changes. -->
+
+## Related Issue
+
+<!-- Use "Closes #123" when this PR completes an issue. -->
+
+## Author checklist
+
+- [ ] This PR has a Conventional Commit-style title.
+- [ ] I performed a self-review.
+- [ ] I updated documentation and configuration where needed.
+- [ ] I did not include secrets, production data, or unrelated changes.

@@ -95,19 +95,19 @@ bun run dev
 | Branch | Purpose |
 |---|---|
 | `main` | Production-ready code. All PRs merge here. |
-| `feat/<name>` | New features |
+| `feature/<name>` | New features |
 | `fix/<name>` | Bug fixes |
 | `docs/<name>` | Documentation-only changes |
 | `chore/<name>` | Build process, dependency, or tooling changes |
 | `refactor/<name>` | Code refactoring |
-| `test/<name>` | Adding or improving tests |
+| `hotfix/<name>` | Urgent production fix |
 
 Always branch from the latest `main`:
 
 ```bash
 git checkout main
 git pull upstream main
-git checkout -b feat/my-amazing-feature
+git checkout -b feature/my-amazing-feature
 ```
 
 ---
@@ -136,6 +136,8 @@ We use [Conventional Commits](https://www.conventionalcommits.org/). Your commit
 | `test` | Adding or fixing tests |
 | `chore` | Build, CI, or dependency updates |
 | `perf` | Performance improvements |
+| `build` | Build-system or external dependency changes |
+| `ci` | Continuous-integration or deployment changes |
 
 ### Scopes
 
@@ -150,6 +152,8 @@ docs(readme): add Docker deployment guide
 chore(deps): upgrade Prisma to 7.9.1
 test(utils): add unit tests for date formatters
 perf(cache): implement Redis pipeline batching
+build: upgrade the production image
+ci: add pull request checks
 ```
 
 ---
