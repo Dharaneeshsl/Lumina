@@ -41,13 +41,13 @@ services:
     image: redis:7-alpine
     container_name: lumina_redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-lumina_redis_password}
+    command: redis-server --appendonly yes
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-lumina_redis_password}", "ping"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -67,7 +67,7 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-lumina_user}:${POSTGRES_PASSWORD:-lumina_password}@db:5432/${POSTGRES_DB:-lumina_dev}"
-      REDIS_URL: "redis://:${REDIS_PASSWORD:-lumina_redis_password}@redis:6379"
+      REDIS_URL: "redis://redis:6379"
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
     ports:
