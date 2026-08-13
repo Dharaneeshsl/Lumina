@@ -1,9 +1,6 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@lumina/db';
-
-
-
-
+  
 
 export const createPost = async (
   tx: Prisma.TransactionClient,

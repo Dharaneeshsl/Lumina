@@ -4,7 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --filter=./apps/* --filter=@lumina/db --env-mode=loose --ui=stream --output-logs=full",
-    "dev:setup": "bun run --filter @lumina/db generate",
+    "dev:setup": "bun internal/scripts/ensure-env.ts && bun run --filter @lumina/db generate",
     "dev:api": "turbo run dev --filter=api... --env-mode=loose --ui=stream --output-logs=full",
     "dev:web": "turbo run dev --filter=web --env-mode=loose --ui=stream --output-logs=full",
     "lint": "turbo run lint",

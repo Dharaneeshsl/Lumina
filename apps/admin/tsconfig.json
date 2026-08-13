@@ -1,4 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@lumina/typescript-config/base.json",
   "include": ["src"]
 }
