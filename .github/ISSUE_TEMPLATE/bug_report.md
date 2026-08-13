@@ -1,41 +1,35 @@
 ---
-name: 🐛 Bug Report
-about: Report a reproducible bug in Lumina
-title: "[bug]: "
-labels: ["bug", "triage"]
+name: Bug
+about: Report a reproducible defect
+title: "fix: "
+labels: [bug, triage]
 assignees: []
 ---
 
-## Bug Description
-<!-- A clear and concise description of the bug. -->
+## Description
 
-## Steps to Reproduce
-1.
-2.
-3.
-4.
+<!-- Steps to reproduce, expected behavior, actual behavior, and environment. -->
 
-## Expected Behavior
-<!-- What you expected to happen. -->
+## Requirements
 
-## Actual Behavior
-<!-- What actually happened. Include error messages, stack traces, or screenshots. -->
+<!-- Behavior that must be restored. -->
 
-## Environment
-| Field | Value |
-|---|---|
-| Lumina version | e.g. 0.9.0 |
-| OS | e.g. macOS 15.2, Ubuntu 24.04, Windows 11 |
-| Node.js version | e.g. 20.15.0 |
-| Bun version | e.g. 1.3.0 |
-| Browser (if UI bug) | e.g. Chrome 127, Safari 18 |
-| Self-hosted or Cloud? | e.g. Cloud (luminohq.com) / Self-hosted |
+## Acceptance Criteria
 
-## Logs / Screenshots
-<!-- Paste any relevant logs here. Use code blocks for log output. -->
-```
-paste logs here
-```
+- [ ]
 
-## Additional Context
-<!-- Any other context about the problem. -->
+## Technical Notes
+
+<!-- Sanitized logs, suspected cause, affected components, and regression-test plan. -->
+
+## Dependencies
+
+<!-- Blocking issues, services, migrations, or vendors. Write "None" if none. -->
+
+## Owner
+
+<!-- @username or team; leave unassigned during triage. -->
+
+## Priority
+
+<!-- Critical / High / Medium / Low -->

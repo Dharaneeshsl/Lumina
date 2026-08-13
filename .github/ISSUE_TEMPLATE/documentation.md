@@ -6,14 +6,30 @@ labels: ["documentation"]
 assignees: []
 ---
 
-## What documentation is affected?
-<!-- Link to the page / file with the issue, or describe where the documentation lives. -->
+## Description
 
-## What is wrong or missing?
-<!-- Be specific. Paste the incorrect text if applicable. -->
+<!-- What documentation is affected and what is missing, inaccurate, or unclear? -->
 
-## What should it say instead?
-<!-- Your suggested correction or addition. -->
+## Requirements
 
-## Additional Context
-<!-- Any extra context or screenshots. -->
+<!-- What must the documentation communicate? -->
+
+## Acceptance Criteria
+
+- [ ]
+
+## Technical Notes
+
+<!-- Audience, commands, screenshots, version constraints, or source material. -->
+
+## Dependencies
+
+<!-- Related releases or product changes. Write "None" if none. -->
+
+## Owner
+
+<!-- @username or team; leave unassigned during triage. -->
+
+## Priority
+
+<!-- Critical / High / Medium / Low -->

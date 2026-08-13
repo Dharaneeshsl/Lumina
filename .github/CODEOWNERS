@@ -1,11 +1,24 @@
-# Default review ownership. Replace with individual GitHub usernames or teams
-# before enabling required reviews in branch protection.
+# Replace these Lumina GitHub teams with the team's real GitHub users or teams
+# before enabling required CODEOWNERS review. Verify every owner exists.
 * @luminohq/core
 
-# Security-sensitive and production-impacting paths.
-/packages/auth/ @luminohq/security
-/packages/database/ @luminohq/security
-/apps/web/middleware.ts @luminohq/security
-/.github/workflows/ @luminohq/platform
+/apps/api/ @luminohq/backend
+/apps/web/ @luminohq/frontend
+/apps/admin/ @luminohq/platform
+/apps/docs/ @luminohq/platform
+/apps/storybook/ @luminohq/frontend
+/workers/ @luminohq/backend
+
+/packages/auth/ @luminohq/security @luminohq/backend
+/packages/db/ @luminohq/database @luminohq/backend
+/packages/storage/ @luminohq/platform @luminohq/backend
+/packages/env/ @luminohq/platform
+/packages/observability/ @luminohq/platform
+/packages/kv/ @luminohq/platform
+/tooling/ @luminohq/platform
+
+/.github/ @luminohq/platform @luminohq/security
+/infra/ @luminohq/platform
 /docker-compose.yml @luminohq/platform
 /vercel.json @luminohq/platform
+/.env.example @luminohq/platform @luminohq/security
