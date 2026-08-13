@@ -1,17 +1,15 @@
-/* Lumino Landing Page CSS */
+/* Lumino Landing Page — Linear-inspired dark theme */
 
 :root {
-  --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, sans-serif;
-  --font-serif: "Newsreader", "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --color-cream: #F8EDE3;
-  --color-sand: #DFD3C3;
-  --color-taupe: #D0B8A8;
-  --color-plum: #7D6E83;
+  --bg-page: #000000;
+  --bg-elevated: #0b0b0b;
+  --border-subtle: #222222;
 
-  --bg-page: #F8EDE3;
-  --color-brand-primary: #18181b;
-  --color-brand-secondary: #52525b;
+  --text-primary: #ffffff;
+  --text-secondary: #8a8a8e;
+  --text-muted: #6b6b6f;
 }
 
 * {
@@ -23,7 +21,7 @@
 html,
 body {
   background-color: var(--bg-page);
-  color: #0f0f0f;
+  color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -47,8 +45,7 @@ button {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-cream);
-  padding-bottom: 80px;
+  background-color: var(--bg-page);
   overflow: hidden;
 }
 
@@ -73,229 +70,210 @@ button {
   overflow: hidden;
 }
 
-/* Header */
+/* Header — full-width Linear-style bar */
 .site-header {
-  position: relative;
-  z-index: 1;
-  max-width: 1320px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
   width: 100%;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.site-header-inner {
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 28px 48px 16px 24px;
+  padding: 0 32px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24px;
 }
 
 /* Lumino wordmark */
 .brand-header-left {
   display: inline-flex;
-  align-items: flex-start;
-  margin-left: 16px;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  color: var(--text-primary);
 }
 
-.brand-logo-wrapper {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  position: relative;
+.brand-logo-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--text-primary);
 }
 
 .brand-logo {
   font-family: var(--font-sans);
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: #0f0f0f;
-  display: inline-flex;
-  align-items: baseline;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
   user-select: none;
 }
 
-.brand-logo-underline {
-  width: 100%;
-  height: 12px;
-  margin-top: 1px;
-  color: #0f0f0f;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.logo-letter-i-wrapper {
-  position: relative;
-  display: inline-block;
-  margin: 0 0.5px;
-}
-
-.graduation-cap-dot-icon {
-  width: 14px;
-  height: 14px;
-  position: absolute;
-  top: -1px;
-  left: 65%;
-  transform: translateX(-50%) rotate(15deg);
-  color: #0f0f0f;
-  pointer-events: none;
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
 }
 
 .site-nav {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
   align-items: center;
 }
 
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 36px;
+  gap: 28px;
   list-style: none;
 }
 
 .nav-link {
-  font-size: 15px;
-  font-weight: 600;
-  color: #0f0f0f;
-  transition: color 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
 }
 
 .nav-link:hover {
-  color: var(--color-plum);
+  color: var(--text-primary);
 }
 
-/* Black & White Social Icons */
-.social-icons-group {
+.header-divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.social-icon-link {
-  color: #0f0f0f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+.header-login-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: color 0.15s ease;
 }
 
-.social-icon-link:hover {
-  color: #666666;
-  transform: translateY(-2px);
+.header-login-btn:hover {
+  color: var(--text-primary);
 }
 
-.header-signin-btn {
-  background-color: var(--color-plum);
-  color: #ffffff;
-  font-size: 13.5px;
-  font-weight: 600;
-  padding: 8px 18px;
+.header-signup-btn {
+  background-color: var(--text-primary);
+  color: #000000;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  margin-left: 8px;
-  box-shadow: 0 2px 8px rgba(125, 110, 131, 0.2);
-  transition: all 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
-.header-signin-btn:hover {
-  background-color: #6b5d72;
-  transform: translateY(-1px);
+.header-signup-btn:hover {
+  opacity: 0.9;
 }
 
-/* Main Hero - Title Moved Down */
+/* Hero — left-aligned, no dashboard mockup */
 .hero-section {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1360px;
-  margin: 0 auto;
+  flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 85px;
-  text-align: center;
+  align-items: flex-start;
+  padding: 140px 32px 120px;
+}
+
+.hero-content {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  text-align: left;
 }
 
 .hero-title {
-  font-family: var(--font-serif);
-  font-size: clamp(4.4rem, 9.8vw, 8.8rem);
-  font-weight: 400;
-  letter-spacing: -0.025em;
-  line-height: 1;
-  color: #0f0f0f;
-  text-align: center;
+  font-family: var(--font-sans);
+  font-size: clamp(2.1rem, 4.2vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  max-width: 720px;
   user-select: none;
 }
 
-.hero-title-highlight-college {
-  color: var(--color-plum);
-  font-weight: 300;
-}
-
 .hero-subtitle {
-  font-size: clamp(1.15rem, 2.2vw, 1.35rem);
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
   font-weight: 400;
-  color: #444444;
-  line-height: 1.6;
-  max-width: 720px;
-  margin-top: 32px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 540px;
+  margin-top: 24px;
 }
 
-/* Neat CTA Button Pill Group */
 .hero-cta-group {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 40px;
+  gap: 12px;
+  margin-top: 36px;
 }
 
 .btn-primary-join {
-  background-color: var(--color-plum);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 14px 32px;
+  background-color: var(--text-primary);
+  color: #000000;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(125, 110, 131, 0.2);
-  transition: all 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
 .btn-primary-join:hover {
-  background-color: #6b5d72;
-  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .btn-secondary-learn {
   background-color: transparent;
-  color: #18181b;
-  border: 1.5px solid #e4e4e7;
-  padding: 13px 27px;
-  border-radius: 9999px;
-  font-size: 16px;
-  font-weight: 600;
+  color: var(--text-secondary);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1.2;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
+  gap: 6px;
+  transition: color 0.15s ease;
 }
 
 .btn-secondary-learn:hover {
-  background-color: #f4f4f5;
-  border-color: #a1a1aa;
-  color: #09090b;
+  color: var(--text-primary);
 }
 
 .btn-secondary-learn .arrow-icon {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 /* Merged Single Showcase Box */
@@ -488,24 +466,27 @@ button {
 
 
 @media (max-width: 900px) {
-  .site-header {
-    padding: 20px 24px;
+  .site-header-inner {
+    padding: 0 20px;
+    height: 56px;
   }
-  .nav-menu {
+
+  .site-nav {
     display: none;
   }
-  .hero-section {
-    padding-top: 50px;
+
+  .header-divider {
+    display: none;
   }
+
+  .hero-section {
+    padding: 100px 20px 80px;
+  }
+
   .hero-cta-group {
     flex-direction: column;
+    align-items: flex-start;
     width: 100%;
-    max-width: 280px;
-  }
-  .btn-primary-join,
-  .btn-secondary-learn {
-    width: 100%;
-    justify-content: center;
   }
 }
 
