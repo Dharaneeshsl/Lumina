@@ -1,113 +1,39 @@
-# Lumina Docker Compose Configuration
-# Use this for local development or self-hosting.
-#
-# Usage:
-#   docker compose up -d          # Start all services
-#   docker compose up db redis -d # Start only infrastructure
-#   docker compose down           # Stop all services
-#   docker compose logs -f web    # Tail logs for the web service
-
-version: "3.9"
-
+# Local development infrastructure only. Run application processes with Bun so
+# hot reload remains available: `bun run dev:api` and `bun run dev:web`.
 services:
-  # --------------------------------------------------------------------------
-  # PostgreSQL — Primary Database
-  # --------------------------------------------------------------------------
   db:
     image: postgres:16-alpine
-    container_name: lumina_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-lumina_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lumina_password}
-      POSTGRES_DB: ${POSTGRES_DB:-lumina_dev}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lumina_user} -d ${POSTGRES_DB:-lumina_dev}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - lumina_network
 
-  # --------------------------------------------------------------------------
-  # Redis — Cache & Session Store
-  # --------------------------------------------------------------------------
   redis:
     image: redis:7-alpine
-    container_name: lumina_redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-lumina_redis_password}
+    command: ["sh", "-c", "redis-server --appendonly yes --requirepass $$REDIS_PASSWORD"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-lumina_redis_password}", "ping"]
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a $$REDIS_PASSWORD ping"]
       interval: 10s
       timeout: 3s
       retries: 5
-    networks:
-      - lumina_network
 
-  # --------------------------------------------------------------------------
-  # Web App — Next.js 15 (Marketing + Public API)
-  # --------------------------------------------------------------------------
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-      args:
-        - NODE_ENV=production
-    container_name: lumina_web
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-lumina_user}:${POSTGRES_PASSWORD:-lumina_password}@db:5432/${POSTGRES_DB:-lumina_dev}"
-      REDIS_URL: "redis://:${REDIS_PASSWORD:-lumina_redis_password}@redis:6379"
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
-    ports:
-      - "3000:3000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - lumina_network
-
-  # --------------------------------------------------------------------------
-  # Dashboard App — Vite + React (Nginx static serving)
-  # --------------------------------------------------------------------------
-  dashboard:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-    container_name: lumina_dashboard
-    restart: unless-stopped
-    ports:
-      - "5173:80"
-    depends_on:
-      - web
-    networks:
-      - lumina_network
-
-# ------------------------------------------------------------------------------
-# Volumes
-# ------------------------------------------------------------------------------
 volumes:
   postgres_data:
-    driver: local
   redis_data:
-    driver: local
-
-# ------------------------------------------------------------------------------
-# Networks
-# ------------------------------------------------------------------------------
-networks:
-  lumina_network:
-    driver: bridge
