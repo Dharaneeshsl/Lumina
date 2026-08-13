@@ -16,11 +16,13 @@ import express from "express";
 import type { Request, Response } from "express";
 
 
+import { httpLoggerMiddleware, logger } from "@lumina/observability";
+
 const app = express();
 
 const PORT = process.env.SERVER_PORT;
 
-
+app.use(httpLoggerMiddleware("api"));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -45,8 +47,8 @@ app.get("/ok" , (req : Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  logger.info(`Server is running on port ${PORT}`);
   startCronJobs().catch((error) => {
-    console.error('[cron] Failed to start cron jobs:', error);
+    logger.error("[cron] Failed to start cron jobs", { metadata: { error: String(error) } });
   });
 });
