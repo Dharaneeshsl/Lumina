@@ -11,7 +11,7 @@ Apply this ruleset to `main`:
 | Dismiss stale approvals | Enabled |
 | Require Code Owner review | Enabled |
 | Require approval of most recent push | Enabled |
-| Require status checks and branch freshness | Enabled |
+| Require status checks and branch freshness | Enabled; require `Quality checks`, `Production image vulnerability scan`, `Dependency review`, and `analyze` |
 | Force pushes and deletions | Blocked |
 | Bypass | Administrators only for documented emergency recovery |
 
