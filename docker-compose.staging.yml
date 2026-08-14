@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lumina-postgres-staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lumina_user
+      POSTGRES_PASSWORD: lumina_password
+      POSTGRES_DB: lumina_staging
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata_staging:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lumina_user -d lumina_staging']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: lumina-redis-staging
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata_staging:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: lumina-api-staging
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      SERVER_PORT: 3000
+      DATABASE_URL: postgresql://lumina_user:lumina_password@postgres:5432/lumina_staging
+      REDIS_URL: redis://redis:6379
+      BETTER_AUTH_SECRET: lumina-staging-secret-key-987654321
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'bun',
+          '-e',
+          "fetch('http://127.0.0.1:3000/ready').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata_staging:
+  redisdata_staging:

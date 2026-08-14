@@ -1,4 +1,6 @@
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
+import { generateCorrelationContext, getCorrelationContext, runWithCorrelation } from './context.ts'
+import { httpErrorsTotal, httpRequestDurationSeconds, httpRequestsTotal } from './metrics.ts'
 
 import type { NextFunction, Request, Response } from 'express'
 
@@ -79,13 +81,17 @@ export class Logger {
       metadata?: Record<string, unknown>
     }
   ) {
+    const activeCorrelation = getCorrelationContext()
+    const requestId = context?.request_id || activeCorrelation?.requestId
+    const traceId = context?.trace_id || activeCorrelation?.traceId
+
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       service: this.service,
       environment: this.environment,
-      ...(context?.request_id ? { request_id: context.request_id } : {}),
-      ...(context?.trace_id ? { trace_id: context.trace_id } : {}),
+      ...(requestId ? { request_id: requestId } : {}),
+      ...(traceId ? { trace_id: traceId } : {}),
       message,
       ...(context?.metadata
         ? { metadata: redactSensitiveData(context.metadata) as Record<string, unknown> }
@@ -136,17 +142,32 @@ export function httpLoggerMiddleware(serviceName = 'api') {
   const reqLogger = new Logger({ service: serviceName })
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const requestId = (req.headers['x-request-id'] as string) || randomUUID()
-    const traceId = (req.headers['x-trace-id'] as string) || undefined
-    ;(req as Request & { requestId?: string; traceId?: string }).requestId = requestId
-    ;(req as Request & { requestId?: string; traceId?: string }).traceId = traceId
+    const incomingRequestId = req.headers['x-request-id'] as string
+    const incomingTraceId =
+      (req.headers['x-trace-id'] as string) || (req.headers['traceparent'] as string)
+    const correlation = generateCorrelationContext(incomingRequestId, incomingTraceId)
 
-    res.setHeader('X-Request-ID', requestId)
+    ;(req as Request & { requestId?: string; traceId?: string }).requestId = correlation.requestId
+    ;(req as Request & { requestId?: string; traceId?: string }).traceId = correlation.traceId
+
+    res.setHeader('X-Request-ID', correlation.requestId)
+    res.setHeader('X-Trace-ID', correlation.traceId)
 
     const startTime = Date.now()
 
     res.on('finish', () => {
       const durationMs = Date.now() - startTime
+      const durationSec = durationMs / 1000
+      const route = req.route?.path || req.path || 'unknown'
+      const statusCodeStr = String(res.statusCode)
+
+      // Record Prometheus Metrics
+      httpRequestsTotal.inc({ method: req.method, route, status_code: statusCodeStr })
+      httpRequestDurationSeconds.observe(
+        { method: req.method, route, status_code: statusCodeStr },
+        durationSec
+      )
+
       const metadata = {
         method: req.method,
         path: req.path,
@@ -157,20 +178,23 @@ export function httpLoggerMiddleware(serviceName = 'api') {
       }
 
       if (res.statusCode >= 400) {
+        httpErrorsTotal.inc({ method: req.method, route, status_code: statusCodeStr })
         reqLogger.warn(`${req.method} ${req.path} ${res.statusCode} - ${durationMs}ms`, {
-          request_id: requestId,
-          trace_id: traceId,
+          request_id: correlation.requestId,
+          trace_id: correlation.traceId,
           metadata,
         })
       } else {
         reqLogger.info(`${req.method} ${req.path} ${res.statusCode} - ${durationMs}ms`, {
-          request_id: requestId,
-          trace_id: traceId,
+          request_id: correlation.requestId,
+          trace_id: correlation.traceId,
           metadata,
         })
       }
     })
 
-    next()
+    runWithCorrelation(correlation, () => {
+      next()
+    })
   }
 }
