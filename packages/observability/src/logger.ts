@@ -93,13 +93,11 @@ export class Logger {
     }
 
     if (this.environment === 'production') {
-      console.log(JSON.stringify(entry))
+      console.log('%s', JSON.stringify(entry))
     } else {
       const reqInfo = entry.request_id ? ` [req:${entry.request_id}]` : ''
-      console.log(
-        `[${entry.timestamp}] [${entry.level.toUpperCase()}] [${entry.service}]${reqInfo}: ${entry.message}`,
-        entry.metadata ?? ''
-      )
+      const logHeader = `[${entry.timestamp}] [${entry.level.toUpperCase()}] [${entry.service}]${reqInfo}: ${entry.message}`
+      console.log('%s %o', logHeader, entry.metadata ?? '')
     }
   }
 

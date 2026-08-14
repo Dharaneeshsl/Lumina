@@ -28,6 +28,19 @@ app.use(httpLoggerMiddleware('api'))
 app.use(express.json())
 app.use(cookieParser())
 
+// CSRF origin validation middleware for state-changing requests
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
+  if (isStateChanging) {
+    const origin = req.headers.origin || req.headers.referer
+    const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
+    if (origin && !origin.startsWith(allowedOrigin) && !origin.startsWith('http://localhost:')) {
+      return res.status(403).json({ message: 'CSRF protection: Invalid request origin' })
+    }
+  }
+  next()
+})
+
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',

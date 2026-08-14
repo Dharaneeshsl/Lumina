@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM oven/bun:1.3.0-alpine AS dependencies
+FROM oven/bun:1-alpine AS dependencies
 WORKDIR /app
 
 # `.dockerignore` excludes credentials and build outputs from this context.
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 RUN bun install --frozen-lockfile
 
-FROM oven/bun:1.3.0-alpine AS runtime
+FROM oven/bun:1-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV SERVER_PORT=3000
