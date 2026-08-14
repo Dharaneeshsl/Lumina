@@ -24,6 +24,7 @@ import {
 import { toNodeHandler } from 'better-auth/node'
 import cors from 'cors'
 import express from 'express'
+import rateLimit from 'express-rate-limit'
 
 import type { NextFunction, Request, Response } from 'express'
 
@@ -31,6 +32,23 @@ const app = express()
 
 const PORT = process.env.SERVER_PORT
 
+// Global rate limiting to satisfy security requirements & protect DB/API routes
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 300,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { status: 'error', message: 'Too many requests from this IP, please try again later.' },
+})
+
+const readyLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 60,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+})
+
+app.use(globalLimiter)
 app.use(httpLoggerMiddleware('api'))
 app.use(express.json())
 
@@ -77,7 +95,7 @@ app.get('/health', (req: Request, res: Response) => {
 })
 
 // Task 23: Readiness Probe - Critical dependency readiness check (PostgreSQL DB & Redis)
-app.get('/ready', async (req: Request, res: Response) => {
+app.get('/ready', readyLimiter, async (req: Request, res: Response) => {
   const checks: Record<string, string> = {
     database: 'unknown',
     redis: 'unknown',
