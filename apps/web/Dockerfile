@@ -2,9 +2,11 @@
 FROM oven/bun:1-alpine AS build
 WORKDIR /app
 
+ENV DATABASE_URL="postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev"
+
 COPY . .
 RUN bun install
-
+RUN bun run --filter @lumina/db generate
 RUN bun --cwd apps/web run build
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine AS runtime
