@@ -51,9 +51,7 @@ export const VideoCallContainer: React.FC<VideoCallContainerProps> = ({
 
   const [isMicOn, setIsMicOn] = useState(true)
   const [isCameraOn, setIsCameraOn] = useState(true)
-  const [connectionState, setConnectionState] = useState<
-    'connecting' | 'connected' | 'reconnecting'
-  >('connected')
+  const [connectionState] = useState<'connecting' | 'connected' | 'reconnecting'>('connected')
   const [durationSeconds, setDurationSeconds] = useState(0)
 
   useEffect(() => {
@@ -85,6 +83,7 @@ export const VideoCallContainer: React.FC<VideoCallContainerProps> = ({
     <div
       className="lumina-video-root"
       style={styles.root}
+      data-call-id={callId}
     >
       {/* Top Header Bar */}
       <header style={styles.header}>
