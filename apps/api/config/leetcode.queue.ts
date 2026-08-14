@@ -1,4 +1,5 @@
 import { redis } from './config.redis'
+import { getCorrelationContext } from '@lumina/observability'
 import { Queue } from 'bullmq'
 
 export const LEETCODE_QUEUE_NAME = 'leetcode-sync'
@@ -23,9 +24,14 @@ export async function enqueueProfileSync(
   profileId: string,
   options?: { delay?: number; priority?: number }
 ) {
+  const correlation = getCorrelationContext()
   return leetcodeQueue.add(
     LEETCODE_JOB_SYNC_PROFILE,
-    { profileId },
+    {
+      profileId,
+      request_id: correlation?.requestId,
+      trace_id: correlation?.traceId,
+    },
     {
       ...defaultJobOptions,
       delay: options?.delay,
@@ -36,9 +42,13 @@ export async function enqueueProfileSync(
 }
 
 export async function enqueueDailySync() {
+  const correlation = getCorrelationContext()
   return leetcodeQueue.add(
     LEETCODE_JOB_DAILY_SYNC,
-    {},
+    {
+      request_id: correlation?.requestId,
+      trace_id: correlation?.traceId,
+    },
     {
       ...defaultJobOptions,
       jobId: `daily-sync:${new Date().toISOString().slice(0, 10)}`,

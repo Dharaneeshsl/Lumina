@@ -12,7 +12,12 @@ import '../../workers/leetcode/src/index.ts'
 
 import { auth } from '@lumina/auth'
 import { MSG_OK } from '@lumina/constants'
-import { httpLoggerMiddleware, logger } from '@lumina/observability'
+import {
+  getMetricsContentType,
+  getMetricsText,
+  httpLoggerMiddleware,
+  logger,
+} from '@lumina/observability'
 import { toNodeHandler } from 'better-auth/node'
 import cors from 'cors'
 import express from 'express'
@@ -56,6 +61,17 @@ app.use('/api/leetcode', leetcodeRouter)
 
 app.get('/ok', (req: Request, res: Response) => {
   res.status(200).json({ message: MSG_OK })
+})
+
+app.get('/metrics', async (req: Request, res: Response) => {
+  try {
+    const metrics = await getMetricsText()
+    res.setHeader('Content-Type', getMetricsContentType())
+    res.status(200).send(metrics)
+  } catch (error) {
+    logger.error('Failed to generate Prometheus metrics', { metadata: { error: String(error) } })
+    res.status(500).send('Failed to generate metrics')
+  }
 })
 
 app.listen(PORT, () => {
