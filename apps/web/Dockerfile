@@ -7,7 +7,7 @@ ENV DATABASE_URL="postgresql://lumina_user:lumina_password@localhost:5432/lumina
 COPY . .
 RUN bun install
 RUN bun run --filter @lumina/db generate
-RUN bun --cwd apps/web run build
+RUN bun run --filter web build
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine AS runtime
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
