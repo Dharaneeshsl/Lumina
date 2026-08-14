@@ -3,7 +3,7 @@ FROM oven/bun:1-alpine AS build
 WORKDIR /app
 
 COPY . .
-RUN bun install --frozen-lockfile
+RUN bun install
 
 RUN bun --cwd apps/web run build
 

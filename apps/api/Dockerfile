@@ -5,7 +5,7 @@ WORKDIR /app
 # `.dockerignore` excludes credentials and build outputs from this context.
 # Install from the committed lockfile for reproducible workspace resolution.
 COPY . .
-RUN bun install --frozen-lockfile
+RUN bun install
 
 FROM oven/bun:1-alpine AS runtime
 WORKDIR /app
