@@ -1,12 +1,14 @@
 # Lumina Startup Checklist
 
-This is a living checklist for the Lumina founding team. Use this to track the essential tasks required to go from zero to a fully operational, investor-ready startup.
+This is a living checklist for the Lumina founding team. Use this to track the essential tasks required to go from zero
+to a fully operational, investor-ready startup.
 
 ---
 
 ## 🏗️ Foundation
 
 ### Legal & Company
+
 - [ ] Incorporate the company (Delaware C-Corp recommended for US investors)
 - [ ] Obtain EIN (Employer Identification Number)
 - [ ] Open a business bank account
@@ -19,6 +21,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 - [ ] Ensure GDPR and CCPA compliance documentation
 
 ### Domain & Infrastructure
+
 - [x] Register primary domain (luminohq.com)
 - [ ] Set up DNS with Cloudflare
 - [ ] Configure email domain (Google Workspace recommended)
@@ -37,6 +40,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 ## 🛠️ Product
 
 ### MVP Features
+
 - [x] User authentication (email/password + OAuth)
 - [x] Dashboard with basic chart types
 - [x] PostgreSQL data connector
@@ -49,6 +53,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 - [ ] Mobile-responsive dashboard views
 
 ### Quality & Reliability
+
 - [ ] Set up CI/CD pipeline (GitHub Actions)
 - [ ] Achieve >80% test coverage on core packages
 - [ ] Load test to 10,000 concurrent users
@@ -62,6 +67,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 ## 💼 Business
 
 ### Go-To-Market
+
 - [ ] Define ICP (Ideal Customer Profile)
 - [ ] Build first 100 beta user waitlist
 - [ ] Launch on Product Hunt
@@ -72,6 +78,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 - [ ] Set up affiliate/referral program
 
 ### Sales & Revenue
+
 - [ ] Define pricing tiers (Free, Growth, Enterprise)
 - [ ] Integrate Stripe for subscription billing
 - [ ] Create sales deck (10-slide deck for investor meetings)
@@ -80,6 +87,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 - [ ] Reach $10k MRR
 
 ### Investors & Fundraising
+
 - [ ] Prepare pitch deck
 - [ ] Create financial model (3-year projection)
 - [ ] Draft data room materials
@@ -91,6 +99,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 ## 👥 Team
 
 ### Hiring
+
 - [ ] Define first 5 roles to hire
 - [ ] Post jobs on LinkedIn, Wellfound, and YC Jobs
 - [ ] Set up structured interview process
@@ -98,6 +107,7 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 - [ ] Set up equity management (Carta or Pulley)
 
 ### Culture & Operations
+
 - [ ] Choose async-first communication tools (Slack + Notion)
 - [ ] Write company values document
 - [ ] Set up weekly all-hands meeting cadence
@@ -117,4 +127,4 @@ This is a living checklist for the Lumina founding team. Use this to track the e
 
 ---
 
-*Last updated: August 2026 · Owned by: Sunil Kumar (Founder)*
+_Last updated: August 2026 · Owned by: Sunil Kumar (Founder)_

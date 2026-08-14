@@ -12,8 +12,8 @@ paths:
     get:
       summary: Get the current user's profile
       responses:
-        "200": { description: Profile returned }
-        "401": { $ref: "#/components/responses/Unauthorized" }
+        '200': { description: Profile returned }
+        '401': { $ref: '#/components/responses/Unauthorized' }
     patch:
       summary: Update or create the current user's profile
       requestBody:
@@ -22,13 +22,13 @@ paths:
           application/json:
             schema: { type: object, additionalProperties: true }
       responses:
-        "200": { description: Updated profile returned }
+        '200': { description: Updated profile returned }
   /api/friends:
     get:
       summary: List accepted friends
       responses:
-        "200": { description: Friends returned }
-        "401": { $ref: "#/components/responses/Unauthorized" }
+        '200': { description: Friends returned }
+        '401': { $ref: '#/components/responses/Unauthorized' }
   /api/posts:
     post:
       summary: Create a post with optional media
@@ -40,34 +40,29 @@ paths:
               type: object
               properties:
                 content: { type: string }
-                visibility:
-                  { type: string, enum: [PUBLIC, COLLEGE, FRIENDS, PRIVATE] }
+                visibility: { type: string, enum: [PUBLIC, COLLEGE, FRIENDS, PRIVATE] }
                 media: { type: array, items: { type: string, format: binary } }
       responses:
-        "201": { description: Post created }
+        '201': { description: Post created }
   /api/leaderboard:
     get:
       summary: Get a paginated LeetCode leaderboard
       parameters:
-        - {
-            name: page,
-            in: query,
-            schema: { type: integer, minimum: 1, default: 1 },
-          }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
         - {
             name: limit,
             in: query,
             schema: { type: integer, minimum: 1, maximum: 100, default: 50 },
           }
       responses:
-        "200": { description: Leaderboard returned }
+        '200': { description: Leaderboard returned }
   /api/leetcode/sync:
     post:
       summary: Queue LeetCode synchronization
       responses:
-        "202": { description: Synchronization queued }
-        "400": { description: No LeetCode username linked }
-        "429": { description: Manual synchronization cooldown active }
+        '202': { description: Synchronization queued }
+        '400': { description: No LeetCode username linked }
+        '429': { description: Manual synchronization cooldown active }
 components:
   securitySchemes:
     sessionCookie: { type: apiKey, in: cookie, name: better-auth.session_token }

@@ -1,10 +1,17 @@
-import { enqueueProfileSync } from "../../config/leetcode.queue";
-import * as profileService from './profile.service';
-import { MSG_FAILED_TO_DELETE_COVER_IMAGE, MSG_FAILED_TO_DELETE_PROFILE_PICTURE, MSG_FAILED_TO_FETCH_PROFILE, MSG_FAILED_TO_UPDATE_PROFILE, MSG_FAILED_TO_UPLOAD_COVER_IMAGE, MSG_FAILED_TO_UPLOAD_PROFILE_PICTURE, MSG_PROFILE_NOT_FOUND } from '@lumina/constants';
-import type { AuthenticatedRequest, UsernameParams } from '@lumina/contracts';
-import type { Request, Response } from 'express';
+import { enqueueProfileSync } from '../../config/leetcode.queue'
+import * as profileService from './profile.service'
+import {
+  MSG_FAILED_TO_DELETE_COVER_IMAGE,
+  MSG_FAILED_TO_DELETE_PROFILE_PICTURE,
+  MSG_FAILED_TO_FETCH_PROFILE,
+  MSG_FAILED_TO_UPDATE_PROFILE,
+  MSG_FAILED_TO_UPLOAD_COVER_IMAGE,
+  MSG_FAILED_TO_UPLOAD_PROFILE_PICTURE,
+  MSG_PROFILE_NOT_FOUND,
+} from '@lumina/constants'
 
-
+import type { AuthenticatedRequest, UsernameParams } from '@lumina/contracts'
+import type { Request, Response } from 'express'
 
 export async function getMyProfile(req: Request, res: Response) {
   try {
@@ -31,7 +38,7 @@ export async function updateMyProfile(req: Request, res: Response) {
   try {
     const { user } = req as AuthenticatedRequest
     const userId = user.id
-    const leetcodeUsername = req.body.leetcodeUrl?.split('/').filter(Boolean).pop();
+    const leetcodeUsername = req.body.leetcodeUrl?.split('/').filter(Boolean).pop()
     const profile = await profileService.updateMyProfile(userId, {
       ...req.body,
       leetcodeUsername,
@@ -49,7 +56,6 @@ export async function updateMyProfile(req: Request, res: Response) {
     })
   }
 }
-
 
 export async function getProfileByUsername(req: Request<UsernameParams>, res: Response) {
   try {

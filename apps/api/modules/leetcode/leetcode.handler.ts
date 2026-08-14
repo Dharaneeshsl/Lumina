@@ -1,11 +1,3 @@
-import type { Request, Response } from 'express'
-import {
-  MSG_FAILED_TO_SYNC_LEETCODE,
-  MSG_LEETCODE_SYNC_QUEUED,
-  MSG_LEETCODE_SYNC_RATE_LIMITED,
-  MSG_PROFILE_NOT_FOUND,
-} from '@lumina/constants'
-import type { AuthenticatedRequest } from '@lumina/contracts'
 import { enqueueProfileSync } from '../../config/leetcode.queue'
 import * as syncRepository from './leetcode.sync.repo'
 import {
@@ -13,6 +5,15 @@ import {
   getManualSyncCooldownSeconds,
   recordManualSync,
 } from './leetcode.sync.service'
+import {
+  MSG_FAILED_TO_SYNC_LEETCODE,
+  MSG_LEETCODE_SYNC_QUEUED,
+  MSG_LEETCODE_SYNC_RATE_LIMITED,
+  MSG_PROFILE_NOT_FOUND,
+} from '@lumina/constants'
+
+import type { AuthenticatedRequest } from '@lumina/contracts'
+import type { Request, Response } from 'express'
 
 export async function manualSyncLeetCode(req: Request, res: Response) {
   try {

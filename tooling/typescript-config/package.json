@@ -7,5 +7,9 @@
     "./react.json": "./react.json",
     "./node.json": "./node.json"
   },
-  "files": ["base.json", "react.json", "node.json"]
+  "files": [
+    "base.json",
+    "react.json",
+    "node.json"
+  ]
 }

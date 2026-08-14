@@ -1,7 +1,7 @@
 ---
 name: Infrastructure
 about: Track CI/CD, platform, developer-experience, or operations work
-title: "chore: "
+title: 'chore: '
 labels: [infrastructure, triage]
 assignees: []
 ---

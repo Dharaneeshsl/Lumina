@@ -1,10 +1,8 @@
-import type { Request, Response } from 'express'
-import {
-  MSG_FAILED_TO_FETCH_LEADERBOARD,
-  MSG_LEADERBOARD_USER_NOT_FOUND,
-} from '@lumina/constants'
-import type { AuthenticatedRequest } from '@lumina/contracts'
 import * as leaderboardService from './leaderboard.service'
+import { MSG_FAILED_TO_FETCH_LEADERBOARD, MSG_LEADERBOARD_USER_NOT_FOUND } from '@lumina/constants'
+
+import type { AuthenticatedRequest } from '@lumina/contracts'
+import type { Request, Response } from 'express'
 
 export async function getLeaderboard(req: Request, res: Response) {
   try {

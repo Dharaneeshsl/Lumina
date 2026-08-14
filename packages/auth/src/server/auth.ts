@@ -1,22 +1,20 @@
-import "@lumina/env";
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import {prisma} from "../plugins/plugins.prisma"
-import { resend } from "../plugins/plugins.resend"
+import '@lumina/env'
+
+import { prisma } from '../plugins/plugins.prisma'
+import { resend } from '../plugins/plugins.resend'
+import { betterAuth } from 'better-auth'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
 
 // auth instance resposible for all the auth features
-
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET!,
 
   database: prismaAdapter(prisma, {
-    provider: "postgresql",
+    provider: 'postgresql',
   }),
 
-  trustedOrigins: [
-    process.env.CORS_ORIGIN!,
-  ],
+  trustedOrigins: [process.env.CORS_ORIGIN!],
 
   emailAndPassword: {
     enabled: true,
@@ -26,9 +24,9 @@ export const auth = betterAuth({
       await resend.emails.send({
         from: process.env.RESEND_FROM!,
         to: user.email,
-        subject: "Reset your password",
+        subject: 'Reset your password',
         html: `Click <a href="${url}">here</a> to reset your password.`,
-      });
+      })
     },
   },
 
@@ -39,19 +37,19 @@ export const auth = betterAuth({
       await resend.emails.send({
         from: process.env.RESEND_FROM!,
         to: user.email,
-        subject: "Verify your email",
+        subject: 'Verify your email',
         html: `Click <a href="${url}">here</a> to verify your email.`,
-      });
+      })
     },
   },
 
   session: {
     fields: {
-      ipAddress: "ip",
+      ipAddress: 'ip',
     },
   },
 
   verification: {
-    modelName: "AuthVerification",
+    modelName: 'AuthVerification',
   },
-});
+})

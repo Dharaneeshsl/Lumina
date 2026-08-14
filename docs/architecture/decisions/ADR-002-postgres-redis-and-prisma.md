@@ -20,7 +20,8 @@ Keep PostgreSQL as the durable source of truth through Prisma and use Redis for 
 
 ## Reasoning
 
-The worker persists LeetCode data before updating Redis, and the leaderboard can be rebuilt from PostgreSQL when Redis is empty.
+The worker persists LeetCode data before updating Redis, and the leaderboard can be rebuilt from PostgreSQL when Redis
+is empty.
 
 ## Consequences
 

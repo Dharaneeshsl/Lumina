@@ -1,4 +1,4 @@
-import { prisma } from "@lumina/db"
+import { prisma } from '@lumina/db'
 
 export const findUserById = async (userId: string) => {
   return prisma.user.findUnique({
@@ -22,7 +22,7 @@ export const findUsersByIds = async (userIds: string[]) => {
     select: {
       id: true,
       username: true,
-      image : true,
+      image: true,
     },
   })
 }

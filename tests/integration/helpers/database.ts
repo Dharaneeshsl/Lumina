@@ -2,8 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { URL } from 'node:url'
 import { prisma } from '@db/client'
 
-const schemaPath = new URL('../../../packages/db/prisma/schema.prisma', import.meta.url)
-  .pathname
+const schemaPath = new URL('../../../packages/db/prisma/schema.prisma', import.meta.url).pathname
 const databasePackagePath = new URL('../../../packages/db/', import.meta.url).pathname
 
 let testDatabaseUrl = process.env.TEST_DATABASE_URL

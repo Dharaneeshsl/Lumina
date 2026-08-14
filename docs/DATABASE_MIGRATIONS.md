@@ -22,7 +22,11 @@ bunx prisma migrate deploy --schema packages/db/prisma/schema.prisma
 
 ## Safety, failure, and production
 
-- Use expand/migrate/contract changes: introduce backward-compatible structures, deploy compatible code, backfill, and remove old structures later.
-- Test migrations against a fresh database and representative sanitized data before staging. Confirm backups before destructive work.
-- Never edit or delete an already-applied shared-environment migration. If it fails, pause deployment, inspect `prisma migrate status`, restore compatible application code if necessary, and issue a new corrective migration.
-- A production deployment role applies `migrate deploy` once after CI, review, backup, and rollback-plan approval. Verify migration status, health checks, and database metrics during a staffed rollout.
+- Use expand/migrate/contract changes: introduce backward-compatible structures, deploy compatible code, backfill, and
+  remove old structures later.
+- Test migrations against a fresh database and representative sanitized data before staging. Confirm backups before
+  destructive work.
+- Never edit or delete an already-applied shared-environment migration. If it fails, pause deployment, inspect
+  `prisma migrate status`, restore compatible application code if necessary, and issue a new corrective migration.
+- A production deployment role applies `migrate deploy` once after CI, review, backup, and rollback-plan approval.
+  Verify migration status, health checks, and database metrics during a staffed rollout.

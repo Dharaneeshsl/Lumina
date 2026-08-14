@@ -1,56 +1,75 @@
-import React, { useState } from "react";
-import monsteraImg from "./assets/chris-lee-70l1tDAI6rM-unsplash 2.png";
-import "./SignupPage.css";
+import monsteraImg from './assets/chris-lee-70l1tDAI6rM-unsplash 2.png'
+import React, { useState } from 'react'
+
+import './SignupPage.css'
 
 interface SignupPageProps {
-  onBackToHome: () => void;
-  onGoToLogin?: () => void;
+  onBackToHome: () => void
+  onGoToLogin?: () => void
 }
 
 export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [agreed, setAgreed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [agreed, setAgreed] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
 
     try {
-      const response = await fetch("/api/auth/sign-up/email", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/auth/sign-up/email', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, rememberMe: true }),
-      });
-      const data = (await response.json()) as { message?: string };
+      })
+      const data = (await response.json()) as { message?: string }
 
       if (!response.ok) {
-        throw new Error(data.message ?? "Unable to create your account.");
+        throw new Error(data.message ?? 'Unable to create your account.')
       }
 
-      onGoToLogin?.();
+      onGoToLogin?.()
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
           ? submissionError.message
-          : "Unable to create your account.",
-      );
+          : 'Unable to create your account.'
+      )
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="signup-container">
       {/* Back to home floating nav */}
-      <button className="signup-back-btn" onClick={onBackToHome} aria-label="Back to Home">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
+      <button
+        className="signup-back-btn"
+        onClick={onBackToHome}
+        aria-label="Back to Home"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line
+            x1="19"
+            y1="12"
+            x2="5"
+            y2="12"
+          ></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
         <span>Back to Home</span>
@@ -61,7 +80,10 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
         <div className="signup-form-wrapper">
           <h1 className="signup-title">Get Started Now</h1>
 
-          <form onSubmit={handleSubmit} className="signup-form">
+          <form
+            onSubmit={handleSubmit}
+            className="signup-form"
+          >
             <div className="form-group">
               <label htmlFor="signup-name">Name</label>
               <input
@@ -107,14 +129,31 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
                 required
               />
               <label htmlFor="terms-checkbox">
-                I agree to the <a href="#terms" className="terms-link">terms & policy</a>
+                I agree to the{' '}
+                <a
+                  href="#terms"
+                  className="terms-link"
+                >
+                  terms & policy
+                </a>
               </label>
             </div>
 
-            {error && <p className="signup-error" role="alert">{error}</p>}
+            {error && (
+              <p
+                className="signup-error"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
 
-            <button type="submit" className="signup-submit-btn" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Signup"}
+            <button
+              type="submit"
+              className="signup-submit-btn"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating account...' : 'Signup'}
             </button>
           </form>
 
@@ -125,8 +164,16 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
           </div>
 
           <div className="social-signin-row">
-            <button type="button" className="social-btn google-btn">
-              <svg className="social-icon" width="18" height="18" viewBox="0 0 24 24">
+            <button
+              type="button"
+              className="social-btn google-btn"
+            >
+              <svg
+                className="social-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+              >
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -147,17 +194,30 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
               <span>Sign in with Google</span>
             </button>
 
-            <button type="button" className="social-btn apple-btn">
-              <svg className="social-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.32c.67-.82 1.12-1.96.99-3.1-.97.04-2.15.65-2.84 1.45-.61.71-1.15 1.87-1.01 2.99 1.09.08 2.2-.52 2.86-1.34z"/>
+            <button
+              type="button"
+              className="social-btn apple-btn"
+            >
+              <svg
+                className="social-icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.32c.67-.82 1.12-1.96.99-3.1-.97.04-2.15.65-2.84 1.45-.61.71-1.15 1.87-1.01 2.99 1.09.08 2.2-.52 2.86-1.34z" />
               </svg>
               <span>Sign in with Apple</span>
             </button>
           </div>
 
           <p className="signup-footer-text">
-            Have an account?{" "}
-            <button type="button" className="signin-link-btn" onClick={onGoToLogin || onBackToHome}>
+            Have an account?{' '}
+            <button
+              type="button"
+              className="signin-link-btn"
+              onClick={onGoToLogin || onBackToHome}
+            >
               Sign In
             </button>
           </p>
@@ -167,9 +227,13 @@ export default function SignupPage({ onBackToHome, onGoToLogin }: SignupPageProp
       {/* Right Column: Plant Image Container */}
       <div className="signup-right-col">
         <div className="signup-image-card">
-          <img src={monsteraImg} alt="Monstera Plant" className="signup-monstera-img" />
+          <img
+            src={monsteraImg}
+            alt="Monstera Plant"
+            className="signup-monstera-img"
+          />
         </div>
       </div>
     </div>
-  );
+  )
 }

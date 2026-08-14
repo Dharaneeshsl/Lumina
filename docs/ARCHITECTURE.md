@@ -8,4 +8,5 @@ The current, code-aligned architecture documentation lives in [docs/architecture
 - [Database migration workflow](DATABASE_MIGRATIONS.md)
 - [Secrets and Docker operations](SECRETS.md) and [Docker workflow](DOCKER.md)
 
-The older architecture material was replaced because it described components that are not part of the currently executable Lumina system.
+The older architecture material was replaced because it described components that are not part of the currently
+executable Lumina system.

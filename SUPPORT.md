@@ -8,12 +8,12 @@ Lumina offers multiple support channels depending on your plan and the nature of
 
 For open-source questions, general usage help, and community discussions:
 
-| Channel | Link | Best for |
-|---|---|---|
-| **GitHub Discussions** | [github.com/luminohq/lumina/discussions](https://github.com/luminohq/lumina/discussions) | General Q&A, ideas, show & tell |
-| **GitHub Issues** | [github.com/luminohq/lumina/issues](https://github.com/luminohq/lumina/issues) | Bug reports (use the template) |
-| **Discord Community** | [discord.gg/lumina](https://discord.gg/lumina) | Real-time chat, quick questions |
-| **Stack Overflow** | Tag `lumina-analytics` | Technical implementation questions |
+| Channel                | Link                                                                                     | Best for                           |
+| ---------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------- |
+| **GitHub Discussions** | [github.com/luminohq/lumina/discussions](https://github.com/luminohq/lumina/discussions) | General Q&A, ideas, show & tell    |
+| **GitHub Issues**      | [github.com/luminohq/lumina/issues](https://github.com/luminohq/lumina/issues)           | Bug reports (use the template)     |
+| **Discord Community**  | [discord.gg/lumina](https://discord.gg/lumina)                                           | Real-time chat, quick questions    |
+| **Stack Overflow**     | Tag `lumina-analytics`                                                                   | Technical implementation questions |
 
 > **Response time**: Community support is volunteer-driven. Typical response time is 1–3 business days.
 
@@ -23,16 +23,17 @@ For open-source questions, general usage help, and community discussions:
 
 Customers on paid plans have access to dedicated support:
 
-| Plan | Channel | SLA |
-|---|---|---|
-| **Growth** | Email support | < 24 business hours |
-| **Enterprise** | Dedicated Slack channel + email | < 4 business hours |
-| **Enterprise+** | 24/7 phone + Slack + email | < 1 hour (critical) |
+| Plan            | Channel                         | SLA                 |
+| --------------- | ------------------------------- | ------------------- |
+| **Growth**      | Email support                   | < 24 business hours |
+| **Enterprise**  | Dedicated Slack channel + email | < 4 business hours  |
+| **Enterprise+** | 24/7 phone + Slack + email      | < 1 hour (critical) |
 
 📧 **Support email**: support@luminohq.com  
 🔗 **Support portal**: https://support.luminohq.com
 
 When contacting support, please include:
+
 - Your organization name and plan
 - A clear description of the issue
 - Steps to reproduce the problem

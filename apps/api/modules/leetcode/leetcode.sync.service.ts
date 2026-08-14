@@ -2,6 +2,7 @@ import { redis } from '../../config/config.redis'
 import * as leaderboardRepository from '../leaderboard/leaderboard.repo'
 import { fetchLeetCodeStats, transformLeetCodeStats } from './leetcode.service'
 import * as syncRepository from './leetcode.sync.repo'
+
 import type { LeetCodeStats, ProfileLeetCodeSnapshot, SyncResult } from './leetcode.types'
 
 const MANUAL_SYNC_RATE_LIMIT_KEY = (userId: string) => `leetcode:sync:ratelimit:${userId}`
@@ -17,10 +18,7 @@ function isValidStats(stats: LeetCodeStats, profile: ProfileLeetCodeSnapshot) {
     return false
   }
 
-  if (
-    stats.solvedCount !==
-    stats.easySolved + stats.mediumSolved + stats.hardSolved
-  ) {
+  if (stats.solvedCount !== stats.easySolved + stats.mediumSolved + stats.hardSolved) {
     return false
   }
 
@@ -100,12 +98,7 @@ export async function canManualSync(userId: string) {
 }
 
 export async function recordManualSync(userId: string) {
-  await redis.set(
-    MANUAL_SYNC_RATE_LIMIT_KEY(userId),
-    '1',
-    'EX',
-    MANUAL_SYNC_RATE_LIMIT_SECONDS
-  )
+  await redis.set(MANUAL_SYNC_RATE_LIMIT_KEY(userId), '1', 'EX', MANUAL_SYNC_RATE_LIMIT_SECONDS)
 }
 
 export async function getManualSyncCooldownSeconds(userId: string) {

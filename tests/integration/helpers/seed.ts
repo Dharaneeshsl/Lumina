@@ -1,5 +1,5 @@
-import { prisma } from '@db/client'
 import { createCollege, createProfile, createTestUser } from './factories'
+import { prisma } from '@db/client'
 
 export async function seedDatabase() {
   const college = await createCollege()

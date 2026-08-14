@@ -1,4 +1,5 @@
 import { StreamChat } from 'stream-chat'
+
 import 'dotenv/config'
 
 if (!process.env.STREAM_API_KEY) {

@@ -1,6 +1,4 @@
-import * as postsService from './posts.service';
-import type { AuthenticatedRequest } from '@lumina/contracts';
-import type { NextFunction, Request, Response } from 'express';
+import * as postsService from './posts.service'
 import {
   MSG_COMMENT_CANNOT_BE_EMPTY,
   MSG_FAILED_TO_CREATE_COMMENT,
@@ -11,7 +9,10 @@ import {
   MSG_LIKE_UPDATED,
   MSG_POST_CREATED_SUCCESSFULLY,
   MSG_POST_NOT_FOUND,
-} from '@lumina/constants';
+} from '@lumina/constants'
+
+import type { AuthenticatedRequest } from '@lumina/contracts'
+import type { NextFunction, Request, Response } from 'express'
 
 export const createPost = async (
   req: AuthenticatedRequest,
@@ -107,10 +108,7 @@ export const createComment = async (req: AuthenticatedRequest, res: Response) =>
   }
 }
 
-export const toggleSavePost = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
+export const toggleSavePost = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: postId } = req.params
     const userId = req.user.id
@@ -123,7 +121,6 @@ export const toggleSavePost = async (
       success: true,
       ...result,
     })
-    
   } catch (error: any) {
     if (error.message === 'POST_NOT_FOUND') {
       return res.status(404).json({
@@ -142,10 +139,7 @@ export const toggleSavePost = async (
   }
 }
 
-export const getMySavedPosts = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
+export const getMySavedPosts = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user.id
 
@@ -164,5 +158,5 @@ export const getMySavedPosts = async (
 
       message: MSG_INTERNAL_SERVER_ERROR,
     })
-    }
+  }
 }

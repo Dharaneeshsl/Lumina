@@ -1,6 +1,6 @@
 import path from 'node:path'
-import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
 
 const repoRoot = path.resolve(import.meta.dirname, '../..')
 

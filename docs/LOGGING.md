@@ -4,7 +4,8 @@ Lumina uses a centralized structured application logging engine implemented in `
 
 ## Log Schema
 
-Every log entry outputs JSON in production environments (`NODE_ENV=production`) and formatted context in development environments:
+Every log entry outputs JSON in production environments (`NODE_ENV=production`) and formatted context in development
+environments:
 
 ```json
 {
@@ -39,7 +40,8 @@ Every log entry outputs JSON in production environments (`NODE_ENV=production`) 
 
 ## Automatic Redaction & Data Protection
 
-The logging pipeline automatically redacts sensitive fields across all metadata objects and payloads. The following fields are masked as `"[REDACTED]"`:
+The logging pipeline automatically redacts sensitive fields across all metadata objects and payloads. The following
+fields are masked as `"[REDACTED]"`:
 
 - Passwords & hashes (`password`, `pass`)
 - Authentication tokens & secrets (`token`, `access_token`, `refresh_token`, `secret`, `better_auth_secret`)
@@ -50,18 +52,18 @@ The logging pipeline automatically redacts sensitive fields across all metadata 
 ## Usage Example
 
 ```typescript
-import { logger, httpLoggerMiddleware } from "@lumina/observability";
+import { httpLoggerMiddleware, logger } from '@lumina/observability'
 
 // Express HTTP request logging middleware
-app.use(httpLoggerMiddleware("api"));
+app.use(httpLoggerMiddleware('api'))
 
 // Application code logging
-logger.info("User session established", {
+logger.info('User session established', {
   request_id: req.requestId,
-  metadata: { userId: user.id }
-});
+  metadata: { userId: user.id },
+})
 
-logger.error("Failed to sync LeetCode statistics", {
-  metadata: { error: err.message, username: "dev_user" }
-});
+logger.error('Failed to sync LeetCode statistics', {
+  metadata: { error: err.message, username: 'dev_user' },
+})
 ```

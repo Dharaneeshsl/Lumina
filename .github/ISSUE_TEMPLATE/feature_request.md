@@ -1,7 +1,7 @@
 ---
 name: Feature
 about: Propose a product or engineering capability
-title: "feat: "
+title: 'feat: '
 labels: [enhancement, triage]
 assignees: []
 ---

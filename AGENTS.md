@@ -38,6 +38,7 @@ tests/          Integration + unit tests
 ## Conventions
 
 - Package names are `@lumina/*` (never `@repo/*`).
-- API domain code lives under `apps/api/modules/<domain>/` with `*.handler.ts`, `*.service.ts`, `*.repo.ts`, `*.router.ts`, `*.lib.ts`.
+- API domain code lives under `apps/api/modules/<domain>/` with `*.handler.ts`, `*.service.ts`, `*.repo.ts`,
+  `*.router.ts`, `*.lib.ts`.
 - Prefer Bun for scripts and local runs.
 - Do not invent product behavior in stub packages — keep stubs minimal until wired.

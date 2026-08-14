@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
+import request from 'supertest'
+
 import type { Express } from 'express'
-import request, { type Response } from 'supertest'
+import type { Response } from 'supertest'
 
 const resendRequests: Array<{ url: string; body: unknown }> = []
 const originalFetch = globalThis.fetch

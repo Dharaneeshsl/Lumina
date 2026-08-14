@@ -1,4 +1,3 @@
-import { Router } from 'express'
 import { requireAuth } from '../../middleware'
 import {
   getLeaderboard,
@@ -6,6 +5,8 @@ import {
   getMyLeaderboardStats,
   getUserLeaderboardStats,
 } from './leaderboard.handler'
+import { Router } from 'express'
+
 import type { RequestHandler } from 'express'
 
 const router = Router()

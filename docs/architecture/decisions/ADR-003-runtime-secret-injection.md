@@ -2,7 +2,8 @@
 
 ## Context
 
-Lumina requires database credentials, authentication secrets, storage credentials, and third-party API tokens in production.
+Lumina requires database credentials, authentication secrets, storage credentials, and third-party API tokens in
+production.
 
 ## Problem
 
@@ -16,11 +17,13 @@ Secrets must not enter Git history or container images and must be rotatable wit
 
 ## Decision
 
-Use AWS Secrets Manager for production secrets and ECS runtime injection. Use Parameter Store only for non-secret configuration.
+Use AWS Secrets Manager for production secrets and ECS runtime injection. Use Parameter Store only for non-secret
+configuration.
 
 ## Reasoning
 
-Secrets Manager provides the lifecycle, rotation, audit, and access-control capabilities required for credentials and API keys.
+Secrets Manager provides the lifecycle, rotation, audit, and access-control capabilities required for credentials and
+API keys.
 
 ## Consequences
 
@@ -28,4 +31,5 @@ ECS task roles and deployment pipelines require scoped IAM configuration. Rotate
 
 ## Alternatives Rejected
 
-Repository-managed secret files and image build arguments create unacceptable exposure risk; Parameter Store alone lacks dedicated secret lifecycle support.
+Repository-managed secret files and image build arguments create unacceptable exposure risk; Parameter Store alone lacks
+dedicated secret lifecycle support.
