@@ -12,6 +12,9 @@ jobs:
   quality:
     name: Quality checks
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: 'postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev'
+      BETTER_AUTH_SECRET: 'lumina-super-secret-key-123456789'
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -31,7 +34,7 @@ jobs:
       - name: Build API production image
         run: docker build --pull -f apps/api/Dockerfile -t lumina-api:${{ github.sha }} .
       - name: Scan API image
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: lumina-api:${{ github.sha }}
           format: table
