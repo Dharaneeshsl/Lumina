@@ -14,11 +14,10 @@ import { auth } from '@lumina/auth'
 import { MSG_OK } from '@lumina/constants'
 import { httpLoggerMiddleware, logger } from '@lumina/observability'
 import { toNodeHandler } from 'better-auth/node'
-import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
 
-import type { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 
 const app = express()
 
@@ -26,7 +25,6 @@ const PORT = process.env.SERVER_PORT
 
 app.use(httpLoggerMiddleware('api'))
 app.use(express.json())
-app.use(cookieParser())
 
 // CSRF origin validation middleware for state-changing requests
 app.use((req: Request, res: Response, next: NextFunction) => {
