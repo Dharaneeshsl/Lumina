@@ -1,5 +1,6 @@
 import '@lumina/env'
 
+import { redis } from './config/config.redis.ts'
 import { startCronJobs } from './cron/index.ts'
 import chatRoutes from './modules/chat/chat.router.ts'
 import friendsRouter from './modules/friends/friends.router.ts'
@@ -12,7 +13,9 @@ import '../../workers/leetcode/src/index.ts'
 
 import { auth } from '@lumina/auth'
 import { MSG_OK } from '@lumina/constants'
+import { prisma } from '@lumina/db'
 import {
+  errorTrackingMiddleware,
   getMetricsContentType,
   getMetricsText,
   httpLoggerMiddleware,
@@ -63,6 +66,49 @@ app.get('/ok', (req: Request, res: Response) => {
   res.status(200).json({ message: MSG_OK })
 })
 
+// Task 23: Liveness Probe - Fast process alive check
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    service: 'api',
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  })
+})
+
+// Task 23: Readiness Probe - Critical dependency readiness check (PostgreSQL DB & Redis)
+app.get('/ready', async (req: Request, res: Response) => {
+  const checks: Record<string, string> = {
+    database: 'unknown',
+    redis: 'unknown',
+  }
+  let isReady = true
+
+  try {
+    await prisma.$queryRaw`SELECT 1`
+    checks.database = 'ok'
+  } catch (err) {
+    checks.database = `error: ${err instanceof Error ? err.message : String(err)}`
+    isReady = false
+  }
+
+  try {
+    const redisPong = await redis.ping()
+    checks.redis = redisPong === 'PONG' ? 'ok' : `unexpected_response: ${redisPong}`
+  } catch (err) {
+    checks.redis = `error: ${err instanceof Error ? err.message : String(err)}`
+    isReady = false
+  }
+
+  const statusCode = isReady ? 200 : 503
+  res.status(statusCode).json({
+    status: isReady ? 'ready' : 'unavailable',
+    service: 'api',
+    timestamp: new Date().toISOString(),
+    checks,
+  })
+})
+
 app.get('/metrics', async (req: Request, res: Response) => {
   try {
     const metrics = await getMetricsText()
@@ -73,6 +119,9 @@ app.get('/metrics', async (req: Request, res: Response) => {
     res.status(500).send('Failed to generate metrics')
   }
 })
+
+// Global Error Handling Middleware
+app.use(errorTrackingMiddleware())
 
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`)
