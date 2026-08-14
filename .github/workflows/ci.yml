@@ -34,7 +34,7 @@ jobs:
       - name: Build API production image
         run: docker build --pull -f apps/api/Dockerfile -t lumina-api:${{ github.sha }} .
       - name: Scan API image
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: lumina-api:${{ github.sha }}
           format: table
