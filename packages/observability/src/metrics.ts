@@ -59,6 +59,26 @@ export const backgroundJobFailuresTotal = new client.Counter({
   registers: [prometheusRegistry],
 })
 
+export const videoCallsTotal = new client.Counter({
+  name: 'lumina_video_calls_total',
+  help: 'Total number of video calls created, joined, or ended',
+  labelNames: ['type', 'action'],
+  registers: [prometheusRegistry],
+})
+
+export const videoCallFailuresTotal = new client.Counter({
+  name: 'lumina_video_call_failures_total',
+  help: 'Total number of video call failures',
+  labelNames: ['reason'],
+  registers: [prometheusRegistry],
+})
+
+export const videoTokensGeneratedTotal = new client.Counter({
+  name: 'lumina_video_tokens_generated_total',
+  help: 'Total number of Stream Video tokens generated',
+  registers: [prometheusRegistry],
+})
+
 export async function getMetricsText(): Promise<string> {
   return prometheusRegistry.metrics()
 }

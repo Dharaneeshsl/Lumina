@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Lumina API
-  version: 0.1.0
+  version: 1.0.0
   description: Existing internal endpoints are mounted below /api. New public endpoints use /api/v1.
 servers:
   - url: http://localhost:3000
@@ -48,24 +48,56 @@ paths:
     get:
       summary: Get a paginated LeetCode leaderboard
       parameters:
-        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
-        - {
-            name: limit,
-            in: query,
-            schema: { type: integer, minimum: 1, maximum: 100, default: 50 },
-          }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: query
+          in: query
+          schema: { type: string }
       responses:
         '200': { description: Leaderboard returned }
-  /api/leetcode/sync:
+  /api/v1/video/token:
     post:
-      summary: Queue LeetCode synchronization
+      summary: Generate a Stream Video authentication user token
       responses:
-        '202': { description: Synchronization queued }
-        '400': { description: No LeetCode username linked }
-        '429': { description: Manual synchronization cooldown active }
+        '200': { description: Token and Stream API Key returned }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { description: Rate limit exceeded }
+  /api/v1/video/calls:
+    post:
+      summary: Initialize a new 1-on-1 or group video call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  {
+                    type: string,
+                    enum: [ONE_ON_ONE, GROUP, MENTORSHIP, CLUB_MEETING, FACULTY_SESSION],
+                  }
+                title: { type: string }
+                participantIds: { type: array, items: { type: string } }
+      responses:
+        '201': { description: Video call created }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /api/v1/video/calls/history:
+    get:
+      summary: List past video calls for the authenticated user
+      responses:
+        '200': { description: Call history array returned }
+        '401': { $ref: '#/components/responses/Unauthorized' }
 components:
   securitySchemes:
-    sessionCookie: { type: apiKey, in: cookie, name: better-auth.session_token }
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: better-auth.session_token
   responses:
     Unauthorized:
       description: Authentication required
