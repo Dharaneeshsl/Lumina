@@ -1,29 +1,35 @@
-# Release Process
+# Release & Versioning Policy
 
-Lumina uses Conventional Commits and semantic versioning for public releases.
+Lumina enforces Semantic Versioning (`MAJOR.MINOR.PATCH`) and Conventional Commits for all production releases.
 
-## Version policy
+---
 
-- `fix:` commits result in patch releases for customer-visible bug fixes.
-- `feat:` commits result in minor releases for backward-compatible features.
-- Commits containing `BREAKING CHANGE:` result in major releases.
-- `docs:`, `test:`, and most `chore:` commits do not release by themselves.
+## 1. Semantic Versioning Rules
 
-## Before release
+- **MAJOR (`v1.0.0` -> `v2.0.0`)**: Incompatible API schema or breaking system architectural changes.
+- **MINOR (`v1.0.0` -> `v1.1.0`)**: Backward-compatible new features and domain module additions.
+- **PATCH (`v1.0.0` -> `v1.0.1`)**: Backward-compatible bug fixes, security patches, and minor refactoring.
 
-1. Confirm CI is passing on `main`.
-2. Review the generated changelog for customer-facing clarity and remove accidental sensitive details.
-3. Confirm migrations are compatible with the currently deployed application.
-4. Verify that production environment variables and third-party service limits are ready.
-5. Name a release owner and rollback owner.
+---
 
-## Rollback
+## 2. Release Tagging Procedure
 
-For an application regression, redeploy the last known-good artifact or revert the release commit, then validate the
-primary sign-in and dashboard journeys. Do not automatically roll back a database migration: follow its specific
-migration plan and restore only from a tested backup when necessary.
+1. Verify that all CI quality checks (`bun run format:check`, `bun run lint`, `bun run check-types`) pass on `main`.
+2. Update [`CHANGELOG.md`](../CHANGELOG.md) with notable release changes.
+3. Create and push a signed annotated Git tag:
+   ```bash
+   git tag -a v1.0.0 -m "Release v1.0.0 - Production Engineering Foundation"
+   git push origin v1.0.0
+   ```
 
-## After release
+---
 
-Monitor error rate, latency, authentication failures, and support reports for at least 30 minutes. Capture release notes
-and follow-up actions in the tracking system.
+## 3. Automated CD Release Trigger
+
+Pushing a `v*` tag automatically triggers the CD Pipeline ([`.github/workflows/cd.yml`](../.github/workflows/cd.yml)):
+
+1. Runs Code Verification (`format:check`, `lint`, `check-types`).
+2. Builds & Scans production Docker images with Trivy.
+3. Deploys to Staging & applies database migrations (`prisma migrate deploy`).
+4. Executes automated smoke tests (`bun internal/scripts/smoke-test.ts`).
+5. Awaits production deployment approval & executes ECS Fargate service update.

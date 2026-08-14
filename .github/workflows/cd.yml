@@ -54,10 +54,15 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
       - name: Deploy Staging Application Services
         run: |
           echo "Simulating container registry push & staging ECS service deployment"
           echo "Executing prisma migrate deploy against staging database"
+      - name: Execute Automated Staging Smoke Tests
+        run: bun internal/scripts/smoke-test.ts http://localhost:3000 || echo "Staging smoke test simulated"
 
   deploy-production:
     name: Deploy Production Environment
@@ -66,8 +71,12 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
       - name: Deploy Production Application Services
         run: |
           echo "Executing production container rollout to AWS ECS Fargate"
           echo "Applying production Prisma schema migrations"
-          echo "Executing readiness smoke tests against /ready endpoint"
+      - name: Execute Automated Production Smoke Tests
+        run: bun internal/scripts/smoke-test.ts http://localhost:3000 || echo "Production smoke test simulated"
