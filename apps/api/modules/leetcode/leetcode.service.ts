@@ -70,7 +70,9 @@ export async function fetchLeetCodeStats(username: string) {
   return result.data
 }
 
-export function transformLeetCodeStats(data: NonNullable<LeetCodeGraphQLResponse['data']>): LeetCodeStats {
+export function transformLeetCodeStats(
+  data: NonNullable<LeetCodeGraphQLResponse['data']>
+): LeetCodeStats {
   const user = data.matchedUser
 
   if (!user) {
@@ -88,9 +90,7 @@ export function transformLeetCodeStats(data: NonNullable<LeetCodeGraphQLResponse
     easySolved,
     mediumSolved,
     hardSolved,
-    rating: data.userContestRanking?.rating
-      ? Math.round(data.userContestRanking.rating)
-      : null,
+    rating: data.userContestRanking?.rating ? Math.round(data.userContestRanking.rating) : null,
     globalRank: data.userContestRanking?.globalRanking ?? null,
   }
 }

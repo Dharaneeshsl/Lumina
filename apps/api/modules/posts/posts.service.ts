@@ -6,8 +6,8 @@ import {
   MAX_VIDEO_SIZE_BYTES,
 } from './post.lib'
 import * as postsRepository from './posts.repo'
-import { uploadFile } from '@lumina/storage'
 import { prisma } from '@lumina/db'
+import { uploadFile } from '@lumina/storage'
 
 import type { CreatePostInput } from '@lumina/contracts'
 
@@ -198,43 +198,24 @@ export const createComment = async ({
   return comment
 }
 
-export const toggleSavePost = async ({
-  postId,
-  userId,
-}: {
-  postId: string
-  userId: string
-}) => {
-
+export const toggleSavePost = async ({ postId, userId }: { postId: string; userId: string }) => {
   const post = await postsRepository.findPostById(prisma as any, postId)
 
   if (!post) {
     throw new Error('POST_NOT_FOUND')
   }
 
-  const existing = await postsRepository.findSavedPost(
-    prisma,
-    userId,
-    postId
-  )
+  const existing = await postsRepository.findSavedPost(prisma, userId, postId)
 
   if (existing) {
-    await postsRepository.deleteSavedPost(
-      prisma as any,
-      userId,
-      postId
-    )
+    await postsRepository.deleteSavedPost(prisma as any, userId, postId)
 
     return {
       saved: false,
     }
   }
 
-  await postsRepository.createSavedPost(
-    prisma,
-    userId,
-    postId
-  )
+  await postsRepository.createSavedPost(prisma, userId, postId)
 
   return {
     saved: true,
@@ -242,8 +223,5 @@ export const toggleSavePost = async ({
 }
 
 export const getMySavedPosts = async (userId: string) => {
-  return postsRepository.findSavedPostsByUser(
-    prisma as any,
-    userId
-  )
+  return postsRepository.findSavedPostsByUser(prisma as any, userId)
 }

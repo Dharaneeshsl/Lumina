@@ -6,20 +6,23 @@ Lumina has separate development and production container responsibilities.
 
 1. Copy `.env.example` to an untracked `.env` and set local PostgreSQL/Redis credentials.
 2. Start infrastructure with `docker compose up -d`.
-3. Generate the Prisma client and run applications with Bun: `bun run dev:api`, `bun run dev:web`, and, where needed, `bun run worker:leetcode`.
+3. Generate the Prisma client and run applications with Bun: `bun run dev:api`, `bun run dev:web`, and, where needed,
+   `bun run worker:leetcode`.
 4. Stop infrastructure with `docker compose down`.
 
-The root Compose file intentionally runs only PostgreSQL and Redis. It does not contain fallback passwords, production services, or application secrets.
+The root Compose file intentionally runs only PostgreSQL and Redis. It does not contain fallback passwords, production
+services, or application secrets.
 
 ## Production images
 
-| Image | Dockerfile | Runtime |
-| --- | --- | --- |
-| API | `apps/api/Dockerfile` | Bun, port 3000, `/ok` health check |
-| LeetCode worker | `workers/leetcode/Dockerfile` | Bun worker process |
-| Web | `apps/web/Dockerfile` | unprivileged Nginx, port 8080 |
+| Image           | Dockerfile                    | Runtime                            |
+| --------------- | ----------------------------- | ---------------------------------- |
+| API             | `apps/api/Dockerfile`         | Bun, port 3000, `/ok` health check |
+| LeetCode worker | `workers/leetcode/Dockerfile` | Bun worker process                 |
+| Web             | `apps/web/Dockerfile`         | unprivileged Nginx, port 8080      |
 
-All production Dockerfiles use a build stage where useful, pinned base-image versions, lockfile-based Bun installation, `.dockerignore`, and non-root runtime users. Build from the repository root:
+All production Dockerfiles use a build stage where useful, pinned base-image versions, lockfile-based Bun installation,
+`.dockerignore`, and non-root runtime users. Build from the repository root:
 
 ```bash
 docker build -f apps/api/Dockerfile -t lumina-api:local .
@@ -27,7 +30,8 @@ docker build -f workers/leetcode/Dockerfile -t lumina-worker:local .
 docker build -f apps/web/Dockerfile -t lumina-web:local .
 ```
 
-Run images with runtime-injected environment variables or an orchestrator secret reference. Never pass secrets through Docker build arguments, bake them into images, or commit a production Compose override.
+Run images with runtime-injected environment variables or an orchestrator secret reference. Never pass secrets through
+Docker build arguments, bake them into images, or commit a production Compose override.
 
 ## Release requirements
 

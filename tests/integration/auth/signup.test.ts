@@ -1,5 +1,3 @@
-import { beforeAll, describe, expect, it } from 'vitest'
-import { prisma } from '@db/client'
 import { createTestApp } from '../helpers/app'
 import {
   buildCookieHeader,
@@ -9,6 +7,8 @@ import {
   signUpWithEmail,
 } from '../helpers/auth'
 import { generateRandomUser } from '../helpers/factories'
+import { prisma } from '@db/client'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 describe('Auth | sign up', () => {
   const app = createTestApp()

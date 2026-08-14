@@ -5,7 +5,10 @@
   "private": true,
   "scripts": {
     "generate": "prisma generate",
-    "dev": "prisma generate --watch"
+    "dev": "prisma generate --watch",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:status": "prisma migrate status"
   },
   "exports": {
     ".": "./src/index.ts"

@@ -2,7 +2,8 @@
 
 ## Overview
 
-The Lumina team takes the security of our platform and the privacy of our users extremely seriously. We appreciate the responsible disclosure of security vulnerabilities by the security research community.
+The Lumina team takes the security of our platform and the privacy of our users extremely seriously. We appreciate the
+responsible disclosure of security vulnerabilities by the security research community.
 
 This document outlines our security policy, the versions we actively support, and our responsible disclosure process.
 
@@ -12,12 +13,12 @@ This document outlines our security policy, the versions we actively support, an
 
 We provide security updates for the following versions of Lumina:
 
-| Version | Supported |
-|---|---|
-| `main` (latest) | ✅ Active support |
-| Latest stable release | ✅ Active support |
+| Version                | Supported              |
+| ---------------------- | ---------------------- |
+| `main` (latest)        | ✅ Active support      |
+| Latest stable release  | ✅ Active support      |
 | Previous major version | ⚠️ Critical fixes only |
-| Older versions | ❌ No longer supported |
+| Older versions         | ❌ No longer supported |
 
 ---
 
@@ -37,7 +38,8 @@ If you discover a security vulnerability, we ask that you follow responsible dis
 
 Send a detailed report to **security@luminohq.com**.
 
-Encrypt your message using our PGP key if the vulnerability is particularly sensitive. Our PGP key is available at [https://luminohq.com/.well-known/security.txt](https://luminohq.com/.well-known/security.txt).
+Encrypt your message using our PGP key if the vulnerability is particularly sensitive. Our PGP key is available at
+[https://luminohq.com/.well-known/security.txt](https://luminohq.com/.well-known/security.txt).
 
 ---
 
@@ -61,15 +63,16 @@ The more detail you provide, the faster we can triage and fix the issue.
 
 When you report a vulnerability to us, we commit to:
 
-| Commitment | Timeline |
-|---|---|
-| **Acknowledge** your report | Within **48 hours** |
-| **Confirm** the vulnerability and its severity | Within **5 business days** |
-| **Provide a remediation timeline** | Within **7 business days** |
-| **Notify you** when the fix is deployed | Upon deployment |
-| **Credit you** in our security advisory | Unless you prefer anonymity |
+| Commitment                                     | Timeline                    |
+| ---------------------------------------------- | --------------------------- |
+| **Acknowledge** your report                    | Within **48 hours**         |
+| **Confirm** the vulnerability and its severity | Within **5 business days**  |
+| **Provide a remediation timeline**             | Within **7 business days**  |
+| **Notify you** when the fix is deployed        | Upon deployment             |
+| **Credit you** in our security advisory        | Unless you prefer anonymity |
 
-We will keep you informed throughout the process and will never take legal action against researchers who follow this policy in good faith.
+We will keep you informed throughout the process and will never take legal action against researchers who follow this
+policy in good faith.
 
 ---
 
@@ -103,30 +106,32 @@ The following are explicitly **out of scope**:
 
 ## Severity Classification
 
-We use the [CVSS v3.1](https://www.first.org/cvss/v3.1/specification-document) scoring system for severity classification:
+We use the [CVSS v3.1](https://www.first.org/cvss/v3.1/specification-document) scoring system for severity
+classification:
 
-| Severity | CVSS Score | Response Time |
-|---|---|---|
-| **Critical** | 9.0 – 10.0 | Patch within 24 hours |
-| **High** | 7.0 – 8.9 | Patch within 7 days |
-| **Medium** | 4.0 – 6.9 | Patch within 30 days |
-| **Low** | 0.1 – 3.9 | Patch in next release |
-| **Informational** | N/A | Tracked for future improvement |
+| Severity          | CVSS Score | Response Time                  |
+| ----------------- | ---------- | ------------------------------ |
+| **Critical**      | 9.0 – 10.0 | Patch within 24 hours          |
+| **High**          | 7.0 – 8.9  | Patch within 7 days            |
+| **Medium**        | 4.0 – 6.9  | Patch within 30 days           |
+| **Low**           | 0.1 – 3.9  | Patch in next release          |
+| **Informational** | N/A        | Tracked for future improvement |
 
 ---
 
 ## Bug Bounty Program
 
-Lumina currently operates a **private bug bounty program**. If you are interested in participating, email **security@luminohq.com** with your GitHub username and a brief background in security research.
+Lumina currently operates a **private bug bounty program**. If you are interested in participating, email
+**security@luminohq.com** with your GitHub username and a brief background in security research.
 
 Bounty ranges (indicative, final amount at Lumina's discretion):
 
-| Severity | Reward |
-|---|---|
-| Critical | $500 – $5,000 |
-| High | $200 – $500 |
-| Medium | $50 – $200 |
-| Low | Swag + public credit |
+| Severity | Reward               |
+| -------- | -------------------- |
+| Critical | $500 – $5,000        |
+| High     | $200 – $500          |
+| Medium   | $50 – $200           |
+| Low      | Swag + public credit |
 
 ---
 
@@ -150,7 +155,9 @@ If you are self-hosting Lumina, please follow these security hardening recommend
 ## Security Contact
 
 - **Email**: security@luminohq.com
-- **GitHub Security Advisories**: [https://github.com/luminohq/lumina/security/advisories](https://github.com/luminohq/lumina/security/advisories)
-- **PGP Key**: Available at [https://luminohq.com/.well-known/security.txt](https://luminohq.com/.well-known/security.txt)
+- **GitHub Security Advisories**:
+  [https://github.com/luminohq/lumina/security/advisories](https://github.com/luminohq/lumina/security/advisories)
+- **PGP Key**: Available at
+  [https://luminohq.com/.well-known/security.txt](https://luminohq.com/.well-known/security.txt)
 
 Thank you for helping keep Lumina and our users safe. 🙏

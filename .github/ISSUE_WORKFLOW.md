@@ -6,14 +6,14 @@ Lumina work moves through one project status at a time:
 Backlog → Ready → In Progress → In Review → Testing → Done
 ```
 
-| Status | Meaning | Exit condition |
-| --- | --- | --- |
-| Backlog | Captured but not yet prioritized | Scope, priority, and owner are triaged |
-| Ready | Prioritized and actionable | An owner starts work |
-| In Progress | Actively being implemented | A pull request is opened |
-| In Review | Pull request awaits feedback or required checks | Required reviews and checks pass |
-| Testing | Merged to a test environment or undergoing verification | Acceptance criteria are verified |
-| Done | Delivered and verified | Issue is closed with PR/release reference |
+| Status      | Meaning                                                 | Exit condition                            |
+| ----------- | ------------------------------------------------------- | ----------------------------------------- |
+| Backlog     | Captured but not yet prioritized                        | Scope, priority, and owner are triaged    |
+| Ready       | Prioritized and actionable                              | An owner starts work                      |
+| In Progress | Actively being implemented                              | A pull request is opened                  |
+| In Review   | Pull request awaits feedback or required checks         | Required reviews and checks pass          |
+| Testing     | Merged to a test environment or undergoing verification | Acceptance criteria are verified          |
+| Done        | Delivered and verified                                  | Issue is closed with PR/release reference |
 
 ## Operating rules
 

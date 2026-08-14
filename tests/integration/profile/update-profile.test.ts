@@ -1,20 +1,20 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { prisma } from '@db/client'
 import { createTestApp } from '../helpers/app'
 import {
+  buildCookieHeader,
+  clearCapturedEmails,
+  getSetCookieHeader,
+  signUpWithEmail,
+} from '../helpers/auth'
+import {
+  clearDatabase,
   connectTestDatabase,
   disconnectTestDatabase,
   prepareTestDatabase,
   setTestDatabaseUrl,
 } from '../helpers/database'
-import {
-  clearCapturedEmails,
-  buildCookieHeader,
-  getSetCookieHeader,
-  signUpWithEmail,
-} from '../helpers/auth'
-import { clearDatabase } from '../helpers/database'
 import { createProfile, generateRandomUser } from '../helpers/factories'
+import { prisma } from '@db/client'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 describe('Profile | update profile', () => {
   const app = createTestApp()

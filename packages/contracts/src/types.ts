@@ -1,46 +1,46 @@
-import type { Request } from "express";
+import type { Request } from 'express'
 
 export interface AuthenticatedRequest extends Request {
   user: {
-    id: string;
-    email: string;
-    role: string;
-  };
+    id: string
+    email: string
+    role: string
+  }
 }
 
 export interface SignUpInput {
-  name: string;
-  email: string;
-  password: string;
-  rememberMe?: boolean;
+  name: string
+  email: string
+  password: string
+  rememberMe?: boolean
 }
 
 export interface SignInInput {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
+  email: string
+  password: string
+  rememberMe?: boolean
 }
 
 export interface UsernameParams {
-  username: string;
+  username: string
 }
 
 export interface UploadFileOptions {
-  buffer: Buffer;
-  mimeType: string;
-  folder: string;
-  fileName?: string;
+  buffer: Buffer
+  mimeType: string
+  folder: string
+  fileName?: string
 }
 
 export interface CreatePostInput {
-  userId: string;
+  userId: string
   body: {
-    content?: string;
-    visibility: "PUBLIC" | "COLLEGE" | "FRIENDS" | "PRIVATE";
-    anonymous?: boolean;
-    location?: string;
-  };
-  files: any[];
+    content?: string
+    visibility: 'PUBLIC' | 'COLLEGE' | 'FRIENDS' | 'PRIVATE'
+    anonymous?: boolean
+    location?: string
+  }
+  files: any[]
 }
 
 export interface LeaderboardEntry {

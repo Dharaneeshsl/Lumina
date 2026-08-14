@@ -1,6 +1,5 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '@lumina/db';
-  
+import { prisma } from '@lumina/db'
+import { Prisma } from '@prisma/client'
 
 export const createPost = async (
   tx: Prisma.TransactionClient,
@@ -188,10 +187,7 @@ export const deleteSavedPost = async (
   })
 }
 
-export const findSavedPostsByUser = async (
-  tx: Prisma.TransactionClient,
-  userId: string
-) => {
+export const findSavedPostsByUser = async (tx: Prisma.TransactionClient, userId: string) => {
   return tx.savedPost.findMany({
     where: {
       userId,

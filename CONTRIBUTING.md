@@ -1,6 +1,7 @@
 # Contributing to Lumina
 
-First off — **thank you** for considering contributing to Lumina! Every contribution, no matter how small, makes a real difference. This document will guide you through everything you need to know to make a great contribution.
+First off — **thank you** for considering contributing to Lumina! Every contribution, no matter how small, makes a real
+difference. This document will guide you through everything you need to know to make a great contribution.
 
 ## Table of Contents
 
@@ -18,7 +19,8 @@ First off — **thank you** for considering contributing to Lumina! Every contri
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it before contributing. We are committed to providing a welcoming and inclusive environment for everyone.
+By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it before
+contributing. We are committed to providing a welcoming and inclusive environment for everyone.
 
 ---
 
@@ -26,9 +28,11 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### 🐛 Reporting Bugs
 
-Before creating a bug report, please check the [existing issues](https://github.com/luminohq/lumina/issues) to see if the problem has already been reported.
+Before creating a bug report, please check the [existing issues](https://github.com/luminohq/lumina/issues) to see if
+the problem has already been reported.
 
 When filing a bug report, include:
+
 - A clear and descriptive title
 - Exact steps to reproduce the problem
 - What you expected to happen vs. what actually happened
@@ -38,7 +42,9 @@ When filing a bug report, include:
 
 ### 💡 Suggesting Features
 
-Feature requests are welcome! Please open a [GitHub Discussion](https://github.com/luminohq/lumina/discussions) in the "Ideas" category. Describe:
+Feature requests are welcome! Please open a [GitHub Discussion](https://github.com/luminohq/lumina/discussions) in the
+"Ideas" category. Describe:
+
 - The problem your feature would solve
 - Your proposed solution
 - Any alternative solutions you've considered
@@ -47,6 +53,7 @@ Feature requests are welcome! Please open a [GitHub Discussion](https://github.c
 ### 🛠️ Submitting Code
 
 We welcome all types of code contributions:
+
 - **Bug fixes** — always welcome!
 - **New features** — please open a discussion first for significant changes
 - **Performance improvements** — with benchmarks
@@ -92,15 +99,15 @@ bun run dev
 
 ## Branching Strategy
 
-| Branch | Purpose |
-|---|---|
-| `main` | Production-ready code. All PRs merge here. |
-| `feature/<name>` | New features |
-| `fix/<name>` | Bug fixes |
-| `docs/<name>` | Documentation-only changes |
-| `chore/<name>` | Build process, dependency, or tooling changes |
-| `refactor/<name>` | Code refactoring |
-| `hotfix/<name>` | Urgent production fix |
+| Branch            | Purpose                                       |
+| ----------------- | --------------------------------------------- |
+| `main`            | Production-ready code. All PRs merge here.    |
+| `feature/<name>`  | New features                                  |
+| `fix/<name>`      | Bug fixes                                     |
+| `docs/<name>`     | Documentation-only changes                    |
+| `chore/<name>`    | Build process, dependency, or tooling changes |
+| `refactor/<name>` | Code refactoring                              |
+| `hotfix/<name>`   | Urgent production fix                         |
 
 Always branch from the latest `main`:
 
@@ -126,22 +133,23 @@ We use [Conventional Commits](https://www.conventionalcommits.org/). Your commit
 
 ### Types
 
-| Type | When to use |
-|---|---|
-| `feat` | A new feature |
-| `fix` | A bug fix |
-| `docs` | Documentation changes only |
-| `style` | Code formatting (no logic change) |
-| `refactor` | Code restructuring (no feature/bug) |
-| `test` | Adding or fixing tests |
-| `chore` | Build, CI, or dependency updates |
-| `perf` | Performance improvements |
-| `build` | Build-system or external dependency changes |
-| `ci` | Continuous-integration or deployment changes |
+| Type       | When to use                                  |
+| ---------- | -------------------------------------------- |
+| `feat`     | A new feature                                |
+| `fix`      | A bug fix                                    |
+| `docs`     | Documentation changes only                   |
+| `style`    | Code formatting (no logic change)            |
+| `refactor` | Code restructuring (no feature/bug)          |
+| `test`     | Adding or fixing tests                       |
+| `chore`    | Build, CI, or dependency updates             |
+| `perf`     | Performance improvements                     |
+| `build`    | Build-system or external dependency changes  |
+| `ci`       | Continuous-integration or deployment changes |
 
 ### Scopes
 
-Use the package or app name: `auth`, `dashboard`, `web`, `database`, `ui`, `emails`, `storage`, `cache`, `logger`, `utils`, `validation`, `types`, `notifications`, `config`.
+Use the package or app name: `auth`, `dashboard`, `web`, `database`, `ui`, `emails`, `storage`, `cache`, `logger`,
+`utils`, `validation`, `types`, `notifications`, `config`.
 
 ### Examples
 
@@ -170,6 +178,7 @@ ci: add pull request checks
 ### PR Title Format
 
 Follow the same Conventional Commits format for your PR title:
+
 ```
 feat(auth): add WebAuthn passkey support
 ```
@@ -178,18 +187,23 @@ feat(auth): add WebAuthn passkey support
 
 ```markdown
 ## What does this PR do?
+
 <!-- Brief description of your changes -->
 
 ## Why is this change needed?
+
 <!-- Context and motivation -->
 
 ## How was this tested?
+
 <!-- Testing approach and coverage -->
 
 ## Screenshots / recordings (if applicable)
+
 <!-- UI changes should include before/after screenshots -->
 
 ## Related issues
+
 <!-- Fixes #123 -->
 ```
 
@@ -199,7 +213,8 @@ feat(auth): add WebAuthn passkey support
 
 ### TypeScript
 
-- **Strict mode** is enabled everywhere. No `any` types unless absolutely unavoidable (add a `// eslint-disable` comment with justification).
+- **Strict mode** is enabled everywhere. No `any` types unless absolutely unavoidable (add a `// eslint-disable` comment
+  with justification).
 - Prefer `interface` over `type` for object shapes.
 - Always add return types to exported functions.
 - Use Zod schemas for all runtime validation at API boundaries.
@@ -214,17 +229,18 @@ feat(auth): add WebAuthn passkey support
 
 ### File Naming
 
-| Type | Convention | Example |
-|---|---|---|
-| React components | PascalCase | `UserProfile.tsx` |
-| Hooks | camelCase with `use` prefix | `useUserData.ts` |
-| Utilities | camelCase | `formatDate.ts` |
-| Constants | SCREAMING_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| CSS files | PascalCase (matching component) | `UserProfile.css` |
+| Type             | Convention                      | Example           |
+| ---------------- | ------------------------------- | ----------------- |
+| React components | PascalCase                      | `UserProfile.tsx` |
+| Hooks            | camelCase with `use` prefix     | `useUserData.ts`  |
+| Utilities        | camelCase                       | `formatDate.ts`   |
+| Constants        | SCREAMING_SNAKE_CASE            | `MAX_RETRY_COUNT` |
+| CSS files        | PascalCase (matching component) | `UserProfile.css` |
 
 ### Code Formatting
 
-We use Prettier with the config in `.prettierrc`. Run `bun run format` before committing. The CI will fail if formatting is not applied.
+We use Prettier with the config in `.prettierrc`. Run `bun run format` before committing. The CI will fail if formatting
+is not applied.
 
 ---
 
@@ -250,9 +266,11 @@ Aim for **>80% code coverage** on new code.
 
 ## Documentation
 
-- **Code comments**: Document non-obvious logic with `//` comments. For complex algorithms, add a comment block explaining the approach.
+- **Code comments**: Document non-obvious logic with `//` comments. For complex algorithms, add a comment block
+  explaining the approach.
 - **JSDoc**: Add JSDoc comments to all exported functions, types, and classes.
-- **README updates**: If your change affects the getting-started flow or introduces new configuration, update the root README.
+- **README updates**: If your change affects the getting-started flow or introduces new configuration, update the root
+  README.
 - **Changelog**: Do **not** manually edit `CHANGELOG.md`. It is auto-generated by our semantic-release pipeline.
 
 ---

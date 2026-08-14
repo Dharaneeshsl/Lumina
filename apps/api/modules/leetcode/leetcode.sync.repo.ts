@@ -1,4 +1,5 @@
 import { prisma } from '@lumina/db'
+
 import type { LeetCodeStats } from './leetcode.types'
 
 const profileSelect = {
@@ -31,10 +32,7 @@ export async function findStaleProfiles(syncedBefore: Date) {
   return prisma.profile.findMany({
     where: {
       leetcodeUsername: { not: null },
-      OR: [
-        { leetcodeUpdatedAt: null },
-        { leetcodeUpdatedAt: { lt: syncedBefore } },
-      ],
+      OR: [{ leetcodeUpdatedAt: null }, { leetcodeUpdatedAt: { lt: syncedBefore } }],
     },
     select: { id: true },
     orderBy: { leetcodeUpdatedAt: 'asc' },

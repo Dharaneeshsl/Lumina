@@ -15,9 +15,7 @@ export async function removeEntry(userId: string) {
   await redis.zrem(LEADERBOARD_KEY, userId)
 }
 
-export async function bulkUpsertEntries(
-  entries: { userId: string; solvedCount: number }[]
-) {
+export async function bulkUpsertEntries(entries: { userId: string; solvedCount: number }[]) {
   if (entries.length === 0) return
 
   const pipeline = redis.pipeline()
@@ -48,12 +46,7 @@ export async function getUserScore(userId: string) {
 }
 
 export async function getEntriesByOffset(limit: number, offset: number) {
-  const results = await redis.zrevrange(
-    LEADERBOARD_KEY,
-    offset,
-    offset + limit - 1,
-    'WITHSCORES'
-  )
+  const results = await redis.zrevrange(LEADERBOARD_KEY, offset, offset + limit - 1, 'WITHSCORES')
 
   const entries: { userId: string; solvedCount: number }[] = []
   for (let i = 0; i < results.length; i += 2) {

@@ -1,4 +1,5 @@
 import fs from 'fs/promises'
+import { randomUUID } from 'node:crypto'
 import os from 'os'
 import path from 'path'
 import ffprobeInstaller from '@ffprobe-installer/ffprobe'
@@ -20,7 +21,7 @@ export const getImageDimensions = async (file: Express.Multer.File) => {
 }
 
 export async function getVideoMetadata(buffer: Buffer) {
-  const tempFile = path.join(os.tmpdir(), `video-${Date.now()}.mp4`)
+  const tempFile = path.join(os.tmpdir(), `video-${randomUUID()}.mp4`)
   await fs.writeFile(tempFile, buffer)
   return new Promise<{
     width: number | null

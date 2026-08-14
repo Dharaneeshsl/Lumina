@@ -1,6 +1,6 @@
-import express from 'express'
 import { requireAuth } from '../../middleware'
 import * as friendsController from './friends.handler'
+import express from 'express'
 
 const router = express.Router()
 

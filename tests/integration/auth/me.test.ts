@@ -1,20 +1,20 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { createTestApp } from '../helpers/app'
+import {
+  buildCookieHeader,
+  clearCapturedEmails,
+  clearDatabase,
+  getSession,
+  getSetCookieHeader,
+  signUpWithEmail,
+} from '../helpers/auth'
 import {
   connectTestDatabase,
   disconnectTestDatabase,
   prepareTestDatabase,
   setTestDatabaseUrl,
 } from '../helpers/database'
-import {
-  clearCapturedEmails,
-  clearDatabase,
-  buildCookieHeader,
-  getSetCookieHeader,
-  getSession,
-  signUpWithEmail,
-} from '../helpers/auth'
 import { generateRandomUser } from '../helpers/factories'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 describe('Auth | current session', () => {
   const app = createTestApp()

@@ -1,11 +1,11 @@
 import { redis } from '../../../apps/api/config/config.redis'
-import { runLeetcodeDailySync } from '../../../apps/api/cron/leetcode.daily-sync.job'
-import { syncProfileById } from '../../../apps/api/modules/leetcode/leetcode.sync.service'
 import {
   LEETCODE_JOB_DAILY_SYNC,
   LEETCODE_JOB_SYNC_PROFILE,
   LEETCODE_QUEUE_NAME,
 } from '../../../apps/api/config/leetcode.queue'
+import { runLeetcodeDailySync } from '../../../apps/api/cron/leetcode.daily-sync.job'
+import { syncProfileById } from '../../../apps/api/modules/leetcode/leetcode.sync.service'
 import { Worker } from 'bullmq'
 
 export const leetcodeWorker = new Worker(

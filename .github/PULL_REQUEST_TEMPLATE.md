@@ -13,6 +13,7 @@
 ## Testing performed
 
 <!-- List automated and manual checks. Include commands and relevant results. -->
+
 - [ ] Tests added or updated
 - [ ] `bun run test`
 - [ ] `bun run lint`

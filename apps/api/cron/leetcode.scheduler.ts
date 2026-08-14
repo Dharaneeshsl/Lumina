@@ -1,4 +1,4 @@
-import { leetcodeQueue, LEETCODE_JOB_DAILY_SYNC } from '../config/leetcode.queue'
+import { LEETCODE_JOB_DAILY_SYNC, leetcodeQueue } from '../config/leetcode.queue'
 
 const DAILY_SYNC_CRON = '0 3 * * *'
 const DAILY_SYNC_SCHEDULER_ID = 'leetcode-daily-sync'

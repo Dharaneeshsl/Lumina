@@ -1,7 +1,7 @@
 ---
 name: Refactor
 about: Propose internal code or architecture improvement without a product behavior change
-title: "refactor: "
+title: 'refactor: '
 labels: [refactor, triage]
 assignees: []
 ---

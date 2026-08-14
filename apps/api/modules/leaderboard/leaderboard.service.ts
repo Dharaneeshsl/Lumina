@@ -1,6 +1,7 @@
-import { prisma } from '@lumina/db'
 import * as syncRepository from '../leetcode/leetcode.sync.repo'
-import * as repository from './leaderboard.repo'  
+import * as repository from './leaderboard.repo'
+import { prisma } from '@lumina/db'
+
 import type { LeaderboardEntry } from '@lumina/contracts'
 
 const DEFAULT_LIMIT = 50

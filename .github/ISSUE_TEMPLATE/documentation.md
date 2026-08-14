@@ -1,8 +1,8 @@
 ---
 name: 📖 Documentation Issue
 about: Report missing, incorrect, or unclear documentation
-title: "[docs]: "
-labels: ["documentation"]
+title: '[docs]: '
+labels: ['documentation']
 assignees: []
 ---
 

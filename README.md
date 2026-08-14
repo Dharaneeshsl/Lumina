@@ -10,7 +10,7 @@
 
 > **Verified Identity • Communities • Clubs • Events • Placements • Mentorship • Campus Services**
 
-*Building the trusted digital ecosystem for the next generation of universities.*
+_Building the trusted digital ecosystem for the next generation of universities._
 
 <br/>
 
@@ -66,13 +66,21 @@
 
 # Overview
 
-**Lumino** is a production-grade, multi-tenant platform built to become the digital operating system for modern college communities. It unifies verified identities, campus organizations, student engagement, career development, mentorship, and essential campus services inside one secure, scalable ecosystem — so institutions can run their entire campus from a single trusted platform instead of a patchwork of disconnected apps.
+**Lumino** is a production-grade, multi-tenant platform built to become the digital operating system for modern college
+communities. It unifies verified identities, campus organizations, student engagement, career development, mentorship,
+and essential campus services inside one secure, scalable ecosystem — so institutions can run their entire campus from a
+single trusted platform instead of a patchwork of disconnected apps.
 
-From a single college deployment to a nationwide academic network, Lumino is engineered for **horizontal scalability**, **fault-tolerant services**, and **production-grade reliability**. Every module is independently extensible yet seamlessly integrated, giving universities a modern foundation to digitize campus life while delivering a fast, intuitive experience for students, faculty, alumni, and administrators.
+From a single college deployment to a nationwide academic network, Lumino is engineered for **horizontal scalability**,
+**fault-tolerant services**, and **production-grade reliability**. Every module is independently extensible yet
+seamlessly integrated, giving universities a modern foundation to digitize campus life while delivering a fast,
+intuitive experience for students, faculty, alumni, and administrators.
 
 ### Why Lumino exists
 
-Campus life today is fragmented. Students bounce between WhatsApp groups, Google Forms, LinkedIn, Discord, and a dozen other tools. Administrators juggle spreadsheets. Clubs run events on one platform and communicate on another. Career offices track placements in silos.
+Campus life today is fragmented. Students bounce between WhatsApp groups, Google Forms, LinkedIn, Discord, and a dozen
+other tools. Administrators juggle spreadsheets. Clubs run events on one platform and communicate on another. Career
+offices track placements in silos.
 
 Lumino replaces that chaos with **one verified, role-aware platform** — built like infrastructure, not a side project.
 
@@ -101,16 +109,17 @@ Lumino replaces that chaos with **one verified, role-aware platform** — built 
 
 # 🎯 Who Is Lumino For?
 
-Lumino is designed for educational institutions that want to replace fragmented campus tools with a single, secure, and scalable digital ecosystem.
+Lumino is designed for educational institutions that want to replace fragmented campus tools with a single, secure, and
+scalable digital ecosystem.
 
-| Audience | What they get |
-|----------|---------------|
-| **Students** | One place for social feed, messaging, clubs, events, marketplace, and coding leaderboard |
-| **Faculty & Admins** | Role-based dashboards, verification workflows, and campus-wide visibility |
-| **Clubs & Communities** | Dedicated spaces for events, posts, and member management |
-| **Career Offices** | Internship listings, applications, and placement pipelines |
-| **Alumni** | Verified network access, mentorship, and institutional connection |
-| **Engineering Teams** | A modular monorepo they can extend without rewriting the core |
+| Audience                | What they get                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| **Students**            | One place for social feed, messaging, clubs, events, marketplace, and coding leaderboard |
+| **Faculty & Admins**    | Role-based dashboards, verification workflows, and campus-wide visibility                |
+| **Clubs & Communities** | Dedicated spaces for events, posts, and member management                                |
+| **Career Offices**      | Internship listings, applications, and placement pipelines                               |
+| **Alumni**              | Verified network access, mentorship, and institutional connection                        |
+| **Engineering Teams**   | A modular monorepo they can extend without rewriting the core                            |
 
 **Lumino is a great fit if you:**
 
@@ -124,7 +133,8 @@ Lumino is designed for educational institutions that want to replace fragmented 
 - 🛒 Want campus services like marketplaces, lost & found, and community resources
 - 📈 Need an architecture that supports thousands of concurrent users across institutions
 
-**Lumino may not be the right fit** if your institution only needs a simple notice board, static website, or basic messaging app.
+**Lumino may not be the right fit** if your institution only needs a simple notice board, static website, or basic
+messaging app.
 
 ---
 
@@ -147,22 +157,23 @@ Use Lumino when your institution has outgrown disconnected tools and needs a cen
 
 ## Shipped & Active
 
-| Module | Description |
-|--------|-------------|
-| **Authentication** | Email/password + Google OAuth via Better Auth, sessions, refresh tokens |
-| **Profiles** | Rich student profiles with avatar, cover image, skills, social links, CGPA |
-| **Social Feed** | Posts with image/video media, likes, comments, saves, visibility controls |
-| **Friends** | Send/accept/reject requests, unfriend, mutual friends |
-| **Real-Time Chat** | 1:1 and group conversations via Stream Chat |
-| **LeetCode Integration** | Auto-sync solved counts from public LeetCode profiles |
-| **Leaderboard** | Redis-powered rankings — paginated, personal rank, around-me view |
-| **File Storage** | S3-compatible uploads for profile pictures, covers, and post media |
-| **Verification** | Student ID, face, and email verification workflows |
-| **Multi-Tenant Data Model** | Colleges, departments, clubs, communities, events, marketplace |
+| Module                      | Description                                                                |
+| --------------------------- | -------------------------------------------------------------------------- |
+| **Authentication**          | Email/password + Google OAuth via Better Auth, sessions, refresh tokens    |
+| **Profiles**                | Rich student profiles with avatar, cover image, skills, social links, CGPA |
+| **Social Feed**             | Posts with image/video media, likes, comments, saves, visibility controls  |
+| **Friends**                 | Send/accept/reject requests, unfriend, mutual friends                      |
+| **Real-Time Chat**          | 1:1 and group conversations via Stream Chat                                |
+| **LeetCode Integration**    | Auto-sync solved counts from public LeetCode profiles                      |
+| **Leaderboard**             | Redis-powered rankings — paginated, personal rank, around-me view          |
+| **File Storage**            | S3-compatible uploads for profile pictures, covers, and post media         |
+| **Verification**            | Student ID, face, and email verification workflows                         |
+| **Multi-Tenant Data Model** | Colleges, departments, clubs, communities, events, marketplace             |
 
 ## LeetCode Leaderboard — How It Works
 
-Lumino ships a production-style competitive coding leaderboard that pulls **real solved counts** from LeetCode — never manually incremented.
+Lumino ships a production-style competitive coding leaderboard that pulls **real solved counts** from LeetCode — never
+manually incremented.
 
 ```
 LeetCode API
@@ -185,7 +196,8 @@ GET /api/leaderboard
 
 ## Coming Soon
 
-See the full [Roadmap →](ROADMAP.md) for planned features including push notifications, study groups, advanced analytics, mobile apps, and institution-wide admin tooling.
+See the full [Roadmap →](ROADMAP.md) for planned features including push notifications, study groups, advanced
+analytics, mobile apps, and institution-wide admin tooling.
 
 ---
 
@@ -239,13 +251,13 @@ graph TB
 
 ### Design Principles
 
-| Principle | Implementation |
-|-----------|----------------|
-| **Modular modules** | Each domain lives in `modules/` with handler → service → repo |
+| Principle                | Implementation                                                          |
+| ------------------------ | ----------------------------------------------------------------------- |
+| **Modular modules**      | Each domain lives in `modules/` with handler → service → repo           |
 | **Durable + fast reads** | PostgreSQL is source of truth; Redis powers hot paths like leaderboards |
-| **Async by default** | Long-running work (LeetCode sync, media processing) goes through BullMQ |
-| **Type-safe end-to-end** | TypeScript everywhere, shared types in `@lumina/contracts` |
-| **Cloud-native** | Docker Compose locally, Vercel + managed Postgres/Redis in production |
+| **Async by default**     | Long-running work (LeetCode sync, media processing) goes through BullMQ |
+| **Type-safe end-to-end** | TypeScript everywhere, shared types in `@lumina/contracts`              |
+| **Cloud-native**         | Docker Compose locally, Vercel + managed Postgres/Redis in production   |
 
 ### Monorepo Structure
 
@@ -292,46 +304,46 @@ lumina/
 
 ## Frontend
 
-| Technology | Role |
-|------------|------|
-| **React 18** | UI framework for the web app |
-| **Vite 8** | Lightning-fast dev server and production bundler |
-| **Three.js + React Three Fiber** | 3D visuals and interactive UI elements |
-| **TypeScript** | Full type safety across the frontend |
+| Technology                       | Role                                             |
+| -------------------------------- | ------------------------------------------------ |
+| **React 18**                     | UI framework for the web app                     |
+| **Vite 8**                       | Lightning-fast dev server and production bundler |
+| **Three.js + React Three Fiber** | 3D visuals and interactive UI elements           |
+| **TypeScript**                   | Full type safety across the frontend             |
 
 ## Backend
 
-| Technology | Role |
-|------------|------|
-| **Bun** | High-performance JavaScript runtime for the API server |
-| **Express 5** | HTTP routing, middleware, REST API |
-| **Better Auth** | Authentication, sessions, OAuth, 2FA-ready |
-| **Zod** | Runtime request validation |
-| **Multer** | Multipart file upload handling |
-| **Fluent FFmpeg** | Video processing for post media |
+| Technology        | Role                                                   |
+| ----------------- | ------------------------------------------------------ |
+| **Bun**           | High-performance JavaScript runtime for the API server |
+| **Express 5**     | HTTP routing, middleware, REST API                     |
+| **Better Auth**   | Authentication, sessions, OAuth, 2FA-ready             |
+| **Zod**           | Runtime request validation                             |
+| **Multer**        | Multipart file upload handling                         |
+| **Fluent FFmpeg** | Video processing for post media                        |
 
 ## Data & Infrastructure
 
-| Technology | Role |
-|------------|------|
-| **PostgreSQL 16** | Primary relational database |
-| **Prisma 7** | ORM, migrations, type-safe queries |
-| **Redis 7** | Leaderboard ZSETs, BullMQ backend, rate limiting |
-| **BullMQ 6** | Job queues, retries, cron schedulers, concurrency control |
-| **ioredis** | Redis client for Node/Bun |
-| **AWS S3 / Cloudflare R2** | Object storage for media files |
-| **Stream Chat** | Real-time messaging infrastructure |
+| Technology                 | Role                                                      |
+| -------------------------- | --------------------------------------------------------- |
+| **PostgreSQL 16**          | Primary relational database                               |
+| **Prisma 7**               | ORM, migrations, type-safe queries                        |
+| **Redis 7**                | Leaderboard ZSETs, BullMQ backend, rate limiting          |
+| **BullMQ 6**               | Job queues, retries, cron schedulers, concurrency control |
+| **ioredis**                | Redis client for Node/Bun                                 |
+| **AWS S3 / Cloudflare R2** | Object storage for media files                            |
+| **Stream Chat**            | Real-time messaging infrastructure                        |
 
 ## DevOps & Tooling
 
-| Technology | Role |
-|------------|------|
-| **Turborepo** | Monorepo build orchestration and caching |
-| **Docker Compose** | Local development infrastructure |
-| **GitHub Actions** | CI/CD pipelines |
-| **Vitest** | Unit and integration testing |
-| **Prettier** | Code formatting |
-| **OxLint** | Fast linting for the dashboard app |
+| Technology         | Role                                     |
+| ------------------ | ---------------------------------------- |
+| **Turborepo**      | Monorepo build orchestration and caching |
+| **Docker Compose** | Local development infrastructure         |
+| **GitHub Actions** | CI/CD pipelines                          |
+| **Vitest**         | Unit and integration testing             |
+| **Prettier**       | Code formatting                          |
+| **OxLint**         | Fast linting for the dashboard app       |
 
 ---
 
@@ -385,11 +397,11 @@ bun run dev:api
 bun run dev:web
 ```
 
-| Service | Default URL |
-|---------|-------------|
-| API Server | `http://localhost:3000` |
-| Web UI | `http://localhost:5173` |
-| Prisma Studio | `make db-studio` |
+| Service       | Default URL             |
+| ------------- | ----------------------- |
+| API Server    | `http://localhost:3000` |
+| Web UI        | `http://localhost:5173` |
+| Prisma Studio | `make db-studio`        |
 
 ### Useful commands
 
@@ -406,18 +418,18 @@ make docker-logs    # Tail infrastructure logs
 
 # 📡 API Overview
 
-| Endpoint | Description |
-|----------|-------------|
-| `POST /api/auth/*` | Authentication (Better Auth) |
-| `GET /api/profile/me` | Current user profile |
-| `PATCH /api/profile/me` | Update profile + trigger LeetCode sync |
-| `GET /api/posts` | Social feed |
-| `GET /api/friends` | Friends list & requests |
-| `GET /api/chat/conversations` | Chat conversations |
-| `GET /api/leaderboard` | Paginated coding leaderboard |
-| `GET /api/leaderboard/me` | Your rank and solved count |
-| `GET /api/leaderboard/me/around` | Users ranked near you |
-| `POST /api/leetcode/sync` | Manual LeetCode profile sync (rate-limited) |
+| Endpoint                         | Description                                 |
+| -------------------------------- | ------------------------------------------- |
+| `POST /api/auth/*`               | Authentication (Better Auth)                |
+| `GET /api/profile/me`            | Current user profile                        |
+| `PATCH /api/profile/me`          | Update profile + trigger LeetCode sync      |
+| `GET /api/posts`                 | Social feed                                 |
+| `GET /api/friends`               | Friends list & requests                     |
+| `GET /api/chat/conversations`    | Chat conversations                          |
+| `GET /api/leaderboard`           | Paginated coding leaderboard                |
+| `GET /api/leaderboard/me`        | Your rank and solved count                  |
+| `GET /api/leaderboard/me/around` | Users ranked near you                       |
+| `POST /api/leetcode/sync`        | Manual LeetCode profile sync (rate-limited) |
 
 All protected routes require authentication via session cookies.
 
@@ -441,7 +453,8 @@ See the full [ROADMAP.md](ROADMAP.md) for details.
 
 # 🤝 Contributing
 
-We welcome contributions from the community. Whether it's a bug fix, a new feature, or documentation improvements — every PR matters.
+We welcome contributions from the community. Whether it's a bug fix, a new feature, or documentation improvements —
+every PR matters.
 
 1. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions
 2. Check [existing issues](https://github.com/luminohq/lumina/issues) before opening a new one
@@ -454,7 +467,8 @@ Please also review our [Code of Conduct](CODE_OF_CONDUCT.md) and [Security Polic
 
 # 🔒 Security
 
-Found a vulnerability? Please **do not** open a public issue. See [SECURITY.md](SECURITY.md) for responsible disclosure guidelines.
+Found a vulnerability? Please **do not** open a public issue. See [SECURITY.md](SECURITY.md) for responsible disclosure
+guidelines.
 
 ---
 

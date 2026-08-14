@@ -1,7 +1,7 @@
 ---
 name: Architecture Decision
 about: Propose a significant technical decision for review
-title: "docs(adr): "
+title: 'docs(adr): '
 labels: [architecture, triage]
 assignees: []
 ---

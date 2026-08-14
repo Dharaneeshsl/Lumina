@@ -1,12 +1,12 @@
 /**
  * internal/scripts/seed.ts
- * 
+ *
  * Database seeding script for Lumina development and testing.
- * 
+ *
  * Usage:
  *   bun run internal/scripts/seed.ts
  *   bun run db:seed
- * 
+ *
  * This script creates:
  *   - Demo organization and workspace
  *   - Demo admin user (admin@lumina.dev / password: Demo1234!)
@@ -15,8 +15,8 @@
  *   - Sample data source connections
  */
 
-import { PrismaClient } from '@prisma/client'
 import { hash } from '@node-rs/argon2'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 

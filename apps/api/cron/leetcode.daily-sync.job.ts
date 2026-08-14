@@ -1,5 +1,5 @@
-import * as syncRepository from '../modules/leetcode/leetcode.sync.repo'
 import { enqueueProfileSync } from '../config/leetcode.queue'
+import * as syncRepository from '../modules/leetcode/leetcode.sync.repo'
 
 const STALE_SYNC_MS = 24 * 60 * 60 * 1000
 const DAILY_SYNC_STAGGER_MS = 3000
