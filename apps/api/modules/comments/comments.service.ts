@@ -13,6 +13,7 @@ import {
   updateCommentContentRepo,
 } from './comments.repo'
 import { prisma } from '@lumina/db'
+import { logger } from '@lumina/observability'
 
 export const MAX_COMMENT_DEPTH = 5 // Depths 0, 1, 2, 3, 4 (max depth limit 5)
 export const MAX_PINNED_COMMENTS_PER_POST = 3
@@ -291,8 +292,23 @@ export async function reportCommentService(params: {
     throw { status: 404, message: 'COMMENT_NOT_FOUND' }
   }
 
+  if (comment.isDeleted) {
+    throw { status: 400, message: 'CANNOT_REPORT_DELETED_COMMENT' }
+  }
+
   try {
-    return await createReportRepo(commentId, reporterUserId, reason.trim(), details?.trim())
+    const report = await createReportRepo(commentId, reporterUserId, reason.trim(), details?.trim())
+
+    logger.info('[moderation] Comment report filed', {
+      metadata: {
+        reportId: report.id,
+        commentId,
+        reason: reason.trim(),
+        status: report.status,
+      },
+    })
+
+    return report
   } catch (err: any) {
     if (err.code === 'P2002') {
       throw { status: 409, message: 'ALREADY_REPORTED_COMMENT' }
