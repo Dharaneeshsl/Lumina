@@ -27,6 +27,22 @@ jobs:
       - run: bun run check-types
       - run: bun run check-openapi
 
+  build-apps:
+    name: Build API & Web production apps
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: 'postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev'
+      BETTER_AUTH_SECRET: 'lumina-super-secret-key-123456789'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
+      - run: bun install --frozen-lockfile || bun install
+      - run: bun run --filter @lumina/db generate
+      - run: bun run --filter api build
+      - run: bun run --filter web build
+
   container-security:
     name: Production image vulnerability scan
     runs-on: ubuntu-latest

@@ -28,6 +28,8 @@ jobs:
       - run: bun run lint
       - run: bun run check-types
       - run: bun run check-openapi
+      - run: bun run --filter api build
+      - run: bun run --filter web build
 
   build-and-scan:
     name: Build & Security Scan Containers
