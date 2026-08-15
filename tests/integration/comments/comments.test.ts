@@ -206,6 +206,14 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     expect(deleteRes.body.comment.isDeleted).toBe(true)
     expect(deleteRes.body.comment.content).toBe('[Comment deleted]')
 
+    // Concurrent / Duplicate delete attempt returns 400 COMMENT_ALREADY_DELETED
+    const dupDeleteRes = await request(app)
+      .delete(`/api/v1/comments/${commentId}`)
+      .set('Cookie', cookieAuthor ?? '')
+
+    expect(dupDeleteRes.status).toBe(400)
+    expect(dupDeleteRes.body.message).toBe('COMMENT_ALREADY_DELETED')
+
     // Attempting to react to a deleted comment fails with 400
     const deletedReactRes = await request(app)
       .post(`/api/v1/comments/${commentId}/reactions`)

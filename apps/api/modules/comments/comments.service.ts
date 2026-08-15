@@ -167,6 +167,10 @@ export async function deleteCommentService(params: {
     throw { status: 404, message: 'COMMENT_NOT_FOUND' }
   }
 
+  if (comment.isDeleted) {
+    throw { status: 400, message: 'COMMENT_ALREADY_DELETED' }
+  }
+
   const isOwner = comment.userId === userId
   const isPostOwner = comment.post.authorId === userId
   const isAdmin = userRole === 'ADMIN'
