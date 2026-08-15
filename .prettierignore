@@ -19,3 +19,10 @@ generated
 *.min.css
 bun.lock
 package-lock.json
+node_modules
+.git
+.turbo
+.kilo
+dist
+build
+coverage
