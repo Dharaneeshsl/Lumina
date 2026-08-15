@@ -35,7 +35,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     clearCapturedEmails()
   })
 
-  it('FR-06-001: creates root comment, nested reply, and enforces max depth limit 5', async () => {
+  it('FR-06-001: creates root comment, nested reply, and enforces max depth limit 5 & clamped pagination limit', async () => {
     const author = generateRandomUser({ email: 'author.post@example.test' })
     const commenter = generateRandomUser({
       email: 'commenter.post@example.test',
@@ -89,9 +89,16 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     expect(failRes.status).toBe(422)
     expect(failRes.body.message).toBe('COMMENT_MAX_DEPTH_EXCEEDED')
+
+    // Verify pagination limit clamping (Problem 48)
+    const listRes = await request(app)
+      .get(`/api/v1/posts/${post.id}/comments?limit=9999`)
+      .set('Cookie', cookieCommenter ?? '')
+
+    expect(listRes.status).toBe(200)
   })
 
-  it('FR-06-002 & FR-06-003: supports reactions, reaction counts, edit history log, and optimistic concurrency', async () => {
+  it('FR-06-002 & FR-06-003: supports reactions, emoji format validation, edit history log, and optimistic concurrency', async () => {
     const author = generateRandomUser({ email: 'reaction.user@example.test' })
     const signup = await signUpWithEmail(app, author)
     const cookie = buildCookieHeader(getSetCookieHeader(signup))
@@ -108,7 +115,16 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     const commentId = commentRes.body.id
 
-    // FR-06-002: Add Emoji Reaction
+    // Problem 50: Rejects invalid non-emoji string
+    const invalidEmojiRes = await request(app)
+      .post(`/api/v1/comments/${commentId}/reactions`)
+      .set('Cookie', cookie ?? '')
+      .send({ emoji: 'NOT_AN_EMOJI_LONG_STRING' })
+
+    expect(invalidEmojiRes.status).toBe(400)
+    expect(invalidEmojiRes.body.message).toBe('INVALID_EMOJI_FORMAT')
+
+    // FR-06-002: Add Valid Emoji Reaction
     const reactRes = await request(app)
       .post(`/api/v1/comments/${commentId}/reactions`)
       .set('Cookie', cookie ?? '')

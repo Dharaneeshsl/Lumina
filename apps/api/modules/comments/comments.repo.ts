@@ -76,28 +76,63 @@ export async function getCommentsForPostRepo(postId: string, cursor?: string, li
     take: limit + 1,
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
-    include: {
+    select: {
+      id: true,
+      content: true,
+      postId: true,
+      userId: true,
+      parentId: true,
+      depth: true,
+      isDeleted: true,
+      isPinned: true,
+      version: true,
+      createdAt: true,
+      updatedAt: true,
       user: { select: { id: true, name: true, username: true, image: true } },
-      reactions: true,
+      reactions: { select: { id: true, emoji: true, userId: true } },
       mentions: {
-        include: { mentionedUser: { select: { id: true, name: true, username: true } } },
+        select: { id: true, mentionedUser: { select: { id: true, name: true, username: true } } },
       },
       replies: {
+        take: 10,
         orderBy: { createdAt: 'asc' },
-        include: {
+        select: {
+          id: true,
+          content: true,
+          postId: true,
+          userId: true,
+          parentId: true,
+          depth: true,
+          isDeleted: true,
+          isPinned: true,
+          version: true,
+          createdAt: true,
+          updatedAt: true,
           user: { select: { id: true, name: true, username: true, image: true } },
-          reactions: true,
+          reactions: { select: { id: true, emoji: true, userId: true } },
           mentions: {
-            include: { mentionedUser: { select: { id: true, name: true, username: true } } },
+            select: {
+              id: true,
+              mentionedUser: { select: { id: true, name: true, username: true } },
+            },
           },
           replies: {
+            take: 10,
             orderBy: { createdAt: 'asc' },
-            include: {
+            select: {
+              id: true,
+              content: true,
+              postId: true,
+              userId: true,
+              parentId: true,
+              depth: true,
+              isDeleted: true,
+              isPinned: true,
+              version: true,
+              createdAt: true,
+              updatedAt: true,
               user: { select: { id: true, name: true, username: true, image: true } },
-              reactions: true,
-              mentions: {
-                include: { mentionedUser: { select: { id: true, name: true, username: true } } },
-              },
+              reactions: { select: { id: true, emoji: true, userId: true } },
             },
           },
         },
@@ -211,10 +246,36 @@ export async function removeReactionRepo(commentId: string, userId: string, emoj
   return { action: 'removed', emoji }
 }
 
-export async function togglePinCommentRepo(commentId: string, isPinned: boolean) {
-  return prisma.comment.update({
-    where: { id: commentId },
-    data: { isPinned },
+export async function togglePinCommentRepo(commentId: string, postId: string, maxPins = 3) {
+  return prisma.$transaction(async (tx) => {
+    const comment = await tx.comment.findUnique({
+      where: { id: commentId },
+      select: { id: true, isPinned: true, isDeleted: true },
+    })
+
+    if (!comment) {
+      throw { status: 404, message: 'COMMENT_NOT_FOUND' }
+    }
+
+    if (comment.isDeleted) {
+      throw { status: 400, message: 'CANNOT_PIN_DELETED_COMMENT' }
+    }
+
+    const nextPinnedState = !comment.isPinned
+
+    if (nextPinnedState) {
+      const pinnedCount = await tx.comment.count({
+        where: { postId, isPinned: true },
+      })
+      if (pinnedCount >= maxPins) {
+        throw { status: 400, message: 'MAX_PINNED_COMMENTS_EXCEEDED' }
+      }
+    }
+
+    return tx.comment.update({
+      where: { id: commentId },
+      data: { isPinned: nextPinnedState },
+    })
   })
 }
 

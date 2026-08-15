@@ -17,6 +17,21 @@ import { logger } from '@lumina/observability'
 
 export const MAX_COMMENT_DEPTH = 5 // Depths 0, 1, 2, 3, 4 (max depth limit 5)
 export const MAX_PINNED_COMMENTS_PER_POST = 3
+export const DEFAULT_PAGE_LIMIT = 20
+export const MAX_PAGE_LIMIT = 50
+
+const EMOJI_REGEX = /^(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u200d|\ufe0f){1,16}$/u
+
+export function validateEmoji(emoji: string): string {
+  const trimmed = emoji?.trim()
+  if (!trimmed || trimmed.length === 0) {
+    throw { status: 400, message: 'Emoji character is required' }
+  }
+  if (trimmed.length > 16 || !EMOJI_REGEX.test(trimmed)) {
+    throw { status: 400, message: 'INVALID_EMOJI_FORMAT' }
+  }
+  return trimmed
+}
 
 export async function createCommentService(params: {
   postId: string
@@ -111,7 +126,11 @@ export async function getCommentsForPostService(postId: string, cursor?: string,
     throw { status: 404, message: 'POST_NOT_FOUND' }
   }
 
-  return getCommentsForPostRepo(postId, cursor, limit)
+  const numLimit =
+    typeof limit === 'number' ? limit : parseInt(String(limit), 10) || DEFAULT_PAGE_LIMIT
+  const safeLimit = Math.min(Math.max(1, numLimit), MAX_PAGE_LIMIT)
+
+  return getCommentsForPostRepo(postId, cursor, safeLimit)
 }
 
 export async function editCommentService(params: {
@@ -190,10 +209,7 @@ export async function toggleReactionService(params: {
   emoji: string
 }) {
   const { commentId, userId, emoji } = params
-
-  if (!emoji || emoji.trim().length === 0) {
-    throw { status: 400, message: 'Emoji character is required' }
-  }
+  const validEmoji = validateEmoji(emoji)
 
   const comment = await findCommentById(commentId)
   if (!comment) {
@@ -204,14 +220,14 @@ export async function toggleReactionService(params: {
     throw { status: 400, message: 'CANNOT_REACT_TO_DELETED_COMMENT' }
   }
 
-  const result = await toggleReactionRepo(commentId, userId, emoji.trim())
+  const result = await toggleReactionRepo(commentId, userId, validEmoji)
 
   if (result.action === 'added' && comment.userId !== userId) {
     await prisma.notification.create({
       data: {
         userId: comment.userId,
         title: 'New reaction on your comment',
-        body: `Someone reacted with ${emoji} to your comment`,
+        body: `Someone reacted with ${validEmoji} to your comment`,
         type: 'COMMENT_REACTION',
       },
     })
@@ -226,17 +242,14 @@ export async function removeReactionService(params: {
   emoji: string
 }) {
   const { commentId, userId, emoji } = params
-
-  if (!emoji || emoji.trim().length === 0) {
-    throw { status: 400, message: 'Emoji character is required' }
-  }
+  const validEmoji = validateEmoji(emoji)
 
   const comment = await findCommentById(commentId)
   if (!comment) {
     throw { status: 404, message: 'COMMENT_NOT_FOUND' }
   }
 
-  return removeReactionRepo(commentId, userId, emoji.trim())
+  return removeReactionRepo(commentId, userId, validEmoji)
 }
 
 export async function togglePinCommentService(params: {
@@ -262,17 +275,7 @@ export async function togglePinCommentService(params: {
     throw { status: 403, message: 'NOT_AUTHORIZED_TO_PIN_COMMENT' }
   }
 
-  if (!comment.isPinned) {
-    const pinnedCount = await prisma.comment.count({
-      where: { postId: comment.postId, isPinned: true },
-    })
-    if (pinnedCount >= MAX_PINNED_COMMENTS_PER_POST) {
-      throw { status: 400, message: 'MAX_PINNED_COMMENTS_EXCEEDED' }
-    }
-  }
-
-  const nextPinnedState = !comment.isPinned
-  return togglePinCommentRepo(commentId, nextPinnedState)
+  return togglePinCommentRepo(commentId, comment.postId, MAX_PINNED_COMMENTS_PER_POST)
 }
 
 export async function reportCommentService(params: {
