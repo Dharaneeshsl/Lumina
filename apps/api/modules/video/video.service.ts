@@ -1,21 +1,28 @@
 import { STREAM_API_KEY, streamVideoClient } from './video.config.ts'
 import * as videoRepo from './video.repo.ts'
+import { badRequest, forbidden, notFound } from '../../lib/http-error.ts'
 
 import type { VideoCallType } from '@lumina/db'
+
+const ONE_ON_ONE_TYPES: VideoCallType[] = ['ONE_ON_ONE', 'MENTORSHIP']
 
 export const generateVideoToken = async (userId: string) => {
   const user = await videoRepo.findUserById(userId)
   if (!user) {
-    throw new Error('USER_NOT_FOUND')
+    throw notFound('USER_NOT_FOUND')
   }
 
-  await streamVideoClient.upsertUser({
-    id: user.id,
-    name: user.name || user.username || 'Lumina User',
-    image: user.image || undefined,
-  })
+  if (process.env.NODE_ENV !== 'test') {
+    await streamVideoClient.upsertUsers([
+      {
+        id: user.id,
+        name: user.name || user.username || 'Lumina User',
+        image: user.image || undefined,
+      },
+    ])
+  }
 
-  const token = streamVideoClient.createToken(user.id)
+  const token = streamVideoClient.generateUserToken({ user_id: user.id })
   return {
     token,
     apiKey: STREAM_API_KEY,
@@ -36,24 +43,36 @@ export const createCall = async ({
 }) => {
   const caller = await videoRepo.findUserById(userId)
   if (!caller) {
-    throw new Error('USER_NOT_FOUND')
+    throw notFound('USER_NOT_FOUND')
   }
 
-  // Ensure caller is included in participant set
-  const allParticipantIds = Array.from(new Set([userId, ...participantIds]))
+  const uniqueParticipantIds = Array.from(new Set(participantIds.filter(Boolean)))
+  if (uniqueParticipantIds.length !== participantIds.length) {
+    throw badRequest('DUPLICATE_PARTICIPANTS')
+  }
+  if (uniqueParticipantIds.includes(userId)) {
+    throw badRequest('CANNOT_CALL_SELF')
+  }
 
-  // Security check: For 1-on-1 private calls, verify friendship or valid user target
-  if (type === 'ONE_ON_ONE' && participantIds.length === 1) {
-    const targetUserId = participantIds[0]
-    if (targetUserId === userId) {
-      throw new Error('CANNOT_CALL_SELF')
+  if (ONE_ON_ONE_TYPES.includes(type)) {
+    if (uniqueParticipantIds.length !== 1) {
+      throw badRequest('ONE_ON_ONE_REQUIRES_SINGLE_PARTICIPANT')
     }
+    const targetUserId = uniqueParticipantIds[0]
     const targetUser = await videoRepo.findUserById(targetUserId)
     if (!targetUser) {
-      throw new Error('TARGET_USER_NOT_FOUND')
+      throw badRequest('TARGET_USER_NOT_FOUND')
     }
   }
 
+  for (const participantId of uniqueParticipantIds) {
+    const participant = await videoRepo.findUserById(participantId)
+    if (!participant) {
+      throw badRequest('TARGET_USER_NOT_FOUND')
+    }
+  }
+
+  const allParticipantIds = [userId, ...uniqueParticipantIds]
   const streamCallId = `lumina_call_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 
   const call = await videoRepo.createVideoCall({
@@ -76,20 +95,20 @@ export const createCall = async ({
   }
 }
 
+function assertCallAccess(call: NonNullable<Awaited<ReturnType<typeof videoRepo.findCallById>>>, userId: string) {
+  const isParticipant = call.participants.some((p) => p.userId === userId)
+  const isHost = call.createdById === userId
+  if (!isParticipant && !isHost) {
+    throw forbidden('CALL_UNAUTHORIZED')
+  }
+}
+
 export const getCallDetails = async (callId: string, userId: string) => {
   const call = await videoRepo.findCallById(callId)
   if (!call) {
-    throw new Error('CALL_NOT_FOUND')
+    throw notFound('CALL_NOT_FOUND')
   }
-
-  // Security Authorization Check: Verify caller is host or invited participant
-  const isParticipant = call.participants.some((p) => p.userId === userId)
-  const isHost = call.createdById === userId
-
-  if (!isParticipant && !isHost && call.type !== 'GROUP') {
-    throw new Error('CALL_UNAUTHORIZED')
-  }
-
+  assertCallAccess(call, userId)
   return call
 }
 
@@ -126,7 +145,12 @@ export const respondToCallInvite = async (
 ) => {
   const call = await videoRepo.findCallById(callId)
   if (!call) {
-    throw new Error('CALL_NOT_FOUND')
+    throw notFound('CALL_NOT_FOUND')
+  }
+
+  const invite = call.participants.find((p) => p.userId === userId)
+  if (!invite) {
+    throw forbidden('INVITE_UNAUTHORIZED')
   }
 
   const status = response === 'ACCEPT' ? 'ACCEPTED' : 'REJECTED'
@@ -146,11 +170,11 @@ export const respondToCallInvite = async (
 export const endCall = async (callId: string, userId: string) => {
   const call = await videoRepo.findCallById(callId)
   if (!call) {
-    throw new Error('CALL_NOT_FOUND')
+    throw notFound('CALL_NOT_FOUND')
   }
 
   if (call.createdById !== userId) {
-    throw new Error('ONLY_HOST_CAN_END_CALL')
+    throw forbidden('ONLY_HOST_CAN_END_CALL')
   }
 
   const endedCall = await videoRepo.updateCallStatus(call.id, 'ENDED', new Date())

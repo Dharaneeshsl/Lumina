@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "lumina",
@@ -50,6 +49,7 @@
         "@lumina/env": "workspace:*",
         "@lumina/observability": "workspace:*",
         "@lumina/storage": "workspace:*",
+        "@lumina/validators": "workspace:*",
         "@types/cookie-parser": "^1.4.10",
         "@types/cors": "^2.8.19",
         "@types/dotenv": "^8.2.3",

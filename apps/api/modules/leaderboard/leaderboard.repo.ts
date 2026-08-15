@@ -1,5 +1,4 @@
 import { redis } from '../../config/config.redis'
-
 export const LEADERBOARD_KEY = 'leaderboard:problems_solved'
 
 export async function upsertEntry(userId: string, solvedCount: number) {

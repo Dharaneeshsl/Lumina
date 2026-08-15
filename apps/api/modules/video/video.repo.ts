@@ -102,19 +102,11 @@ export const updateParticipantStatus = async ({
   joinedAt?: Date
   leftAt?: Date
 }) => {
-  return prisma.videoCallParticipant.upsert({
+  return prisma.videoCallParticipant.update({
     where: {
       callId_userId: { callId, userId },
     },
-    create: {
-      callId,
-      userId,
-      role: 'PARTICIPANT',
-      status,
-      joinedAt,
-      leftAt,
-    },
-    update: {
+    data: {
       status,
       ...(joinedAt ? { joinedAt } : {}),
       ...(leftAt ? { leftAt } : {}),

@@ -26,7 +26,7 @@ export interface UsernameParams {
 }
 
 export interface UploadFileOptions {
-  buffer: Buffer
+  buffer?: Buffer
   mimeType: string
   folder: string
   fileName?: string
@@ -40,7 +40,12 @@ export interface CreatePostInput {
     anonymous?: boolean
     location?: string
   }
-  files: any[]
+  files: Array<{
+    buffer: Buffer
+    mimetype: string
+    size: number
+    originalname: string
+  }>
 }
 
 export interface LeaderboardEntry {

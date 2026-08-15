@@ -337,6 +337,7 @@ model Comment {
   postId    String
   userId    String
   parentId  String?
+  isPinned  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -349,6 +350,7 @@ model Comment {
   @@index([postId])
   @@index([userId])
   @@index([parentId])
+  @@index([postId, isPinned])
 }
 
 model Like {

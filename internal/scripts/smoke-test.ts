@@ -1,3 +1,5 @@
+import { process } from 'node:process'
+
 const targetUrl = process.argv[2] || process.env.TARGET_URL || 'http://localhost:3000'
 
 interface ProbeResult {

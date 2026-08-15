@@ -1,32 +1,56 @@
 import { randomUUID } from 'crypto'
+import { createReadStream } from 'fs'
 import { s3 } from './s3'
 import { getBucketName, getRegion } from './utils'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
 
 import type { UploadFileOptions } from '@lumina/contracts'
+import type { Readable } from 'stream'
+
+function safeObjectName(mimeType: string) {
+  const ext =
+    mimeType === 'image/jpeg' || mimeType === 'image/jpg'
+      ? 'jpg'
+      : mimeType === 'image/png'
+        ? 'png'
+        : mimeType === 'image/webp'
+          ? 'webp'
+          : mimeType === 'video/mp4'
+            ? 'mp4'
+            : mimeType === 'video/webm'
+              ? 'webm'
+              : mimeType === 'video/quicktime'
+                ? 'mov'
+                : 'bin'
+  return `${randomUUID()}.${ext}`
+}
 
 export async function uploadFile({
   buffer,
+  body,
   mimeType,
   folder,
   fileName,
-}: UploadFileOptions): Promise<{ url: string; key: string }> {
+}: UploadFileOptions & { body?: Readable; filePath?: string }): Promise<{
+  url: string
+  key: string
+}> {
   const bucketName = getBucketName()
   const region = getRegion()
+  const objectName = safeObjectName(mimeType)
+  const key = `${folder}/${objectName}`
+  void fileName
 
-  const key = `${folder}/${fileName ?? randomUUID()}`
-
-  console.log({
-    bucket: bucketName,
-    region,
-    key,
-  })
+  const payload = body ?? buffer
+  if (!payload) {
+    throw new Error('Upload body is required')
+  }
 
   await s3.send(
     new PutObjectCommand({
       Bucket: bucketName,
       Key: key,
-      Body: buffer,
+      Body: payload,
       ContentType: mimeType,
     })
   )
@@ -37,4 +61,16 @@ export async function uploadFile({
     url,
     key,
   }
+}
+
+export async function uploadFileFromPath(args: {
+  filePath: string
+  mimeType: string
+  folder: string
+}) {
+  return uploadFile({
+    mimeType: args.mimeType,
+    folder: args.folder,
+    body: createReadStream(args.filePath),
+  })
 }

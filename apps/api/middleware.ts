@@ -6,7 +6,10 @@ import {
 } from '@lumina/constants'
 import multer from 'multer'
 
+import type { AuthenticatedRequest } from '@lumina/contracts'
 import type { NextFunction, Request, Response } from 'express'
+
+export type AuthRequest = AuthenticatedRequest
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
@@ -20,7 +23,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       })
     }
 
-    ;(req as Request & { user: typeof session.user }).user = session.user
+    ;(req as AuthenticatedRequest).user = {
+      id: session.user.id,
+      email: session.user.email,
+      role: 'role' in session.user ? String(session.user.role) : 'STUDENT',
+    }
 
     next()
   } catch {
@@ -30,15 +37,48 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
-const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100 MB
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  try {
+    const session = await auth.api.getSession({
+      headers: req.headers,
+    })
+    if (session) {
+      ;(req as AuthenticatedRequest).user = {
+        id: session.user.id,
+        email: session.user.email,
+        role: 'role' in session.user ? String(session.user.role) : 'STUDENT',
+      }
+    }
+  } catch {
+    // anonymous viewers are allowed
+  }
+  next()
+}
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+const MAX_VIDEO_SIZE = 25 * 1024 * 1024
+const MAX_CONCURRENT_UPLOADS = 10
+
+let inflightUploads = 0
+
+export function boundConcurrentUploads(req: Request, res: Response, next: NextFunction) {
+  if (inflightUploads >= MAX_CONCURRENT_UPLOADS) {
+    return res.status(429).json({ message: 'Too many concurrent uploads' })
+  }
+  inflightUploads += 1
+  const release = () => {
+    inflightUploads = Math.max(0, inflightUploads - 1)
+  }
+  res.once('finish', release)
+  res.once('close', release)
+  next()
+}
 
 const imageMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-
 const videoMimeTypes = ['video/mp4', 'video/webm', 'video/quicktime']
 
 const fileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
-  if (allowedMimeTypes.includes(file.mimetype)) {
+  if (imageMimeTypes.includes(file.mimetype)) {
     cb(null, true)
   } else {
     cb(new Error(MSG_ONLY_IMAGE_MIME_TYPES_ALLOWED))
@@ -54,12 +94,12 @@ const postMediaFileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
   cb(new Error(MSG_ONLY_IMAGE_AND_VIDEO_MIME_TYPES_ALLOWED))
 }
 
-const allowedMimeTypes = imageMimeTypes
-
 export const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: MAX_IMAGE_SIZE,
+    files: 1,
+    fields: 10,
   },
   fileFilter,
 })
@@ -68,6 +108,8 @@ export const uploadPostMedia = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: MAX_VIDEO_SIZE,
+    files: 10,
+    fields: 20,
   },
   fileFilter: postMediaFileFilter,
 })

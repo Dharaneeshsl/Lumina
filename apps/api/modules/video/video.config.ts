@@ -1,9 +1,20 @@
-import { StreamChat } from 'stream-chat'
+import { StreamClient } from '@stream-io/node-sdk'
 
-import 'dotenv/config'
+function requiredSecret(name: string) {
+  const value = process.env[name]
+  if (value && value.trim().length > 0) {
+    return value
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`Missing required secret: ${name}`)
+  }
+  if (process.env.NODE_ENV === 'test') {
+    return `test_${name.toLowerCase()}_value_not_for_production`
+  }
+  throw new Error(`Missing required environment variable: ${name}`)
+}
 
-const STREAM_API_KEY = process.env.STREAM_API_KEY || 'dummy_stream_api_key'
-const STREAM_API_SECRET = process.env.STREAM_API_SECRET || 'dummy_stream_api_secret_1234567890_key'
+export const STREAM_API_KEY = requiredSecret('STREAM_API_KEY')
+const STREAM_API_SECRET = requiredSecret('STREAM_API_SECRET')
 
-export const streamVideoClient = StreamChat.getInstance(STREAM_API_KEY, STREAM_API_SECRET)
-export { STREAM_API_KEY }
+export const streamVideoClient = new StreamClient(STREAM_API_KEY, STREAM_API_SECRET)

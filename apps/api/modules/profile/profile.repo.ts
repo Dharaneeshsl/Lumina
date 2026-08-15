@@ -1,5 +1,7 @@
 import { prisma } from '@lumina/db'
 
+import type { Prisma } from '@lumina/db'
+
 export async function findByUserId(userId: string) {
   return prisma.profile.findUnique({
     where: {
@@ -12,7 +14,7 @@ export async function findByUsername(username: string) {
   return prisma.profile.findFirst({
     where: {
       user: {
-        username,
+        username, 
       },
     },
     include: {
@@ -21,27 +23,26 @@ export async function findByUsername(username: string) {
   })
 }
 
-export async function updateProfile(userId: string, data: any) {
-  try {
-    return await prisma.profile.upsert({
-      where: { userId },
-      update: data,
-      create: {
-        userId,
-        ...data,
-        leetcodeUsername: data.leetcodeUsername || null,
-      },
-    })
-  } catch (error) {
-    console.error('Prisma Error:', error)
-    throw error
-  }
+export async function updateProfile(userId: string, data: Prisma.ProfileUncheckedUpdateInput) {
+  const firstName = typeof data.firstName === 'string' ? data.firstName : 'Student'
+  const lastName = typeof data.lastName === 'string' ? data.lastName : 'User'
+
+  return prisma.profile.upsert({
+    where: { userId },
+    update: data,
+    create: {
+      ...(data as Prisma.ProfileUncheckedCreateInput),
+      userId,
+      firstName,
+      lastName,
+    },
+  })
 }
 
 export const updateProfilePicture = async (
   userId: string,
-  profileImageUrl: string | any,
-  profileImageKey: string | any
+  profileImageUrl: string,
+  profileImageKey: string
 ) => {
   return prisma.profile.update({
     where: {
@@ -87,7 +88,6 @@ export const removeCoverImage = async (userId: string) => {
     where: {
       userId,
     },
-
     data: {
       coverImage: null,
       coverImageKey: null,

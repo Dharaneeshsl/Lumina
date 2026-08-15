@@ -11,6 +11,7 @@
     "@types/multer": "^2.2.0"
   },
   "dependencies": {
+    "@lumina/validators": "workspace:*",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@lumina/auth": "workspace:*",
     "@lumina/constants": "workspace:*",
