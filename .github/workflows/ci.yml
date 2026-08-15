@@ -25,6 +25,7 @@ jobs:
       - run: bun run format:check
       - run: bun run lint
       - run: bun run check-types
+      - run: bun run check-openapi
 
   container-security:
     name: Production image vulnerability scan
