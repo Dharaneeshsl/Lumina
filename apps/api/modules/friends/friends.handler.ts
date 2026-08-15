@@ -1,5 +1,5 @@
-import * as friendsService from './friends.service'
 import { sendError } from '../../lib/send-error'
+import * as friendsService from './friends.service'
 
 import type { AuthenticatedRequest } from '@lumina/contracts'
 import type { Request, Response } from 'express'
