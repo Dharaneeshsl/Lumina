@@ -4,6 +4,7 @@ import {
   deleteCommentHandler,
   editCommentHandler,
   getCommentsForPostHandler,
+  removeReactionHandler,
   reportCommentHandler,
   togglePinHandler,
   toggleReactionHandler,
@@ -57,6 +58,14 @@ commentsRouter.post(
   requireAuth,
   async (req: Request, res: Response) => {
     await toggleReactionHandler(req as AuthenticatedRequest, res)
+  }
+)
+
+commentsRouter.delete(
+  '/comments/:commentId/reactions',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    await removeReactionHandler(req as AuthenticatedRequest, res)
   }
 )
 

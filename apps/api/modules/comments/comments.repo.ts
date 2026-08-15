@@ -3,7 +3,7 @@ import { prisma } from '@lumina/db'
 export async function findPostById(postId: string) {
   return prisma.post.findUnique({
     where: { id: postId },
-    select: { id: id, authorId: true, visibility: true },
+    select: { id: true, authorId: true, visibility: true },
   })
 }
 
@@ -51,8 +51,27 @@ export async function createCommentRecord(data: {
   })
 }
 
+function formatCommentWithReactions(comment: any) {
+  const reactionCounts: Record<string, number> = {}
+  if (comment.reactions) {
+    for (const r of comment.reactions) {
+      reactionCounts[r.emoji] = (reactionCounts[r.emoji] || 0) + 1
+    }
+  }
+
+  const formattedReplies = comment.replies
+    ? comment.replies.map((reply: any) => formatCommentWithReactions(reply))
+    : []
+
+  return {
+    ...comment,
+    reactionCounts,
+    replies: formattedReplies,
+  }
+}
+
 export async function getCommentsForPostRepo(postId: string, cursor?: string, limit = 20) {
-  const comments = await prisma.comment.findMany({
+  const rawComments = await prisma.comment.findMany({
     where: { postId, parentId: null },
     take: limit + 1,
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
@@ -78,10 +97,12 @@ export async function getCommentsForPostRepo(postId: string, cursor?: string, li
   })
 
   let nextCursor: string | undefined = undefined
-  if (comments.length > limit) {
-    const nextItem = comments.pop()
+  if (rawComments.length > limit) {
+    const nextItem = rawComments.pop()
     nextCursor = nextItem?.id
   }
+
+  const comments = rawComments.map((c) => formatCommentWithReactions(c))
 
   return { comments, nextCursor }
 }
@@ -146,6 +167,22 @@ export async function toggleReactionRepo(commentId: string, userId: string, emoj
     })
     return { action: 'added', reaction }
   }
+}
+
+export async function removeReactionRepo(commentId: string, userId: string, emoji: string) {
+  const existing = await prisma.commentReaction.findUnique({
+    where: {
+      commentId_userId_emoji: { commentId, userId, emoji },
+    },
+  })
+
+  if (existing) {
+    await prisma.commentReaction.delete({
+      where: { id: existing.id },
+    })
+  }
+
+  return { action: 'removed', emoji }
 }
 
 export async function togglePinCommentRepo(commentId: string, isPinned: boolean) {

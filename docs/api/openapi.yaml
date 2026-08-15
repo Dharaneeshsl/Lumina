@@ -83,7 +83,7 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '422': { description: Max comment depth 5 exceeded }
     get:
-      summary: Fetch comments tree for a post with cursor pagination
+      summary: Fetch comments tree for a post with cursor pagination and formatted reaction counts
       parameters:
         - name: postId
           in: path
@@ -128,6 +128,44 @@ paths:
       responses:
         '200': { description: Comment soft deleted }
         '403': { description: Not authorized to delete comment }
+  /api/v1/comments/{commentId}/reactions:
+    post:
+      summary: Toggle or add emoji reaction to a comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emoji]
+              properties:
+                emoji: { type: string }
+      responses:
+        '200': { description: Reaction toggled }
+        '400': { description: Cannot react to deleted comment }
+    delete:
+      summary: Remove emoji reaction from a comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emoji]
+              properties:
+                emoji: { type: string }
+      responses:
+        '200': { description: Reaction removed }
   /api/v1/video/token:
     post:
       summary: Generate a Stream Video authentication user token

@@ -91,7 +91,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     expect(failRes.body.message).toBe('COMMENT_MAX_DEPTH_EXCEEDED')
   })
 
-  it('FR-06-002 & FR-06-003: supports reactions, edit history, and optimistic concurrency', async () => {
+  it('FR-06-002 & FR-06-003: supports reactions, reaction counts, explicit removal, and edit history', async () => {
     const author = generateRandomUser({ email: 'reaction.user@example.test' })
     const signup = await signUpWithEmail(app, author)
     const cookie = buildCookieHeader(getSetCookieHeader(signup))
@@ -116,6 +116,23 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     expect(reactRes.status).toBe(200)
     expect(reactRes.body.action).toBe('added')
+
+    // Fetch comments and verify reactionCounts formatting
+    const listRes = await request(app)
+      .get(`/api/v1/posts/${post.id}/comments`)
+      .set('Cookie', cookie ?? '')
+
+    expect(listRes.status).toBe(200)
+    expect(listRes.body.comments[0].reactionCounts['🔥']).toBe(1)
+
+    // Remove Emoji Reaction via DELETE
+    const removeRes = await request(app)
+      .delete(`/api/v1/comments/${commentId}/reactions`)
+      .set('Cookie', cookie ?? '')
+      .send({ emoji: '🔥' })
+
+    expect(removeRes.status).toBe(200)
+    expect(removeRes.body.action).toBe('removed')
 
     // FR-06-003: Edit Comment (Owner-only)
     const editRes = await request(app)
@@ -188,5 +205,14 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     expect(deleteRes.status).toBe(200)
     expect(deleteRes.body.comment.isDeleted).toBe(true)
     expect(deleteRes.body.comment.content).toBe('[Comment deleted]')
+
+    // Attempting to react to a deleted comment fails with 400
+    const deletedReactRes = await request(app)
+      .post(`/api/v1/comments/${commentId}/reactions`)
+      .set('Cookie', cookieAuthor ?? '')
+      .send({ emoji: '🔥' })
+
+    expect(deletedReactRes.status).toBe(400)
+    expect(deletedReactRes.body.message).toBe('CANNOT_REACT_TO_DELETED_COMMENT')
   })
 })

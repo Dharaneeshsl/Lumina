@@ -3,6 +3,7 @@ import {
   deleteCommentService,
   editCommentService,
   getCommentsForPostService,
+  removeReactionService,
   reportCommentService,
   togglePinCommentService,
   toggleReactionService,
@@ -103,6 +104,25 @@ export async function toggleReactionHandler(req: AuthenticatedRequest, res: Resp
   } catch (err: any) {
     const status = err.status || 500
     res.status(status).json({ message: err.message || 'Failed to update reaction' })
+  }
+}
+
+export async function removeReactionHandler(req: AuthenticatedRequest, res: Response) {
+  try {
+    const userId = req.user.id
+    const { commentId } = req.params
+    const { emoji } = req.body
+
+    const result = await removeReactionService({
+      commentId: commentId!,
+      userId,
+      emoji,
+    })
+
+    res.status(200).json(result)
+  } catch (err: any) {
+    const status = err.status || 500
+    res.status(status).json({ message: err.message || 'Failed to remove reaction' })
   }
 }
 

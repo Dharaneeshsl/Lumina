@@ -5,6 +5,7 @@ import {
   findCommentById,
   findPostById,
   getCommentsForPostRepo,
+  removeReactionRepo,
   softDeleteCommentRepo,
   togglePinCommentRepo,
   toggleReactionRepo,
@@ -183,6 +184,10 @@ export async function toggleReactionService(params: {
     throw { status: 404, message: 'COMMENT_NOT_FOUND' }
   }
 
+  if (comment.isDeleted) {
+    throw { status: 400, message: 'CANNOT_REACT_TO_DELETED_COMMENT' }
+  }
+
   const result = await toggleReactionRepo(commentId, userId, emoji.trim())
 
   if (result.action === 'added' && comment.userId !== userId) {
@@ -197,6 +202,25 @@ export async function toggleReactionService(params: {
   }
 
   return result
+}
+
+export async function removeReactionService(params: {
+  commentId: string
+  userId: string
+  emoji: string
+}) {
+  const { commentId, userId, emoji } = params
+
+  if (!emoji || emoji.trim().length === 0) {
+    throw { status: 400, message: 'Emoji character is required' }
+  }
+
+  const comment = await findCommentById(commentId)
+  if (!comment) {
+    throw { status: 404, message: 'COMMENT_NOT_FOUND' }
+  }
+
+  return removeReactionRepo(commentId, userId, emoji.trim())
 }
 
 export async function togglePinCommentService(params: {
