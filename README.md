@@ -358,7 +358,7 @@ lumina/
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/luminohq/lumina.git
+git clone https://github.com/Lumino-x1/Lumina.git
 cd lumina
 bun install
 ```
