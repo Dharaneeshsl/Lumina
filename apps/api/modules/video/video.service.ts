@@ -1,6 +1,6 @@
+import { badRequest, forbidden, notFound } from '../../lib/http-error.ts'
 import { STREAM_API_KEY, streamVideoClient } from './video.config.ts'
 import * as videoRepo from './video.repo.ts'
-import { badRequest, forbidden, notFound } from '../../lib/http-error.ts'
 
 import type { VideoCallType } from '@lumina/db'
 
@@ -95,7 +95,10 @@ export const createCall = async ({
   }
 }
 
-function assertCallAccess(call: NonNullable<Awaited<ReturnType<typeof videoRepo.findCallById>>>, userId: string) {
+function assertCallAccess(
+  call: NonNullable<Awaited<ReturnType<typeof videoRepo.findCallById>>>,
+  userId: string
+) {
   const isParticipant = call.participants.some((p) => p.userId === userId)
   const isHost = call.createdById === userId
   if (!isParticipant && !isHost) {

@@ -187,11 +187,7 @@ export const deleteSavedPost = async (
   })
 }
 
-export const listComments = async (
-  postId: string,
-  limit: number,
-  cursor?: string
-) => {
+export const listComments = async (postId: string, limit: number, cursor?: string) => {
   return prisma.comment.findMany({
     where: {
       postId,

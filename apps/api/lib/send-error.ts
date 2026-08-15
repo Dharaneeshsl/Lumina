@@ -55,7 +55,11 @@ function mapKnownError(message: string): { status: number; message: string; code
       message: 'ONLY_HOST_CAN_END_CALL',
       code: 'ONLY_HOST_CAN_END_CALL',
     },
-    INVITE_UNAUTHORIZED: { status: 403, message: 'INVITE_UNAUTHORIZED', code: 'INVITE_UNAUTHORIZED' },
+    INVITE_UNAUTHORIZED: {
+      status: 403,
+      message: 'INVITE_UNAUTHORIZED',
+      code: 'INVITE_UNAUTHORIZED',
+    },
     POST_NOT_FOUND: { status: 404, message: 'POST_NOT_FOUND', code: 'POST_NOT_FOUND' },
     PARENT_COMMENT_NOT_FOUND: {
       status: 404,

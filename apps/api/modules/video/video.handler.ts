@@ -1,10 +1,9 @@
-import * as videoService from './video.service.ts'
 import { sendError } from '../../lib/send-error.ts'
+import * as videoService from './video.service.ts'
 import { logger } from '@lumina/observability'
-import { createCallSchema, respondInviteSchema } from "@lumina/validators"
+import { createCallSchema, respondInviteSchema } from '@lumina/validators'
 
 import type { AuthRequest } from '../../middleware'
-
 import type { Request, Response } from 'express'
 
 function userIdOf(req: Request) {
@@ -86,7 +85,11 @@ export const respondToInvite = async (req: Request, res: Response) => {
     if (!parsed.success) {
       return res.status(400).json({ message: 'INVALID_RESPONSE' })
     }
-    const result = await videoService.respondToCallInvite(callId as string, userId, parsed.data.response as 'ACCEPT' | 'REJECT')
+    const result = await videoService.respondToCallInvite(
+      callId as string,
+      userId,
+      parsed.data.response as 'ACCEPT' | 'REJECT'
+    )
     return res.status(200).json(result)
   } catch (error) {
     return sendError(res, error)

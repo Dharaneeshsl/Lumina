@@ -1,8 +1,8 @@
-import { canViewProfile, toPublicProfileDto } from './profile.dto'
-import * as repository from './profile.repo'
 import { assertDeclaredMimeMatchesContent } from '../../lib/file-signature'
 import { badRequest, notFound } from '../../lib/http-error'
 import * as friendsRepo from '../friends/friends.repo'
+import { canViewProfile, toPublicProfileDto } from './profile.dto'
+import * as repository from './profile.repo'
 import { prisma } from '@lumina/db'
 import { deleteFile, uploadFile } from '@lumina/storage'
 import { profileUpdateSchema, protectedProfileFields } from '@lumina/validators'
@@ -44,7 +44,10 @@ export async function updateMyProfile(userId: string, body: unknown) {
   return repository.updateProfile(userId, data)
 }
 
-export async function getProfileByUsername(username: string, viewer?: AuthenticatedRequest['user']) {
+export async function getProfileByUsername(
+  username: string,
+  viewer?: AuthenticatedRequest['user']
+) {
   const profile = await repository.findByUsername(username)
   if (!profile) {
     throw notFound('PROFILE_NOT_FOUND')

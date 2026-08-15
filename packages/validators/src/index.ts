@@ -58,7 +58,9 @@ export const protectedProfileFields = [
 
 export const createCallSchema = z
   .object({
-    type: z.enum(['ONE_ON_ONE', 'GROUP', 'MENTORSHIP', 'CLUB_MEETING', 'FACULTY_SESSION']).optional(),
+    type: z
+      .enum(['ONE_ON_ONE', 'GROUP', 'MENTORSHIP', 'CLUB_MEETING', 'FACULTY_SESSION'])
+      .optional(),
     title: z.string().trim().min(1).max(120).optional(),
     participantIds: z.array(z.string().min(1).max(64)).max(50).optional(),
   })

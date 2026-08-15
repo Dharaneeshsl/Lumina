@@ -32,10 +32,7 @@ export function detectMediaKind(buffer: Buffer): 'image' | 'video' | null {
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
     return 'image'
   }
-  if (
-    buffer.toString('ascii', 0, 4) === 'RIFF' &&
-    buffer.toString('ascii', 8, 12) === 'WEBP'
-  ) {
+  if (buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') {
     return 'image'
   }
   if (buffer.toString('ascii', 4, 8) === 'ftyp') {

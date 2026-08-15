@@ -14,7 +14,7 @@ export async function findByUsername(username: string) {
   return prisma.profile.findFirst({
     where: {
       user: {
-        username, 
+        username,
       },
     },
     include: {
