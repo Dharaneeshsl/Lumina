@@ -43,11 +43,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
+
       - name: Qodana Scan
         uses: JetBrains/qodana-action@v2026.1
         with:
           upload-result: true
           args: |
+            --linter qodana-js
+            --within-docker false
             --profile-name qodana.recommended
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}

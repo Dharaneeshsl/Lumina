@@ -1,6 +1,8 @@
 version: '1.0'
 
-linter: jetbrains/qodana-js:2026.1
+# Native mode runs on the CI runner (not the qodana-js image), so Bun is available.
+linter: qodana-js
+withinDocker: false
 
 profile:
   name: qodana.recommended
@@ -23,4 +25,5 @@ exclude:
       - '**/.git/**'
 
 bootstrap: |
+  set -eu
   bun install --frozen-lockfile || bun install
