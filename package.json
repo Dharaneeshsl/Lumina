@@ -15,6 +15,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "check-types": "turbo run check-types",
+    "check-openapi": "bun internal/scripts/check-openapi.ts",
     "worker:leetcode": "bun workers/leetcode/src/index.ts",
     "db:migrate:deploy": "bun run --filter @lumina/db migrate:deploy"
   },
@@ -31,7 +32,8 @@
     "supertest": "^7.1.4",
     "turbo": "^2.10.8",
     "typescript": "5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "yaml": "^2.9.0"
   },
   "overrides": {
     "react": "18.3.1",

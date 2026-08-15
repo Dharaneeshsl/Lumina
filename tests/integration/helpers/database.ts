@@ -31,14 +31,16 @@ export function getTestDatabaseUrl() {
 
 export async function prepareTestDatabase() {
   const databaseUrl = getTestDatabaseUrl()
+  const command = process.platform === 'win32' ? 'bunx.cmd' : 'bunx'
 
-  execFileSync('bunx', ['prisma', 'migrate', 'deploy', '--schema', schemaPath], {
+  execFileSync(command, ['prisma', 'db', 'push', '--schema', schemaPath, '--skip-generate'], {
     cwd: databasePackagePath,
     env: {
       ...process.env,
       DATABASE_URL: databaseUrl,
     },
     stdio: 'pipe',
+    shell: true,
   })
 }
 

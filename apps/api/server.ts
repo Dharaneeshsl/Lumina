@@ -8,6 +8,7 @@ import leaderboardRouter from './modules/leaderboard/leaderboard.router.ts'
 import leetcodeRouter from './modules/leetcode/leetcode.router.ts'
 import postsRouter from './modules/posts/posts.router.ts'
 import { profileRouter } from './modules/profile/profile.router.ts'
+import videoRouter from './modules/video/video.router.ts'
 
 import '../../workers/leetcode/src/index.ts'
 
@@ -79,6 +80,7 @@ app.use('/api/posts', postsRouter)
 app.use('/api/chat', chatRoutes)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/leetcode', leetcodeRouter)
+app.use('/api/v1/video', videoRouter)
 
 app.get('/ok', (req: Request, res: Response) => {
   res.status(200).json({ message: MSG_OK })

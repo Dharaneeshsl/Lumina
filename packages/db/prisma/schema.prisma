@@ -89,6 +89,8 @@ model User {
   verification           Verification?
   wishlists              Wishlist[]
   savedPosts             SavedPost[]
+  createdVideoCalls      VideoCall[]             @relation("CreatedCalls")
+  videoCallParticipants  VideoCallParticipant[]
 
   @@index([collegeId])
   @@index([departmentId])
@@ -377,6 +379,8 @@ enum NotificationType {
   SHARE
   FOLLOW
   FRIEND_REQUEST
+  VIDEO_CALL_INVITE
+  VIDEO_CALL_START
 }
 
 model Conversation {
@@ -626,6 +630,72 @@ model InternshipApplication {
   user         User              @relation(fields: [userId], references: [id])
 
   @@unique([internshipId, userId])
+}
+
+model VideoCall {
+  id           String                 @id @default(cuid())
+  streamCallId String                 @unique
+  type         VideoCallType          @default(ONE_ON_ONE)
+  title        String?
+  createdById  String
+  status       VideoCallStatus        @default(SCHEDULED)
+  scheduledAt  DateTime?
+  startedAt    DateTime?
+  endedAt      DateTime?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  createdBy    User                   @relation("CreatedCalls", fields: [createdById], references: [id])
+  participants VideoCallParticipant[]
+
+  @@index([createdById])
+  @@index([streamCallId])
+  @@index([status])
+}
+
+model VideoCallParticipant {
+  id        String                @id @default(cuid())
+  callId    String
+  userId    String
+  role      VideoCallRole         @default(PARTICIPANT)
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  status    ParticipantCallStatus @default(INVITED)
+  createdAt DateTime              @default(now())
+  call      VideoCall             @relation(fields: [callId], references: [id], onDelete: Cascade)
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([callId, userId])
+  @@index([callId])
+  @@index([userId])
+}
+
+enum VideoCallType {
+  ONE_ON_ONE
+  GROUP
+  MENTORSHIP
+  CLUB_MEETING
+  FACULTY_SESSION
+}
+
+enum VideoCallStatus {
+  SCHEDULED
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+enum VideoCallRole {
+  HOST
+  PARTICIPANT
+  SPEAKER
+}
+
+enum ParticipantCallStatus {
+  INVITED
+  ACCEPTED
+  REJECTED
+  JOINED
+  LEFT
 }
 
 enum UserStatus {
