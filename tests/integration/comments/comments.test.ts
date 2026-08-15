@@ -154,13 +154,19 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     const reporter = generateRandomUser({ email: 'reporter@example.test' })
 
     const signupPostAuthor = await signUpWithEmail(app, postAuthor)
-    await signUpWithEmail(app, mentionedUser)
+    const signupMentioned = await signUpWithEmail(app, mentionedUser)
     const signupReporter = await signUpWithEmail(app, reporter)
 
     const cookieAuthor = buildCookieHeader(getSetCookieHeader(signupPostAuthor))
     const cookieReporter = buildCookieHeader(getSetCookieHeader(signupReporter))
 
     const dbPostAuthor = await prisma.user.findUnique({ where: { email: postAuthor.email } })
+    const dbMentioned = await prisma.user.findUnique({ where: { email: mentionedUser.email } })
+    await prisma.user.update({
+      where: { id: dbMentioned!.id },
+      data: { username: 'alex99', status: 'ACTIVE' },
+    })
+
     const post = await prisma.post.create({
       data: { authorId: dbPostAuthor!.id, content: 'Pin post' },
     })
@@ -172,6 +178,17 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
       .send({ content: 'Hey @alex99 check this out!' })
 
     const commentId = commentRes.body.id
+
+    // Verify mention record created
+    const mentions = await prisma.commentMention.findMany({ where: { commentId } })
+    expect(mentions.length).toBe(1)
+    expect(mentions[0].mentionedUserId).toBe(dbMentioned!.id)
+
+    // Verify notification created for mentioned user
+    const notifications = await prisma.notification.findMany({
+      where: { userId: dbMentioned!.id, type: 'COMMENT_MENTION' },
+    })
+    expect(notifications.length).toBe(1)
 
     // FR-06-006: Pin Comment (Post owner)
     const pinRes = await request(app)

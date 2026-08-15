@@ -79,16 +79,25 @@ export async function getCommentsForPostRepo(postId: string, cursor?: string, li
     include: {
       user: { select: { id: true, name: true, username: true, image: true } },
       reactions: true,
+      mentions: {
+        include: { mentionedUser: { select: { id: true, name: true, username: true } } },
+      },
       replies: {
         orderBy: { createdAt: 'asc' },
         include: {
           user: { select: { id: true, name: true, username: true, image: true } },
           reactions: true,
+          mentions: {
+            include: { mentionedUser: { select: { id: true, name: true, username: true } } },
+          },
           replies: {
             orderBy: { createdAt: 'asc' },
             include: {
               user: { select: { id: true, name: true, username: true, image: true } },
               reactions: true,
+              mentions: {
+                include: { mentionedUser: { select: { id: true, name: true, username: true } } },
+              },
             },
           },
         },
@@ -227,7 +236,10 @@ export async function createReportRepo(
 
 export async function createMentionsRepo(commentId: string, usernames: string[]) {
   const users = await prisma.user.findMany({
-    where: { username: { in: usernames } },
+    where: {
+      username: { in: usernames },
+      status: { notIn: ['DEACTIVATED', 'SUSPENDED'] },
+    },
     select: { id: true },
   })
 
