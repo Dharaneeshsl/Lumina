@@ -59,6 +59,75 @@ paths:
           schema: { type: string }
       responses:
         '200': { description: Leaderboard returned }
+  /api/v1/posts/{postId}/comments:
+    post:
+      summary: Create a root comment or nested reply attached to a post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+                parentId: { type: string }
+      responses:
+        '201': { description: Comment or reply created }
+        '400': { description: Invalid content or parent post mismatch }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { description: Max comment depth 5 exceeded }
+    get:
+      summary: Fetch comments tree for a post with cursor pagination
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: cursor
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200': { description: Comments tree returned }
+        '404': { description: Post not found }
+  /api/v1/comments/{commentId}:
+    patch:
+      summary: Edit a comment (owner-only, tracked in edit history)
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content: { type: string }
+      responses:
+        '200': { description: Comment updated }
+        '403': { description: Not authorized to edit comment }
+    delete:
+      summary: Soft delete comment (tombstone preserving reply tree)
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Comment soft deleted }
+        '403': { description: Not authorized to delete comment }
   /api/v1/video/token:
     post:
       summary: Generate a Stream Video authentication user token

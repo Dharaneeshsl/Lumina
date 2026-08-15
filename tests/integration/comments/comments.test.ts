@@ -1,0 +1,192 @@
+import { createTestApp } from '../helpers/app'
+import {
+  buildCookieHeader,
+  clearCapturedEmails,
+  getSetCookieHeader,
+  signUpWithEmail,
+} from '../helpers/auth'
+import {
+  clearDatabase,
+  connectTestDatabase,
+  disconnectTestDatabase,
+  prepareTestDatabase,
+  setTestDatabaseUrl,
+} from '../helpers/database'
+import { generateRandomUser } from '../helpers/factories'
+import { prisma } from '@db/client'
+import request from 'supertest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+
+describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
+  const app = createTestApp()
+
+  beforeAll(async () => {
+    setTestDatabaseUrl()
+    await prepareTestDatabase()
+    await connectTestDatabase()
+  })
+
+  afterAll(async () => {
+    await disconnectTestDatabase()
+  })
+
+  afterEach(async () => {
+    await clearDatabase()
+    clearCapturedEmails()
+  })
+
+  it('FR-06-001: creates root comment, nested reply, and enforces max depth limit 5', async () => {
+    const author = generateRandomUser({ email: 'author.post@example.test' })
+    const commenter = generateRandomUser({
+      email: 'commenter.post@example.test',
+      username: 'commenter1',
+    })
+
+    const signupAuthor = await signUpWithEmail(app, author)
+    const signupCommenter = await signUpWithEmail(app, commenter)
+
+    const cookieAuthor = buildCookieHeader(getSetCookieHeader(signupAuthor))
+    const cookieCommenter = buildCookieHeader(getSetCookieHeader(signupCommenter))
+
+    const dbAuthor = await prisma.user.findUnique({ where: { email: author.email } })
+
+    // Create post
+    const post = await prisma.post.create({
+      data: {
+        authorId: dbAuthor!.id,
+        content: 'Test post for comments',
+      },
+    })
+
+    // Create root comment (depth 0)
+    const rootRes = await request(app)
+      .post(`/api/v1/posts/${post.id}/comments`)
+      .set('Cookie', cookieCommenter ?? '')
+      .send({ content: 'Root comment Level 0' })
+
+    expect(rootRes.status).toBe(201)
+    expect(rootRes.body.depth).toBe(0)
+
+    let parentId = rootRes.body.id
+
+    // Create nested replies down to depth 4
+    for (let depth = 1; depth < 5; depth++) {
+      const replyRes = await request(app)
+        .post(`/api/v1/posts/${post.id}/comments`)
+        .set('Cookie', cookieCommenter ?? '')
+        .send({ content: `Reply Level ${depth}`, parentId })
+
+      expect(replyRes.status).toBe(201)
+      expect(replyRes.body.depth).toBe(depth)
+      parentId = replyRes.body.id
+    }
+
+    // Attempting to exceed max depth 5 (depth 5 index) must fail with 422
+    const failRes = await request(app)
+      .post(`/api/v1/posts/${post.id}/comments`)
+      .set('Cookie', cookieCommenter ?? '')
+      .send({ content: 'Exceeding max depth level', parentId })
+
+    expect(failRes.status).toBe(422)
+    expect(failRes.body.message).toBe('COMMENT_MAX_DEPTH_EXCEEDED')
+  })
+
+  it('FR-06-002 & FR-06-003: supports reactions, edit history, and optimistic concurrency', async () => {
+    const author = generateRandomUser({ email: 'reaction.user@example.test' })
+    const signup = await signUpWithEmail(app, author)
+    const cookie = buildCookieHeader(getSetCookieHeader(signup))
+
+    const dbUser = await prisma.user.findUnique({ where: { email: author.email } })
+    const post = await prisma.post.create({
+      data: { authorId: dbUser!.id, content: 'Reaction post' },
+    })
+
+    const commentRes = await request(app)
+      .post(`/api/v1/posts/${post.id}/comments`)
+      .set('Cookie', cookie ?? '')
+      .send({ content: 'Initial comment content' })
+
+    const commentId = commentRes.body.id
+
+    // FR-06-002: Add Emoji Reaction
+    const reactRes = await request(app)
+      .post(`/api/v1/comments/${commentId}/reactions`)
+      .set('Cookie', cookie ?? '')
+      .send({ emoji: '🔥' })
+
+    expect(reactRes.status).toBe(200)
+    expect(reactRes.body.action).toBe('added')
+
+    // FR-06-003: Edit Comment (Owner-only)
+    const editRes = await request(app)
+      .patch(`/api/v1/comments/${commentId}`)
+      .set('Cookie', cookie ?? '')
+      .send({ content: 'Edited comment content' })
+
+    expect(editRes.status).toBe(200)
+    expect(editRes.body.content).toBe('Edited comment content')
+    expect(editRes.body.version).toBe(2)
+  })
+
+  it('FR-06-004 & FR-06-005 & FR-06-006 & FR-06-007: soft delete, mentions, pin, and report', async () => {
+    const postAuthor = generateRandomUser({ email: 'post.owner@example.test' })
+    const mentionedUser = generateRandomUser({
+      email: 'mentioned@example.test',
+      username: 'alex99',
+    })
+    const reporter = generateRandomUser({ email: 'reporter@example.test' })
+
+    const signupPostAuthor = await signUpWithEmail(app, postAuthor)
+    await signUpWithEmail(app, mentionedUser)
+    const signupReporter = await signUpWithEmail(app, reporter)
+
+    const cookieAuthor = buildCookieHeader(getSetCookieHeader(signupPostAuthor))
+    const cookieReporter = buildCookieHeader(getSetCookieHeader(signupReporter))
+
+    const dbPostAuthor = await prisma.user.findUnique({ where: { email: postAuthor.email } })
+    const post = await prisma.post.create({
+      data: { authorId: dbPostAuthor!.id, content: 'Pin post' },
+    })
+
+    // FR-06-005: Create comment with @alex99 mention
+    const commentRes = await request(app)
+      .post(`/api/v1/posts/${post.id}/comments`)
+      .set('Cookie', cookieAuthor ?? '')
+      .send({ content: 'Hey @alex99 check this out!' })
+
+    const commentId = commentRes.body.id
+
+    // FR-06-006: Pin Comment (Post owner)
+    const pinRes = await request(app)
+      .post(`/api/v1/comments/${commentId}/pin`)
+      .set('Cookie', cookieAuthor ?? '')
+
+    expect(pinRes.status).toBe(200)
+    expect(pinRes.body.isPinned).toBe(true)
+
+    // FR-06-007: Report Comment
+    const reportRes = await request(app)
+      .post(`/api/v1/comments/${commentId}/report`)
+      .set('Cookie', cookieReporter ?? '')
+      .send({ reason: 'Spam', details: 'Contains unwanted advertising' })
+
+    expect(reportRes.status).toBe(201)
+
+    // Duplicate Report Rejection
+    const dupReportRes = await request(app)
+      .post(`/api/v1/comments/${commentId}/report`)
+      .set('Cookie', cookieReporter ?? '')
+      .send({ reason: 'Spam' })
+
+    expect(dupReportRes.status).toBe(409)
+
+    // FR-06-004: Soft Delete Comment (Tombstone)
+    const deleteRes = await request(app)
+      .delete(`/api/v1/comments/${commentId}`)
+      .set('Cookie', cookieAuthor ?? '')
+
+    expect(deleteRes.status).toBe(200)
+    expect(deleteRes.body.comment.isDeleted).toBe(true)
+    expect(deleteRes.body.comment.content).toBe('[Comment deleted]')
+  })
+})
