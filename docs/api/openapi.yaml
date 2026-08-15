@@ -100,7 +100,7 @@ paths:
         '404': { description: Post not found }
   /api/v1/comments/{commentId}:
     patch:
-      summary: Edit a comment (owner-only, tracked in edit history)
+      summary: Edit a comment (owner-only, tracked in edit history, concurrent-edit safe)
       parameters:
         - name: commentId
           in: path
@@ -118,6 +118,7 @@ paths:
       responses:
         '200': { description: Comment updated }
         '403': { description: Not authorized to edit comment }
+        '409': { description: Stale comment version concurrent conflict }
     delete:
       summary: Soft delete comment (tombstone preserving reply tree)
       parameters:
@@ -128,6 +129,17 @@ paths:
       responses:
         '200': { description: Comment soft deleted }
         '403': { description: Not authorized to delete comment }
+  /api/v1/comments/{commentId}/history:
+    get:
+      summary: Fetch edit history log for a comment
+      parameters:
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Array of edit history entries returned }
+        '404': { description: Comment not found }
   /api/v1/comments/{commentId}/reactions:
     post:
       summary: Toggle or add emoji reaction to a comment

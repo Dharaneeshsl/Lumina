@@ -4,6 +4,7 @@ import {
   createReportRepo,
   findCommentById,
   findPostById,
+  getCommentEditHistoryRepo,
   getCommentsForPostRepo,
   removeReactionRepo,
   softDeleteCommentRepo,
@@ -143,6 +144,15 @@ export async function editCommentService(params: {
     userId,
     comment.version
   )
+}
+
+export async function getCommentEditHistoryService(commentId: string) {
+  const comment = await findCommentById(commentId)
+  if (!comment) {
+    throw { status: 404, message: 'COMMENT_NOT_FOUND' }
+  }
+
+  return getCommentEditHistoryRepo(commentId)
 }
 
 export async function deleteCommentService(params: {

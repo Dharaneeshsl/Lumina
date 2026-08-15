@@ -2,6 +2,7 @@ import {
   createCommentService,
   deleteCommentService,
   editCommentService,
+  getCommentEditHistoryService,
   getCommentsForPostService,
   removeReactionService,
   reportCommentService,
@@ -66,6 +67,19 @@ export async function editCommentHandler(req: AuthenticatedRequest, res: Respons
   } catch (err: any) {
     const status = err.status || 500
     res.status(status).json({ message: err.message || 'Failed to edit comment' })
+  }
+}
+
+export async function getCommentEditHistoryHandler(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { commentId } = req.params
+
+    const history = await getCommentEditHistoryService(commentId!)
+
+    res.status(200).json(history)
+  } catch (err: any) {
+    const status = err.status || 500
+    res.status(status).json({ message: err.message || 'Failed to fetch comment edit history' })
   }
 }
 

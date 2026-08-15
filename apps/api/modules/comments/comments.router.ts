@@ -3,6 +3,7 @@ import {
   createCommentHandler,
   deleteCommentHandler,
   editCommentHandler,
+  getCommentEditHistoryHandler,
   getCommentsForPostHandler,
   removeReactionHandler,
   reportCommentHandler,
@@ -46,6 +47,14 @@ commentsRouter.patch(
   commentRateLimiter,
   async (req: Request, res: Response) => {
     await editCommentHandler(req as AuthenticatedRequest, res)
+  }
+)
+
+commentsRouter.get(
+  '/comments/:commentId/history',
+  requireAuth,
+  async (req: Request, res: Response) => {
+    await getCommentEditHistoryHandler(req as AuthenticatedRequest, res)
   }
 )
 

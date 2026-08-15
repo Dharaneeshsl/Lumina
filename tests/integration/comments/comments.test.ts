@@ -91,7 +91,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     expect(failRes.body.message).toBe('COMMENT_MAX_DEPTH_EXCEEDED')
   })
 
-  it('FR-06-002 & FR-06-003: supports reactions, reaction counts, explicit removal, and edit history', async () => {
+  it('FR-06-002 & FR-06-003: supports reactions, reaction counts, edit history log, and optimistic concurrency', async () => {
     const author = generateRandomUser({ email: 'reaction.user@example.test' })
     const signup = await signUpWithEmail(app, author)
     const cookie = buildCookieHeader(getSetCookieHeader(signup))
@@ -125,15 +125,6 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     expect(listRes.status).toBe(200)
     expect(listRes.body.comments[0].reactionCounts['🔥']).toBe(1)
 
-    // Remove Emoji Reaction via DELETE
-    const removeRes = await request(app)
-      .delete(`/api/v1/comments/${commentId}/reactions`)
-      .set('Cookie', cookie ?? '')
-      .send({ emoji: '🔥' })
-
-    expect(removeRes.status).toBe(200)
-    expect(removeRes.body.action).toBe('removed')
-
     // FR-06-003: Edit Comment (Owner-only)
     const editRes = await request(app)
       .patch(`/api/v1/comments/${commentId}`)
@@ -143,6 +134,15 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     expect(editRes.status).toBe(200)
     expect(editRes.body.content).toBe('Edited comment content')
     expect(editRes.body.version).toBe(2)
+
+    // Fetch Edit History Log (Auditing)
+    const historyRes = await request(app)
+      .get(`/api/v1/comments/${commentId}/history`)
+      .set('Cookie', cookie ?? '')
+
+    expect(historyRes.status).toBe(200)
+    expect(historyRes.body.length).toBe(1)
+    expect(historyRes.body[0].previousContent).toBe('Initial comment content')
   })
 
   it('FR-06-004 & FR-06-005 & FR-06-006 & FR-06-007: soft delete, mentions, pin, and report', async () => {

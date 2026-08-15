@@ -114,28 +114,45 @@ export async function updateCommentContentRepo(
   editedByUserId: string,
   currentVersion: number
 ) {
-  return prisma.$transaction(async (tx) => {
-    await tx.commentEditHistory.create({
-      data: {
-        commentId,
-        previousContent,
-        editedByUserId,
-        version: currentVersion,
-      },
-    })
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await tx.commentEditHistory.create({
+        data: {
+          commentId,
+          previousContent,
+          editedByUserId,
+          version: currentVersion,
+        },
+      })
 
-    const updated = await tx.comment.update({
-      where: { id: commentId, version: currentVersion },
-      data: {
-        content: newContent,
-        version: { increment: 1 },
-      },
-      include: {
-        user: { select: { id: true, name: true, username: true, image: true } },
-      },
-    })
+      const updated = await tx.comment.update({
+        where: { id: commentId, version: currentVersion },
+        data: {
+          content: newContent,
+          version: { increment: 1 },
+        },
+        include: {
+          user: { select: { id: true, name: true, username: true, image: true } },
+        },
+      })
 
-    return updated
+      return updated
+    })
+  } catch (err: any) {
+    if (err.code === 'P2025') {
+      throw { status: 409, message: 'STALE_COMMENT_VERSION' }
+    }
+    throw err
+  }
+}
+
+export async function getCommentEditHistoryRepo(commentId: string) {
+  return prisma.commentEditHistory.findMany({
+    where: { commentId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      editedBy: { select: { id: true, name: true, username: true } },
+    },
   })
 }
 
