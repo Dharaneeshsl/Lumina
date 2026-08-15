@@ -3,6 +3,7 @@ import '@lumina/env'
 import { redis } from './config/config.redis.ts'
 import { startCronJobs } from './cron/index.ts'
 import chatRoutes from './modules/chat/chat.router.ts'
+import commentsRouter from './modules/comments/comments.router.ts'
 import friendsRouter from './modules/friends/friends.router.ts'
 import leaderboardRouter from './modules/leaderboard/leaderboard.router.ts'
 import leetcodeRouter from './modules/leetcode/leetcode.router.ts'
@@ -81,6 +82,7 @@ app.use('/api/chat', chatRoutes)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/leetcode', leetcodeRouter)
 app.use('/api/v1/video', videoRouter)
+app.use('/api/v1', commentsRouter)
 
 app.get('/ok', (req: Request, res: Response) => {
   res.status(200).json({ message: MSG_OK })
