@@ -15,6 +15,7 @@ import {
 import { prisma } from '@lumina/db'
 
 export const MAX_COMMENT_DEPTH = 5 // Depths 0, 1, 2, 3, 4 (max depth limit 5)
+export const MAX_PINNED_COMMENTS_PER_POST = 3
 
 export async function createCommentService(params: {
   postId: string
@@ -173,7 +174,7 @@ export async function deleteCommentService(params: {
 
   const isOwner = comment.userId === userId
   const isPostOwner = comment.post.authorId === userId
-  const isAdmin = userRole === 'ADMIN'
+  const isAdmin = userRole === 'ADMIN' || userRole === 'MODERATOR'
 
   if (!isOwner && !isPostOwner && !isAdmin) {
     throw { status: 403, message: 'NOT_AUTHORIZED_TO_DELETE_COMMENT' }
@@ -249,11 +250,24 @@ export async function togglePinCommentService(params: {
     throw { status: 404, message: 'COMMENT_NOT_FOUND' }
   }
 
-  const isPostOwner = comment.post.authorId === userId
-  const isAdmin = userRole === 'ADMIN'
+  if (comment.isDeleted) {
+    throw { status: 400, message: 'CANNOT_PIN_DELETED_COMMENT' }
+  }
 
-  if (!isPostOwner && !isAdmin) {
+  const isPostOwner = comment.post.authorId === userId
+  const isAdminOrModerator = userRole === 'ADMIN' || userRole === 'MODERATOR'
+
+  if (!isPostOwner && !isAdminOrModerator) {
     throw { status: 403, message: 'NOT_AUTHORIZED_TO_PIN_COMMENT' }
+  }
+
+  if (!comment.isPinned) {
+    const pinnedCount = await prisma.comment.count({
+      where: { postId: comment.postId, isPinned: true },
+    })
+    if (pinnedCount >= MAX_PINNED_COMMENTS_PER_POST) {
+      throw { status: 400, message: 'MAX_PINNED_COMMENTS_EXCEEDED' }
+    }
   }
 
   const nextPinnedState = !comment.isPinned
