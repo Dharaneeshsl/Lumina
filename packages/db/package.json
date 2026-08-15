@@ -14,7 +14,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@lumina/env": "workspace:*"
+    "@lumina/env": "workspace:*",
+    "@lumina/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest"

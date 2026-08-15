@@ -180,6 +180,7 @@
       "name": "@lumina/db",
       "dependencies": {
         "@lumina/env": "workspace:*",
+        "@lumina/observability": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -337,6 +338,9 @@
     "workers/leetcode": {
       "name": "@lumina/worker-leetcode",
       "dependencies": {
+        "@lumina/db": "workspace:*",
+        "@lumina/env": "workspace:*",
+        "@lumina/observability": "workspace:*",
         "api": "workspace:*",
         "bullmq": "^6.0.9",
       },
