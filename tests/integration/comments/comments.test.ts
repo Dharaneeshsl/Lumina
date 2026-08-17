@@ -69,8 +69,8 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     let parentId = rootRes.body.id
 
-    // Create nested replies down to depth 4
-    for (let depth = 1; depth < 5; depth++) {
+    // Create nested replies down to depth 9
+    for (let depth = 1; depth < 10; depth++) {
       const replyRes = await request(app)
         .post(`/api/v1/posts/${post.id}/comments`)
         .set('Cookie', cookieCommenter ?? '')
@@ -81,7 +81,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
       parentId = replyRes.body.id
     }
 
-    // Attempting to exceed max depth 5 (depth 5 index) must fail with 422
+    // Attempting to exceed max depth 10 (depth 10 index) must fail with 422
     const failRes = await request(app)
       .post(`/api/v1/posts/${post.id}/comments`)
       .set('Cookie', cookieCommenter ?? '')

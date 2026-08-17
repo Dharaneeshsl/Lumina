@@ -15,7 +15,7 @@ import {
 import { prisma } from '@lumina/db'
 import { logger } from '@lumina/observability'
 
-export const MAX_COMMENT_DEPTH = 5 // Depths 0, 1, 2, 3, 4 (max depth limit 5)
+export const MAX_COMMENT_DEPTH = 10 // Depths 0 through 9 (max depth limit 10)
 export const MAX_PINNED_COMMENTS_PER_POST = 3
 export const DEFAULT_PAGE_LIMIT = 20
 export const MAX_PAGE_LIMIT = 50
