@@ -34,15 +34,20 @@ paths:
     get:
       summary: Get current user profile
       responses:
-        '200': { description: Profile returned }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '200':
+          description: Profile returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
     patch:
       summary: Update or create current user profile
       requestBody:
         required: true
         content:
           application/json:
-            schema: { type: object, additionalProperties: true }
+            schema:
+              type: object
+              additionalProperties: true
       responses:
         '200': { description: Updated profile returned }
   /api/profile/{username}:
@@ -145,9 +150,150 @@ paths:
             schema:
               type: object
               properties:
-                content: { type: string }
-                visibility: { type: string, enum: [PUBLIC, COLLEGE, FRIENDS, PRIVATE] }
-                media: { type: array, items: { type: string, format: binary } }
+                content:
+                  type: string
+                visibility:
+                  type: string
+                  enum:
+                    - PUBLIC
+                    - COLLEGE
+                    - FRIENDS
+                    - PRIVATE
+                media:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Post created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/saved:
+    get:
+      summary: Get saved posts
+      responses:
+        '200':
+          description: Saved posts returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/{id}/like:
+    post:
+      summary: Like a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post liked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/{id}/likes/count:
+    get:
+      summary: Get post like count
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Like count returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/{id}/comments:
+    get:
+      summary: Get comments for a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comments returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Add a comment to a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Comment created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/{id}/comments/{commentId}/pin:
+    patch:
+      summary: Pin or unpin a comment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment pin status updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/{id}/comments/{commentId}:
+    delete:
+      summary: Delete a comment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Comment deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/posts/{id}/save:
+    post:
+      summary: Save a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '201': { description: Post created }
   /api/posts/{id}/like:
@@ -216,13 +362,37 @@ paths:
       parameters:
         - name: page
           in: query
-          schema: { type: integer, default: 1 }
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
         - name: limit
           in: query
-          schema: { type: integer, default: 20 }
-        - name: query
-          in: query
-          schema: { type: string }
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: Leaderboard page returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/leaderboard/me:
+    get:
+      summary: Get the current user's rank and solved count
+      responses:
+        '200':
+          description: Current user leaderboard stats returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/leaderboard/me/around:
+    get:
+      summary: Get users ranked near the current user
       responses:
         '200': { description: Leaderboard returned }
   /api/leaderboard/me/around:
@@ -256,32 +426,132 @@ paths:
     post:
       summary: Generate Stream Video authentication token
       responses:
-        '200': { description: Token and Stream API Key returned }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-        '429': { description: Rate limit exceeded }
+        '200':
+          description: Video token returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Too many video token requests
+
   /api/v1/video/calls:
     post:
-      summary: Initialize a new 1-on-1 or group video call
+      summary: Create a 1-on-1 or group video call
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              additionalProperties: false
               properties:
                 type:
-                  {
-                    type: string,
-                    enum: [ONE_ON_ONE, GROUP, MENTORSHIP, CLUB_MEETING, FACULTY_SESSION],
-                  }
-                title: { type: string }
-                participantIds: { type: array, items: { type: string } }
+                  type: string
+                  enum:
+                    - ONE_ON_ONE
+                    - GROUP
+                    - MENTORSHIP
+                    - CLUB_MEETING
+                    - FACULTY_SESSION
+                title:
+                  type: string
+                  maxLength: 120
+                participantIds:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: string
       responses:
-        '201': { description: Video call created }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        '201':
+          description: Video call created
+        '400':
+          description: Invalid call payload
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Too many call creation attempts
+
   /api/v1/video/calls/history:
     get:
-      summary: List past video calls for the authenticated user
+      summary: Get the current user's video call history
+      responses:
+        '200':
+          description: Call history returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/video/calls/{callId}:
+    get:
+      summary: Get video call details and participant status
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Call details returned
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/video/calls/{callId}/join:
+    post:
+      summary: Authorize join and return Stream call credentials
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Join authorized
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Caller is not a participant
+
+  /api/v1/video/calls/{callId}/respond:
+    post:
+      summary: Accept or decline a video call invitation
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - response
+              additionalProperties: false
+              properties:
+                response:
+                  type: string
+                  enum:
+                    - ACCEPT
+                    - REJECT
+      responses:
+        '200':
+          description: Invitation response recorded
+        '400':
+          description: Invalid response payload
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/video/calls/{callId}/end:
+    post:
+      summary: End an active video call as the host
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200': { description: Call history array returned }
         '401': { $ref: '#/components/responses/Unauthorized' }
@@ -497,3 +767,10 @@ components:
   responses:
     Unauthorized:
       description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string

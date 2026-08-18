@@ -1,6 +1,6 @@
 import '@lumina/env'
 
-import { redis } from './config/config.redis.ts'
+import { createApp } from './app.ts'
 import { startCronJobs } from './cron/index.ts'
 import chatRoutes from './modules/chat/chat.router.ts'
 import commentsRouter from './modules/comments/comments.router.ts'
@@ -32,23 +32,11 @@ import type { NextFunction, Request, Response } from 'express'
 
 const app = express()
 
+const app = createApp()
 const PORT = process.env.SERVER_PORT
 
-// Global rate limiting to satisfy security requirements & protect DB/API routes
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 300,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: { status: 'error', message: 'Too many requests from this IP, please try again later.' },
-})
-
-const readyLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  limit: 60,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-})
+const runWorkers = process.env.RUN_WORKERS === 'true'
+const runScheduler = process.env.RUN_SCHEDULER === 'true'
 
 app.use(globalLimiter)
 app.use(httpLoggerMiddleware('api'))
@@ -147,7 +135,9 @@ app.use(errorTrackingMiddleware())
 
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`)
-  startCronJobs().catch((error) => {
-    logger.error('[cron] Failed to start cron jobs', { metadata: { error: String(error) } })
-  })
+  if (runScheduler) {
+    startCronJobs().catch((error) => {
+      logger.error('[cron] Failed to start cron jobs', { metadata: { error: String(error) } })
+    })
+  }
 })

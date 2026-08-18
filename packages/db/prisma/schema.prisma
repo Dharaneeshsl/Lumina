@@ -362,6 +362,7 @@ model Comment {
   @@index([postId, createdAt])
   @@index([userId])
   @@index([parentId])
+  @@index([postId, isPinned])
 }
 
 model CommentReaction {

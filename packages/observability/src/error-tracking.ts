@@ -54,6 +54,14 @@ export function errorTrackingMiddleware() {
       return next(err)
     }
 
+    if ('status' in err && typeof (err as { status?: number }).status === 'number') {
+      const status = (err as { status: number; message: string; code?: string }).status
+      return res.status(status).json({
+        message: status >= 500 ? 'An unexpected internal server error occurred.' : err.message,
+        code: (err as { code?: string }).code,
+      })
+    }
+
     res.status(500).json({
       type: 'https://lumina.app/errors/internal-server-error',
       title: 'Internal Server Error',

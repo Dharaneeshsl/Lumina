@@ -1,3 +1,5 @@
+import { parseLimit } from '../../lib/pagination'
+import { sendError } from '../../lib/send-error'
 import * as postsService from './posts.service'
 import {
   MSG_COMMENT_CANNOT_BE_EMPTY,
@@ -95,16 +97,42 @@ export const createComment = async (req: AuthenticatedRequest, res: Response) =>
       success: true,
       data: comment,
     })
-  } catch (error: any) {
-    if (error.message === 'POST_NOT_FOUND') {
-      return res.status(404).json({
-        message: MSG_POST_NOT_FOUND,
-      })
-    }
+  } catch (error) {
+    return sendError(res, error)
+  }
+}
 
-    return res.status(500).json({
-      message: MSG_FAILED_TO_CREATE_COMMENT,
-    })
+export const listComments = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const limit = parseLimit(req.query.limit)
+    const cursor = typeof req.query.cursor === 'string' ? req.query.cursor : undefined
+    const comments = await postsService.listComments(req.params.id as string, limit, cursor)
+    return res.status(200).json({ success: true, data: comments })
+  } catch (error) {
+    return sendError(res, error)
+  }
+}
+
+export const pinComment = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const isPinned = req.body?.isPinned !== false
+    const result = await postsService.pinComment(
+      req.user.id,
+      req.params.commentId as string,
+      isPinned
+    )
+    return res.status(200).json({ success: true, data: result })
+  } catch (error) {
+    return sendError(res, error)
+  }
+}
+
+export const deleteComment = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    await postsService.deleteComment(req.user.id, req.params.commentId as string)
+    return res.status(204).send()
+  } catch (error) {
+    return sendError(res, error)
   }
 }
 

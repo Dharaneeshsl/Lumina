@@ -1,4 +1,4 @@
-import { requireAuth, upload } from '../../middleware'
+import { boundConcurrentUploads, optionalAuth, requireAuth, upload } from '../../middleware'
 import {
   deleteCoverImage,
   deleteProfilePicture,
@@ -19,10 +19,22 @@ profileRouter.get('/test', (req, res) => {
 
 profileRouter.get('/me', requireAuth, getMyProfile)
 profileRouter.patch('/me', requireAuth, updateMyProfile)
-profileRouter.get('/:username', getProfileByUsername)
-profileRouter.patch('/avatar', requireAuth, upload.single('image'), uploadProfilePicture)
+profileRouter.get('/:username', optionalAuth, getProfileByUsername as any)
+profileRouter.patch(
+  '/avatar',
+  requireAuth,
+  boundConcurrentUploads,
+  upload.single('image'),
+  uploadProfilePicture
+)
 profileRouter.delete('/avatar', requireAuth, deleteProfilePicture)
-profileRouter.patch('/cover', requireAuth, upload.single('image'), uploadCoverImage)
+profileRouter.patch(
+  '/cover',
+  requireAuth,
+  boundConcurrentUploads,
+  upload.single('image'),
+  uploadCoverImage
+)
 profileRouter.delete('/cover', requireAuth, deleteCoverImage)
 
 export default profileRouter

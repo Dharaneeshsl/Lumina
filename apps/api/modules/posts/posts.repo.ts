@@ -187,6 +187,51 @@ export const deleteSavedPost = async (
   })
 }
 
+export const listComments = async (postId: string, limit: number, cursor?: string) => {
+  return prisma.comment.findMany({
+    where: {
+      postId,
+      parentId: null,
+    },
+    take: limit,
+    ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+    orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }],
+    include: {
+      user: { select: { id: true, username: true, name: true, image: true } },
+      replies: {
+        take: 20,
+        orderBy: { createdAt: 'asc' },
+        include: {
+          user: { select: { id: true, username: true, name: true, image: true } },
+        },
+      },
+    },
+  })
+}
+
+export const countPinnedComments = async (tx: Prisma.TransactionClient, postId: string) => {
+  return tx.comment.count({
+    where: { postId, isPinned: true },
+  })
+}
+
+export const setCommentPinned = async (
+  tx: Prisma.TransactionClient,
+  commentId: string,
+  isPinned: boolean
+) => {
+  return tx.comment.update({
+    where: { id: commentId },
+    data: { isPinned },
+  })
+}
+
+export const deleteComment = async (commentId: string) => {
+  return prisma.comment.delete({
+    where: { id: commentId },
+  })
+}
+
 export const findSavedPostsByUser = async (tx: Prisma.TransactionClient, userId: string) => {
   return tx.savedPost.findMany({
     where: {
@@ -198,7 +243,9 @@ export const findSavedPostsByUser = async (tx: Prisma.TransactionClient, userId:
     include: {
       post: {
         include: {
-          author: true,
+          author: {
+            select: { id: true, username: true, name: true, image: true },
+          },
         },
       },
     },

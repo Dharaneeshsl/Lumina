@@ -4,6 +4,7 @@
   "packageManager": "bun@1.3.10",
   "scripts": {
     "build": "turbo run build",
+    "check": "bun run format:check && bun run lint && bun run check-types && bun run check-openapi",
     "dev": "turbo run dev --filter=./apps/* --filter=@lumina/db --env-mode=loose --ui=stream --output-logs=full",
     "dev:setup": "bun internal/scripts/ensure-env.ts && bun run --filter @lumina/db generate",
     "dev:api": "turbo run dev --filter=api... --env-mode=loose --ui=stream --output-logs=full",

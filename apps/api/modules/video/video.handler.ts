@@ -1,12 +1,18 @@
+import { sendError } from '../../lib/send-error.ts'
 import * as videoService from './video.service.ts'
 import { logger } from '@lumina/observability'
+import { createCallSchema, respondInviteSchema } from '@lumina/validators'
 
 import type { AuthRequest } from '../../middleware'
-import type { Response } from 'express'
+import type { Request, Response } from 'express'
 
-export const getVideoToken = async (req: AuthRequest, res: Response) => {
+function userIdOf(req: Request) {
+  return (req as AuthRequest).user?.id
+}
+
+export const getVideoToken = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }
@@ -14,129 +20,99 @@ export const getVideoToken = async (req: AuthRequest, res: Response) => {
     return res.status(200).json(tokenData)
   } catch (error) {
     logger.error('Failed to generate video token', { metadata: { error: String(error) } })
-    return res
-      .status(500)
-      .json({ message: error instanceof Error ? error.message : 'SERVER_ERROR' })
+    return sendError(res, error)
   }
 }
 
-export const createCall = async (req: AuthRequest, res: Response) => {
+export const createCall = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }
-    const { type, title, participantIds } = req.body
+    const parsed = createCallSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return res.status(400).json({ message: 'INVALID_CALL_PAYLOAD' })
+    }
     const callData = await videoService.createCall({
       userId,
-      type,
-      title,
-      participantIds,
+      type: parsed.data.type,
+      title: parsed.data.title,
+      participantIds: parsed.data.participantIds,
     })
     return res.status(201).json(callData)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'SERVER_ERROR'
-    if (message === 'CANNOT_CALL_SELF' || message === 'TARGET_USER_NOT_FOUND') {
-      return res.status(400).json({ message })
-    }
-    logger.error('Failed to create video call', { metadata: { error: String(error) } })
-    return res.status(500).json({ message })
+    return sendError(res, error)
   }
 }
 
-export const getCallDetails = async (req: AuthRequest, res: Response) => {
+export const getCallDetails = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }
     const { callId } = req.params
-    const call = await videoService.getCallDetails(callId, userId)
+    const call = await videoService.getCallDetails(callId as string, userId)
     return res.status(200).json(call)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'SERVER_ERROR'
-    if (message === 'CALL_NOT_FOUND') {
-      return res.status(404).json({ message })
-    }
-    if (message === 'CALL_UNAUTHORIZED') {
-      return res.status(403).json({ message })
-    }
-    return res.status(500).json({ message })
+    return sendError(res, error)
   }
 }
 
-export const joinCall = async (req: AuthRequest, res: Response) => {
+export const joinCall = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }
     const { callId } = req.params
-    const joinData = await videoService.joinCall(callId, userId)
+    const joinData = await videoService.joinCall(callId as string, userId)
     return res.status(200).json(joinData)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'SERVER_ERROR'
-    if (message === 'CALL_NOT_FOUND') {
-      return res.status(404).json({ message })
-    }
-    if (message === 'CALL_UNAUTHORIZED') {
-      return res.status(403).json({ message })
-    }
-    if (message === 'CALL_EXPIRED') {
-      return res.status(410).json({ message })
-    }
-    logger.error('Failed to join video call', { metadata: { error: String(error) } })
-    return res.status(500).json({ message })
+    return sendError(res, error)
   }
 }
 
-export const respondToInvite = async (req: AuthRequest, res: Response) => {
+export const respondToInvite = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }
     const { callId } = req.params
-    const { response } = req.body
-    if (response !== 'ACCEPT' && response !== 'REJECT') {
+    const parsed = respondInviteSchema.safeParse(req.body)
+    if (!parsed.success) {
       return res.status(400).json({ message: 'INVALID_RESPONSE' })
     }
-    const result = await videoService.respondToCallInvite(callId, userId, response)
+    const result = await videoService.respondToCallInvite(
+      callId as string,
+      userId,
+      parsed.data.response as 'ACCEPT' | 'REJECT'
+    )
     return res.status(200).json(result)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'SERVER_ERROR'
-    if (message === 'CALL_NOT_FOUND') {
-      return res.status(404).json({ message })
-    }
-    return res.status(500).json({ message })
+    return sendError(res, error)
   }
 }
 
-export const endCall = async (req: AuthRequest, res: Response) => {
+export const endCall = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }
     const { callId } = req.params
-    const result = await videoService.endCall(callId, userId)
+    const result = await videoService.endCall(callId as string, userId)
     return res.status(200).json(result)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'SERVER_ERROR'
-    if (message === 'CALL_NOT_FOUND') {
-      return res.status(404).json({ message })
-    }
-    if (message === 'ONLY_HOST_CAN_END_CALL') {
-      return res.status(403).json({ message })
-    }
-    logger.error('Failed to end video call', { metadata: { error: String(error) } })
-    return res.status(500).json({ message })
+    return sendError(res, error)
   }
 }
 
-export const getCallHistory = async (req: AuthRequest, res: Response) => {
+export const getCallHistory = async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id
+    const userId = userIdOf(req)
     if (!userId) {
       return res.status(401).json({ message: 'UNAUTHORIZED' })
     }

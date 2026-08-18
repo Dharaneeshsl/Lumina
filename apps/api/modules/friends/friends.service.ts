@@ -1,38 +1,46 @@
+import { badRequest, conflict, forbidden, notFound } from '../../lib/http-error'
 import * as repository from './friends.repo'
 
 export async function sendFriendRequest(senderId: string, receiverId: string) {
   if (senderId === receiverId) {
-    throw new Error('You cannot send a friend request to yourself.')
+    throw badRequest('CANNOT_FRIEND_SELF', 'You cannot send a friend request to yourself.')
   }
 
   const receiver = await repository.findUserById(receiverId)
 
   if (!receiver) {
-    throw new Error('User not found.')
+    throw notFound('USER_NOT_FOUND')
   }
 
   const existingRequest = await repository.findFriendRequest(senderId, receiverId)
 
   if (existingRequest) {
-    throw new Error('Friend request already exists.')
+    throw conflict('FRIEND_REQUEST_EXISTS', 'Friend request already exists.')
   }
 
-  return repository.createFriendRequest(senderId, receiverId)
+  try {
+    return await repository.createFriendRequest(senderId, receiverId)
+  } catch (error) {
+    if (typeof error === 'object' && error && 'code' in error && error.code === 'P2002') {
+      throw conflict('FRIEND_REQUEST_EXISTS', 'Friend request already exists.')
+    }
+    throw error
+  }
 }
 
 export async function acceptFriendRequest(userId: string, requestId: string) {
   const request = await repository.findFriendRequestById(requestId)
 
   if (!request) {
-    throw new Error('Friend request not found.')
+    throw notFound('FRIEND_REQUEST_NOT_FOUND')
   }
 
   if (request.receiverId !== userId) {
-    throw new Error('Unauthorized.')
+    throw forbidden('UNAUTHORIZED')
   }
 
   if (request.status !== 'PENDING') {
-    throw new Error('Friend request is no longer pending.')
+    throw conflict('FRIEND_REQUEST_NOT_PENDING', 'Friend request is no longer pending.')
   }
 
   return repository.updateFriendRequestStatus(requestId, 'ACCEPTED')
@@ -42,15 +50,15 @@ export async function rejectFriendRequest(userId: string, requestId: string) {
   const request = await repository.findFriendRequestById(requestId)
 
   if (!request) {
-    throw new Error('Friend request not found.')
+    throw notFound('FRIEND_REQUEST_NOT_FOUND')
   }
 
   if (request.receiverId !== userId) {
-    throw new Error('Unauthorized.')
+    throw forbidden('UNAUTHORIZED')
   }
 
   if (request.status !== 'PENDING') {
-    throw new Error('Friend request is no longer pending.')
+    throw conflict('FRIEND_REQUEST_NOT_PENDING', 'Friend request is no longer pending.')
   }
 
   return repository.updateFriendRequestStatus(requestId, 'REJECTED')
@@ -60,15 +68,15 @@ export async function cancelFriendRequest(userId: string, requestId: string) {
   const request = await repository.findFriendRequestById(requestId)
 
   if (!request) {
-    throw new Error('Friend request not found.')
+    throw notFound('FRIEND_REQUEST_NOT_FOUND')
   }
 
   if (request.senderId !== userId) {
-    throw new Error('Unauthorized.')
+    throw forbidden('UNAUTHORIZED')
   }
 
   if (request.status !== 'PENDING') {
-    throw new Error('Only pending requests can be cancelled.')
+    throw conflict('FRIEND_REQUEST_NOT_PENDING', 'Only pending requests can be cancelled.')
   }
 
   return repository.updateFriendRequestStatus(requestId, 'CANCELLED')
@@ -78,7 +86,7 @@ export async function unfriend(userId: string, friendId: string) {
   const friendship = await repository.findAcceptedFriendship(userId, friendId)
 
   if (!friendship) {
-    throw new Error('Friendship not found.')
+    throw notFound('FRIENDSHIP_NOT_FOUND')
   }
 
   return repository.deleteFriendship(friendship.id)

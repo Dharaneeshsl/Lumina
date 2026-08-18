@@ -1,0 +1,29 @@
+version: '1.0'
+
+# Native mode runs on the CI runner (not the qodana-js image), so Bun is available.
+linter: qodana-js
+withinDocker: false
+
+profile:
+  name: qodana.recommended
+
+include:
+  - name: CheckDependencyLicenses
+  - name: JSUnusedLocalSymbols
+  - name: ESLint
+  - name: TypeScript
+
+exclude:
+  - name: All
+    paths:
+      - '**/node_modules/**'
+      - '**/.turbo/**'
+      - '**/dist/**'
+      - '**/build/**'
+      - '**/.next/**'
+      - '**/coverage/**'
+      - '**/.git/**'
+
+bootstrap: |
+  set -eu
+  bun install --frozen-lockfile || bun install
