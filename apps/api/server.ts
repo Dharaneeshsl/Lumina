@@ -30,8 +30,6 @@ import rateLimit from 'express-rate-limit'
 
 import type { NextFunction, Request, Response } from 'express'
 
-const app = express()
-
 const app = createApp()
 const PORT = process.env.SERVER_PORT
 
