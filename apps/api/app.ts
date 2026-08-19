@@ -1,4 +1,5 @@
 import { redis } from './config/config.redis.ts'
+import commentsRouter from './modules/comments/comments.router.ts'
 import chatRoutes from './modules/chat/chat.router.ts'
 import friendsRouter from './modules/friends/friends.router.ts'
 import leaderboardRouter from './modules/leaderboard/leaderboard.router.ts'
@@ -74,6 +75,7 @@ export function createApp() {
   app.use('/api/leaderboard', leaderboardRouter)
   app.use('/api/leetcode', leetcodeRouter)
   app.use('/api/video', videoRouter)
+  app.use('/api/comments', commentsRouter)
 
   app.get('/ok', (_req: Request, res: Response) => {
     res.status(200).json({ message: MSG_OK })
