@@ -471,17 +471,17 @@ authentication via session cookies issued by Better Auth (`better-auth.session_t
 | `GET`  | `/api/leaderboard/me/around` | Get users ranked near the current user                              |
 | `GET`  | `/api/leaderboard/:userId`   | Get leaderboard stats for a user                                    |
 
-### Video (`/api/v1`)
+### Video (`/api/video`)
 
 | Method | Endpoint                              | Description                                                   |
 | ------ | ------------------------------------- | ------------------------------------------------------------- |
-| `POST` | `/api/v1/video/token`                 | Generate a Stream Video user JWT token (rate-limited)         |
-| `POST` | `/api/v1/video/calls`                 | Create a 1-on-1 or group video call (rate-limited)            |
-| `GET`  | `/api/v1/video/calls/history`         | Get the current user's video call history                     |
-| `GET`  | `/api/v1/video/calls/:callId`         | Get video call details and participant status                 |
-| `POST` | `/api/v1/video/calls/:callId/join`    | Authorize join and return Stream call credentials             |
-| `POST` | `/api/v1/video/calls/:callId/respond` | Accept or decline a video call invitation (`ACCEPT`/`REJECT`) |
-| `POST` | `/api/v1/video/calls/:callId/end`     | End an active video call as the host                          |
+| `POST` | `/api/video/token`                 | Generate a Stream Video user JWT token (rate-limited)         |
+| `POST` | `/api/video/calls`                 | Create a 1-on-1 or group video call (rate-limited)            |
+| `GET`  | `/api/video/calls/history`         | Get the current user's video call history                     |
+| `GET`  | `/api/video/calls/:callId`         | Get video call details and participant status                 |
+| `POST` | `/api/video/calls/:callId/join`    | Authorize join and return Stream call credentials             |
+| `POST` | `/api/video/calls/:callId/respond` | Accept or decline a video call invitation (`ACCEPT`/`REJECT`) |
+| `POST` | `/api/video/calls/:callId/end`     | End an active video call as the host                          |
 
 Video call `type` accepts `ONE_ON_ONE`, `GROUP`, `MENTORSHIP`, `CLUB_MEETING`, or `FACULTY_SESSION`, with up to 50
 `participantIds` and a 120-character `title`.

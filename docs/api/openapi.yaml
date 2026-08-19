@@ -252,14 +252,14 @@ paths:
       responses:
         '200': { description: Sync initiated }
 
-  /api/v1/video/token:
+  /api/video/token:
     post:
       summary: Generate Stream Video authentication token
       responses:
         '200': { description: Token and Stream API Key returned }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '429': { description: Rate limit exceeded }
-  /api/v1/video/calls:
+  /api/video/calls:
     post:
       summary: Initialize a new 1-on-1 or group video call
       requestBody:
@@ -279,13 +279,13 @@ paths:
       responses:
         '201': { description: Video call created }
         '401': { $ref: '#/components/responses/Unauthorized' }
-  /api/v1/video/calls/history:
+  /api/video/calls/history:
     get:
       summary: List past video calls for the authenticated user
       responses:
         '200': { description: Call history array returned }
         '401': { $ref: '#/components/responses/Unauthorized' }
-  /api/v1/video/calls/{callId}:
+  /api/video/calls/{callId}:
     get:
       summary: Get details of a specific video call
       parameters:
@@ -295,7 +295,7 @@ paths:
           schema: { type: string }
       responses:
         '200': { description: Call details returned }
-  /api/v1/video/calls/{callId}/join:
+  /api/video/calls/{callId}/join:
     post:
       summary: Join an active video call
       parameters:
@@ -305,7 +305,7 @@ paths:
           schema: { type: string }
       responses:
         '200': { description: Call joined }
-  /api/v1/video/calls/{callId}/respond:
+  /api/video/calls/{callId}/respond:
     post:
       summary: Accept or decline a video call invite
       parameters:
@@ -324,7 +324,7 @@ paths:
                 accept: { type: boolean }
       responses:
         '200': { description: Response recorded }
-  /api/v1/video/calls/{callId}/end:
+  /api/video/calls/{callId}/end:
     post:
       summary: End an active video call
       parameters:
