@@ -473,8 +473,8 @@ authentication via session cookies issued by Better Auth (`better-auth.session_t
 
 ### Video (`/api/video`)
 
-| Method | Endpoint                              | Description                                                   |
-| ------ | ------------------------------------- | ------------------------------------------------------------- |
+| Method | Endpoint                           | Description                                                   |
+| ------ | ---------------------------------- | ------------------------------------------------------------- |
 | `POST` | `/api/video/token`                 | Generate a Stream Video user JWT token (rate-limited)         |
 | `POST` | `/api/video/calls`                 | Create a 1-on-1 or group video call (rate-limited)            |
 | `GET`  | `/api/video/calls/history`         | Get the current user's video call history                     |

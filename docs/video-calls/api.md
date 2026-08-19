@@ -6,8 +6,8 @@ Specification of all `/api/video/*` endpoints.
 
 ## 1. Endpoints Overview
 
-| Method | Endpoint                              | Description                                   | Auth Required |  Rate Limit  |
-| :----- | :------------------------------------ | :-------------------------------------------- | :-----------: | :----------: |
+| Method | Endpoint                           | Description                                   | Auth Required |  Rate Limit  |
+| :----- | :--------------------------------- | :-------------------------------------------- | :-----------: | :----------: |
 | `POST` | `/api/video/token`                 | Generates a Stream Video user JWT token       |      Yes      | 30 req / 15m |
 | `POST` | `/api/video/calls`                 | Creates a new 1-on-1 or group video call      |      Yes      | 20 req / 15m |
 | `GET`  | `/api/video/calls/history`         | Fetches call history log for the user         |      Yes      |     None     |
