@@ -423,9 +423,8 @@ bun run format:check # Verify formatting without writing changes
 
 ## 📡 API Reference
 
-Existing internal endpoints are mounted below `/api`; new public endpoints use `/api/v1`. Protected routes require
-authentication via session cookies issued by Better Auth (`better-auth.session_token`). The full contract is defined in
-[`openapi.yaml`](openapi.yaml).
+API endpoints are mounted below `/api`. Protected routes require authentication via session cookies issued by Better
+Auth (`better-auth.session_token`). The full contract is defined in [`openapi.yaml`](openapi.yaml).
 
 ### Profile
 

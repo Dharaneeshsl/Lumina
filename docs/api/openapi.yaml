@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Lumina API
   version: 1.0.0
-  description: Existing internal endpoints are mounted below /api. New public endpoints use /api/v1. System endpoints are at root.
+  description: API endpoints are mounted below /api. System endpoints are at root.
 servers:
   - url: http://localhost:3000
 security:
