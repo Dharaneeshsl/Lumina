@@ -1,6 +1,6 @@
 import { redis } from './config/config.redis.ts'
-import commentsRouter from './modules/comments/comments.router.ts'
 import chatRoutes from './modules/chat/chat.router.ts'
+import commentsRouter from './modules/comments/comments.router.ts'
 import friendsRouter from './modules/friends/friends.router.ts'
 import leaderboardRouter from './modules/leaderboard/leaderboard.router.ts'
 import leetcodeRouter from './modules/leetcode/leetcode.router.ts'
