@@ -374,7 +374,7 @@ paths:
       responses:
         '200': { description: Comments tree returned }
         '404': { description: Post not found }
-  /api/comments/comments/{commentId}:
+  /api/comments/{commentId}:
     patch:
       summary: Edit a comment (owner-only, tracked in edit history, concurrent-edit safe)
       parameters:
@@ -405,7 +405,7 @@ paths:
       responses:
         '200': { description: Comment soft deleted }
         '403': { description: Not authorized to delete comment }
-  /api/comments/comments/{commentId}/history:
+  /api/comments/{commentId}/history:
     get:
       summary: Fetch edit history log for a comment
       parameters:
@@ -416,7 +416,7 @@ paths:
       responses:
         '200': { description: Array of edit history entries returned }
         '404': { description: Comment not found }
-  /api/comments/comments/{commentId}/reactions:
+  /api/comments/{commentId}/reactions:
     post:
       summary: Toggle or add emoji reaction to a comment
       parameters:
@@ -454,7 +454,7 @@ paths:
                 emoji: { type: string }
       responses:
         '200': { description: Reaction removed }
-  /api/comments/comments/{commentId}/pin:
+  /api/comments/{commentId}/pin:
     post:
       summary: Pin or unpin a comment (post owner, admin, or moderator, max 3 pins per post)
       parameters:
@@ -466,7 +466,7 @@ paths:
         '200': { description: Pin state toggled }
         '400': { description: Max pinned comments limit exceeded }
         '403': { description: Not authorized to pin comment }
-  /api/comments/comments/{commentId}/report:
+  /api/comments/{commentId}/report:
     post:
       summary: Report a comment for moderation
       parameters:

@@ -42,7 +42,7 @@ commentsRouter.get('/posts/:postId/comments', requireAuth, async (req: Request, 
 
 // Comment-level endpoints
 commentsRouter.patch(
-  '/comments/:commentId',
+  '/:commentId',
   requireAuth,
   commentRateLimiter,
   async (req: Request, res: Response) => {
@@ -50,48 +50,28 @@ commentsRouter.patch(
   }
 )
 
-commentsRouter.get(
-  '/comments/:commentId/history',
-  requireAuth,
-  async (req: Request, res: Response) => {
-    await getCommentEditHistoryHandler(req as AuthenticatedRequest, res)
-  }
-)
+commentsRouter.get('/:commentId/history', requireAuth, async (req: Request, res: Response) => {
+  await getCommentEditHistoryHandler(req as AuthenticatedRequest, res)
+})
 
-commentsRouter.delete('/comments/:commentId', requireAuth, async (req: Request, res: Response) => {
+commentsRouter.delete('/:commentId', requireAuth, async (req: Request, res: Response) => {
   await deleteCommentHandler(req as AuthenticatedRequest, res)
 })
 
-commentsRouter.post(
-  '/comments/:commentId/reactions',
-  requireAuth,
-  async (req: Request, res: Response) => {
-    await toggleReactionHandler(req as AuthenticatedRequest, res)
-  }
-)
+commentsRouter.post('/:commentId/reactions', requireAuth, async (req: Request, res: Response) => {
+  await toggleReactionHandler(req as AuthenticatedRequest, res)
+})
 
-commentsRouter.delete(
-  '/comments/:commentId/reactions',
-  requireAuth,
-  async (req: Request, res: Response) => {
-    await removeReactionHandler(req as AuthenticatedRequest, res)
-  }
-)
+commentsRouter.delete('/:commentId/reactions', requireAuth, async (req: Request, res: Response) => {
+  await removeReactionHandler(req as AuthenticatedRequest, res)
+})
 
-commentsRouter.post(
-  '/comments/:commentId/pin',
-  requireAuth,
-  async (req: Request, res: Response) => {
-    await togglePinHandler(req as AuthenticatedRequest, res)
-  }
-)
+commentsRouter.post('/:commentId/pin', requireAuth, async (req: Request, res: Response) => {
+  await togglePinHandler(req as AuthenticatedRequest, res)
+})
 
-commentsRouter.post(
-  '/comments/:commentId/report',
-  requireAuth,
-  async (req: Request, res: Response) => {
-    await reportCommentHandler(req as AuthenticatedRequest, res)
-  }
-)
+commentsRouter.post('/:commentId/report', requireAuth, async (req: Request, res: Response) => {
+  await reportCommentHandler(req as AuthenticatedRequest, res)
+})
 
 export default commentsRouter

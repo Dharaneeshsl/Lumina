@@ -117,7 +117,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Problem 50: Rejects invalid non-emoji string
     const invalidEmojiRes = await request(app)
-      .post(`/api/comments/comments/${commentId}/reactions`)
+      .post(`/api/comments/${commentId}/reactions`)
       .set('Cookie', cookie ?? '')
       .send({ emoji: 'NOT_AN_EMOJI_LONG_STRING' })
 
@@ -126,7 +126,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-002: Add Valid Emoji Reaction
     const reactRes = await request(app)
-      .post(`/api/comments/comments/${commentId}/reactions`)
+      .post(`/api/comments/${commentId}/reactions`)
       .set('Cookie', cookie ?? '')
       .send({ emoji: '🔥' })
 
@@ -143,7 +143,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-003: Edit Comment (Owner-only)
     const editRes = await request(app)
-      .patch(`/api/comments/comments/${commentId}`)
+      .patch(`/api/comments/${commentId}`)
       .set('Cookie', cookie ?? '')
       .send({ content: 'Edited comment content' })
 
@@ -153,7 +153,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Fetch Edit History Log (Auditing)
     const historyRes = await request(app)
-      .get(`/api/comments/comments/${commentId}/history`)
+      .get(`/api/comments/${commentId}/history`)
       .set('Cookie', cookie ?? '')
 
     expect(historyRes.status).toBe(200)
@@ -208,7 +208,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-006: Pin Comment (Post owner)
     const pinRes = await request(app)
-      .post(`/api/comments/comments/${commentId}/pin`)
+      .post(`/api/comments/${commentId}/pin`)
       .set('Cookie', cookieAuthor ?? '')
 
     expect(pinRes.status).toBe(200)
@@ -216,7 +216,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-007: Report Comment
     const reportRes = await request(app)
-      .post(`/api/comments/comments/${commentId}/report`)
+      .post(`/api/comments/${commentId}/report`)
       .set('Cookie', cookieReporter ?? '')
       .send({ reason: 'Spam', details: 'Contains unwanted advertising' })
 
@@ -224,7 +224,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Duplicate Report Rejection
     const dupReportRes = await request(app)
-      .post(`/api/comments/comments/${commentId}/report`)
+      .post(`/api/comments/${commentId}/report`)
       .set('Cookie', cookieReporter ?? '')
       .send({ reason: 'Spam' })
 
@@ -232,7 +232,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-004: Soft Delete Comment (Tombstone)
     const deleteRes = await request(app)
-      .delete(`/api/comments/comments/${commentId}`)
+      .delete(`/api/comments/${commentId}`)
       .set('Cookie', cookieAuthor ?? '')
 
     expect(deleteRes.status).toBe(200)
@@ -241,7 +241,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Concurrent / Duplicate delete attempt returns 400 COMMENT_ALREADY_DELETED
     const dupDeleteRes = await request(app)
-      .delete(`/api/comments/comments/${commentId}`)
+      .delete(`/api/comments/${commentId}`)
       .set('Cookie', cookieAuthor ?? '')
 
     expect(dupDeleteRes.status).toBe(400)
@@ -249,7 +249,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Attempting to react to a deleted comment fails with 400
     const deletedReactRes = await request(app)
-      .post(`/api/comments/comments/${commentId}/reactions`)
+      .post(`/api/comments/${commentId}/reactions`)
       .set('Cookie', cookieAuthor ?? '')
       .send({ emoji: '🔥' })
 
