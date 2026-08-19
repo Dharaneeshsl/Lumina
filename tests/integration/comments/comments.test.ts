@@ -60,7 +60,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Create root comment (depth 0)
     const rootRes = await request(app)
-      .post(`/api/v1/posts/${post.id}/comments`)
+      .post(`/api/comments/posts/${post.id}/comments`)
       .set('Cookie', cookieCommenter ?? '')
       .send({ content: 'Root comment Level 0' })
 
@@ -72,7 +72,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     // Create nested replies down to depth 9
     for (let depth = 1; depth < 10; depth++) {
       const replyRes = await request(app)
-        .post(`/api/v1/posts/${post.id}/comments`)
+        .post(`/api/comments/posts/${post.id}/comments`)
         .set('Cookie', cookieCommenter ?? '')
         .send({ content: `Reply Level ${depth}`, parentId })
 
@@ -83,7 +83,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Attempting to exceed max depth 10 (depth 10 index) must fail with 422
     const failRes = await request(app)
-      .post(`/api/v1/posts/${post.id}/comments`)
+      .post(`/api/comments/posts/${post.id}/comments`)
       .set('Cookie', cookieCommenter ?? '')
       .send({ content: 'Exceeding max depth level', parentId })
 
@@ -92,7 +92,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Verify pagination limit clamping (Problem 48)
     const listRes = await request(app)
-      .get(`/api/v1/posts/${post.id}/comments?limit=9999`)
+      .get(`/api/comments/posts/${post.id}/comments?limit=9999`)
       .set('Cookie', cookieCommenter ?? '')
 
     expect(listRes.status).toBe(200)
@@ -109,7 +109,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
     })
 
     const commentRes = await request(app)
-      .post(`/api/v1/posts/${post.id}/comments`)
+      .post(`/api/comments/posts/${post.id}/comments`)
       .set('Cookie', cookie ?? '')
       .send({ content: 'Initial comment content' })
 
@@ -117,7 +117,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Problem 50: Rejects invalid non-emoji string
     const invalidEmojiRes = await request(app)
-      .post(`/api/v1/comments/${commentId}/reactions`)
+      .post(`/api/comments/comments/${commentId}/reactions`)
       .set('Cookie', cookie ?? '')
       .send({ emoji: 'NOT_AN_EMOJI_LONG_STRING' })
 
@@ -126,7 +126,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-002: Add Valid Emoji Reaction
     const reactRes = await request(app)
-      .post(`/api/v1/comments/${commentId}/reactions`)
+      .post(`/api/comments/comments/${commentId}/reactions`)
       .set('Cookie', cookie ?? '')
       .send({ emoji: '🔥' })
 
@@ -135,7 +135,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Fetch comments and verify reactionCounts formatting
     const listRes = await request(app)
-      .get(`/api/v1/posts/${post.id}/comments`)
+      .get(`/api/comments/posts/${post.id}/comments`)
       .set('Cookie', cookie ?? '')
 
     expect(listRes.status).toBe(200)
@@ -143,7 +143,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-003: Edit Comment (Owner-only)
     const editRes = await request(app)
-      .patch(`/api/v1/comments/${commentId}`)
+      .patch(`/api/comments/comments/${commentId}`)
       .set('Cookie', cookie ?? '')
       .send({ content: 'Edited comment content' })
 
@@ -153,7 +153,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Fetch Edit History Log (Auditing)
     const historyRes = await request(app)
-      .get(`/api/v1/comments/${commentId}/history`)
+      .get(`/api/comments/comments/${commentId}/history`)
       .set('Cookie', cookie ?? '')
 
     expect(historyRes.status).toBe(200)
@@ -189,7 +189,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-005: Create comment with @alex99 mention
     const commentRes = await request(app)
-      .post(`/api/v1/posts/${post.id}/comments`)
+      .post(`/api/comments/posts/${post.id}/comments`)
       .set('Cookie', cookieAuthor ?? '')
       .send({ content: 'Hey @alex99 check this out!' })
 
@@ -208,7 +208,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-006: Pin Comment (Post owner)
     const pinRes = await request(app)
-      .post(`/api/v1/comments/${commentId}/pin`)
+      .post(`/api/comments/comments/${commentId}/pin`)
       .set('Cookie', cookieAuthor ?? '')
 
     expect(pinRes.status).toBe(200)
@@ -216,7 +216,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-007: Report Comment
     const reportRes = await request(app)
-      .post(`/api/v1/comments/${commentId}/report`)
+      .post(`/api/comments/comments/${commentId}/report`)
       .set('Cookie', cookieReporter ?? '')
       .send({ reason: 'Spam', details: 'Contains unwanted advertising' })
 
@@ -224,7 +224,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Duplicate Report Rejection
     const dupReportRes = await request(app)
-      .post(`/api/v1/comments/${commentId}/report`)
+      .post(`/api/comments/comments/${commentId}/report`)
       .set('Cookie', cookieReporter ?? '')
       .send({ reason: 'Spam' })
 
@@ -232,7 +232,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // FR-06-004: Soft Delete Comment (Tombstone)
     const deleteRes = await request(app)
-      .delete(`/api/v1/comments/${commentId}`)
+      .delete(`/api/comments/comments/${commentId}`)
       .set('Cookie', cookieAuthor ?? '')
 
     expect(deleteRes.status).toBe(200)
@@ -241,7 +241,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Concurrent / Duplicate delete attempt returns 400 COMMENT_ALREADY_DELETED
     const dupDeleteRes = await request(app)
-      .delete(`/api/v1/comments/${commentId}`)
+      .delete(`/api/comments/comments/${commentId}`)
       .set('Cookie', cookieAuthor ?? '')
 
     expect(dupDeleteRes.status).toBe(400)
@@ -249,7 +249,7 @@ describe('Comments Domain (FR-06-001 through FR-06-007)', () => {
 
     // Attempting to react to a deleted comment fails with 400
     const deletedReactRes = await request(app)
-      .post(`/api/v1/comments/${commentId}/reactions`)
+      .post(`/api/comments/comments/${commentId}/reactions`)
       .set('Cookie', cookieAuthor ?? '')
       .send({ emoji: '🔥' })
 

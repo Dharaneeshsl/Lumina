@@ -100,12 +100,12 @@ function checkOpenApi() {
     '/api/v1/video/calls/{callId}/join',
     '/api/v1/video/calls/{callId}/respond',
     '/api/v1/video/calls/{callId}/end',
-    '/api/v1/posts/{postId}/comments',
-    '/api/v1/comments/{commentId}',
-    '/api/v1/comments/{commentId}/history',
-    '/api/v1/comments/{commentId}/reactions',
-    '/api/v1/comments/{commentId}/pin',
-    '/api/v1/comments/{commentId}/report',
+    '/api/comments/posts/{postId}/comments',
+    '/api/comments/comments/{commentId}',
+    '/api/comments/comments/{commentId}/history',
+    '/api/comments/comments/{commentId}/reactions',
+    '/api/comments/comments/{commentId}/pin',
+    '/api/comments/comments/{commentId}/report',
   ]
 
   const declaredPaths = Object.keys(doc.paths)

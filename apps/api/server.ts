@@ -68,7 +68,7 @@ app.use('/api/chat', chatRoutes)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/leetcode', leetcodeRouter)
 app.use('/api/v1/video', videoRouter)
-app.use('/api/v1', commentsRouter)
+app.use('/api/comments', commentsRouter)
 
 app.get('/ok', (req: Request, res: Response) => {
   res.status(200).json({ message: MSG_OK })
