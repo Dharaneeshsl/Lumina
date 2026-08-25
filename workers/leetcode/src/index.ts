@@ -6,6 +6,7 @@ import {
 } from '../../../apps/api/config/leetcode.queue'
 import { syncProfileById } from '../../../apps/api/src/api/service'
 import { runLeetcodeDailySync } from '../../../apps/api/cron/leetcode.daily-sync.job'
+import { syncProfileById } from '../../../apps/api/src/api/service'
 import {
   backgroundJobFailuresTotal,
   generateCorrelationContext,
