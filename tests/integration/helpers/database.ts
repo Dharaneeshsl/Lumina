@@ -1,9 +1,9 @@
 import { execFileSync } from 'node:child_process'
-import { URL } from 'node:url'
+import { fileURLToPath, URL } from 'node:url'
 import { prisma } from '@db/client'
 
-const schemaPath = new URL('../../../packages/db/prisma/schema.prisma', import.meta.url).pathname
-const databasePackagePath = new URL('../../../packages/db/', import.meta.url).pathname
+const schemaPath = fileURLToPath(new URL('../../../packages/db/prisma/schema.prisma', import.meta.url))
+const databasePackagePath = fileURLToPath(new URL('../../../packages/db/', import.meta.url))
 
 let testDatabaseUrl = process.env.TEST_DATABASE_URL
 
@@ -30,16 +30,22 @@ export function getTestDatabaseUrl() {
 }
 
 export async function prepareTestDatabase() {
+  if (process.env.SKIP_DB_PUSH === 'true') {
+    return
+  }
   const databaseUrl = getTestDatabaseUrl()
 
-  execFileSync('bun', ['x', 'prisma', 'db', 'push', '--schema', schemaPath, '--skip-generate'], {
+  const shellCmd = process.platform === 'win32' ? (process.env.ComSpec || 'C:\\Windows\\System32\\cmd.exe') : true
+
+  execFileSync('bun', ['x', 'prisma', 'db', 'push', '--schema', schemaPath, '--accept-data-loss'], {
     cwd: databasePackagePath,
     env: {
       ...process.env,
       DATABASE_URL: databaseUrl,
+      PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'go on and complete alll',
     },
     stdio: 'pipe',
-    shell: true,
+    shell: shellCmd,
   })
 }
 

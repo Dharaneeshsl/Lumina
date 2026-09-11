@@ -19,10 +19,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 describe('Clubs | Feature Endpoints', () => {
   const app = createTestApp()
 
-  beforeAll(() => {
+  beforeAll(async () => {
     setTestDatabaseUrl()
-    return prepareTestDatabase().then(() => connectTestDatabase())
-  })
+    await prepareTestDatabase()
+    await connectTestDatabase()
+  }, 30000)
 
   afterAll(async () => {
     await disconnectTestDatabase()
