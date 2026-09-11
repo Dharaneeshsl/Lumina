@@ -8,12 +8,12 @@ import { sendError } from '../../lib/send-error'
 import * as api from './service'
 import {
   MSG_COMMENT_CANNOT_BE_EMPTY,
-  MSG_FAILED_TO_DELETE_COVER_IMAGE,
-  MSG_FAILED_TO_DELETE_PROFILE_PICTURE,
-  MSG_FAILED_TO_FETCH_LEADERBOARD,
   MSG_FAILED_TO_CREATE_COMMENT,
   MSG_FAILED_TO_DELETE_COVER_IMAGE,
+  MSG_FAILED_TO_DELETE_COVER_IMAGE,
   MSG_FAILED_TO_DELETE_PROFILE_PICTURE,
+  MSG_FAILED_TO_DELETE_PROFILE_PICTURE,
+  MSG_FAILED_TO_FETCH_LEADERBOARD,
   MSG_FAILED_TO_FETCH_LEADERBOARD,
   MSG_FAILED_TO_FETCH_PROFILE,
   MSG_FAILED_TO_GET_LIKE_COUNT,
@@ -1103,3 +1103,71 @@ export const getGroupChat = (req: Request, res: Response) =>
 
 export const listAuditEvents = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listAuditEvents(userId(req), groupId(req)))
+
+// --- Club HTTP handlers ---
+export const createClub = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createClub(userId(req), req.body))
+
+export const listClubs = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listClubs(userId(req), req.query))
+
+export const getClubById = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getClubById(userId(req), String(req.params.clubId)))
+
+export const updateClub = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.updateClub(userId(req), String(req.params.clubId), req.body))
+
+export const archiveClub = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.archiveClub(userId(req), String(req.params.clubId)))
+
+export const joinClub = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.joinClub(userId(req), String(req.params.clubId)))
+
+export const leaveClub = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.leaveClub(userId(req), String(req.params.clubId)))
+
+export const listClubMembers = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listClubMembers(userId(req), String(req.params.clubId)))
+
+export const inviteClubMember = (req: Request, res: Response) =>
+  respond(req, res, 201, () =>
+    api.inviteClubMember(userId(req), String(req.params.clubId), req.body)
+  )
+
+export const respondClubInvitation = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.respondClubInvitation(userId(req), String(req.params.invitationId), req.body)
+  )
+
+export const updateClubMemberRole = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateClubMemberRole(
+      userId(req),
+      String(req.params.clubId),
+      String(req.params.userId),
+      req.body
+    )
+  )
+
+export const removeClubMember = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.removeClubMember(userId(req), String(req.params.clubId), String(req.params.userId))
+  )
+
+export const uploadClubLogo = async (req: Request, res: Response) => {
+  try {
+    const result = await api.uploadClubLogo(userId(req), String(req.params.clubId), req.file!)
+    return res.status(200).json(result)
+  } catch (err) {
+    return sendError(res, err)
+  }
+}
+
+export const uploadClubBanner = async (req: Request, res: Response) => {
+  try {
+    const result = await api.uploadClubBanner(userId(req), String(req.params.clubId), req.file!)
+    return res.status(200).json(result)
+  } catch (err) {
+    return sendError(res, err)
+  }
+}

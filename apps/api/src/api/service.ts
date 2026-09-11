@@ -31,9 +31,13 @@ import {
   uploadFile,
 } from '@lumina/storage'
 import {
+  clubInvitationSchema,
+  clubQuerySchema,
+  createClubSchema,
   createStudyGroupSchema,
   profileUpdateSchema,
   protectedProfileFields,
+  respondClubInvitationSchema,
   studyGroupDiscussionSchema,
   studyGroupFileRegisterSchema,
   studyGroupFileUploadUrlSchema,
@@ -42,6 +46,8 @@ import {
   studyGroupReplySchema,
   studyGroupSearchQuerySchema,
   studyGroupTimetableSchema,
+  updateClubMemberRoleSchema,
+  updateClubSchema,
   updateStudyGroupDiscussionSchema,
   updateStudyGroupMemberSchema,
   updateStudyGroupNoteSchema,
@@ -54,6 +60,8 @@ import { imageSize } from 'image-size'
 import type { AuthenticatedRequest, CreatePostInput, LeaderboardEntry } from '@lumina/contracts'
 import type { Profile, User, Visibility } from '@lumina/db'
 import type {
+  ClubInvitationStatus,
+  ClubRole,
   ParticipantCallStatus,
   VideoCallRole,
   VideoCallStatus,
@@ -4601,3 +4609,643 @@ export const canChangeMemberRole = StudyGroupPermissions.canChangeMemberRole
 export const canRemoveMember = StudyGroupPermissions.canRemoveMember
 export const readIdempotentResponse = StudyGroupIdempotency.readIdempotentResponse
 export const writeIdempotentResponse = StudyGroupIdempotency.writeIdempotentResponse
+
+// --- club/club.repo.ts ---
+namespace ClubRepo {
+  const userSelect = {
+    id: true,
+    username: true,
+    name: true,
+    image: true,
+  } as const
+
+  const clubInclude = {
+    college: { select: { id: true, name: true, code: true } },
+    members: {
+      include: { user: { select: userSelect } },
+      orderBy: { joinedAt: 'asc' as const },
+    },
+    _count: { select: { members: true, events: true } },
+  } as const
+
+  export async function createClub(
+    ownerId: string,
+    collegeId: string,
+    data: {
+      name: string
+      description?: string | null
+      category?: string | null
+    }
+  ) {
+    return prisma.club.create({
+      data: {
+        name: data.name,
+        description: data.description ?? null,
+        category: data.category ?? null,
+        collegeId,
+        members: {
+          create: {
+            userId: ownerId,
+            role: 'PRESIDENT',
+          },
+        },
+      },
+      include: clubInclude,
+    })
+  }
+
+  export async function listClubs(
+    collegeId: string,
+    options?: {
+      q?: string
+      category?: string
+      status?: string
+      limit?: number
+      cursor?: string
+    }
+  ) {
+    const limit = options?.limit ?? 20
+    return prisma.club.findMany({
+      where: {
+        collegeId,
+        ...(options?.status ? { status: options.status } : {}),
+        ...(options?.category
+          ? { category: { equals: options.category, mode: 'insensitive' } }
+          : {}),
+        ...(options?.q
+          ? {
+              OR: [
+                { name: { contains: options.q, mode: 'insensitive' } },
+                { description: { contains: options.q, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
+      take: limit + 1,
+      ...(options?.cursor ? { skip: 1, cursor: { id: options.cursor } } : {}),
+      include: {
+        _count: { select: { members: true, events: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  export async function findClubById(clubId: string) {
+    return prisma.club.findUnique({
+      where: { id: clubId },
+      include: clubInclude,
+    })
+  }
+
+  export async function updateClub(
+    clubId: string,
+    data: {
+      name?: string
+      description?: string | null
+      category?: string | null
+      status?: string
+    }
+  ) {
+    return prisma.club.update({
+      where: { id: clubId },
+      data,
+      include: clubInclude,
+    })
+  }
+
+  export async function deleteClub(clubId: string) {
+    return prisma.club.delete({ where: { id: clubId } })
+  }
+
+  export async function findMembership(clubId: string, userId: string) {
+    return prisma.clubMember.findUnique({
+      where: { clubId_userId: { clubId, userId } },
+      include: { user: { select: userSelect } },
+    })
+  }
+
+  export async function listMembers(clubId: string) {
+    return prisma.clubMember.findMany({
+      where: { clubId },
+      include: { user: { select: userSelect } },
+      orderBy: { joinedAt: 'asc' },
+    })
+  }
+
+  export async function addMember(clubId: string, userId: string, role: ClubRole = 'MEMBER') {
+    return prisma.clubMember.upsert({
+      where: { clubId_userId: { clubId, userId } },
+      create: { clubId, userId, role },
+      update: { role },
+      include: { user: { select: userSelect } },
+    })
+  }
+
+  export async function updateMemberRole(clubId: string, userId: string, role: ClubRole) {
+    return prisma.clubMember.update({
+      where: { clubId_userId: { clubId, userId } },
+      data: { role },
+      include: { user: { select: userSelect } },
+    })
+  }
+
+  export async function removeMember(clubId: string, userId: string) {
+    return prisma.clubMember.delete({
+      where: { clubId_userId: { clubId, userId } },
+    })
+  }
+
+  export async function createInvitation(data: {
+    clubId: string
+    inviterId: string
+    inviteeId: string
+    role?: ClubRole
+    message?: string
+  }) {
+    return prisma.clubInvitation.upsert({
+      where: { clubId_inviteeId: { clubId: data.clubId, inviteeId: data.inviteeId } },
+      create: {
+        clubId: data.clubId,
+        inviterId: data.inviterId,
+        inviteeId: data.inviteeId,
+        role: data.role ?? 'MEMBER',
+        message: data.message ?? null,
+        status: 'PENDING',
+      },
+      update: {
+        inviterId: data.inviterId,
+        role: data.role ?? 'MEMBER',
+        message: data.message ?? null,
+        status: 'PENDING',
+      },
+      include: {
+        inviter: { select: userSelect },
+        invitee: { select: userSelect },
+      },
+    })
+  }
+
+  export async function findInvitation(clubId: string, inviteeId: string) {
+    return prisma.clubInvitation.findUnique({
+      where: { clubId_inviteeId: { clubId, inviteeId } },
+      include: {
+        inviter: { select: userSelect },
+        invitee: { select: userSelect },
+      },
+    })
+  }
+
+  export async function findInvitationById(invitationId: string) {
+    return prisma.clubInvitation.findUnique({
+      where: { id: invitationId },
+      include: {
+        club: true,
+        inviter: { select: userSelect },
+        invitee: { select: userSelect },
+      },
+    })
+  }
+
+  export async function updateInvitationStatus(invitationId: string, status: ClubInvitationStatus) {
+    return prisma.clubInvitation.update({
+      where: { id: invitationId },
+      data: { status },
+    })
+  }
+
+  export async function updateLogo(clubId: string, logo: string) {
+    return prisma.club.update({
+      where: { id: clubId },
+      data: { logo },
+      include: clubInclude,
+    })
+  }
+
+  export async function updateBanner(clubId: string, banner: string) {
+    return prisma.club.update({
+      where: { id: clubId },
+      data: { banner },
+      include: clubInclude,
+    })
+  }
+}
+
+// --- club/club.permissions.ts ---
+namespace ClubPermissions {
+  export const CLUB_ROLE_RANK: Record<ClubRole, number> = {
+    MEMBER: 1,
+    CORE_MEMBER: 2,
+    SECRETARY: 3,
+    PRESIDENT: 4,
+    FACULTY: 4,
+  }
+
+  export function hasMinRole(role: ClubRole, minimum: ClubRole): boolean {
+    return CLUB_ROLE_RANK[role] >= CLUB_ROLE_RANK[minimum]
+  }
+
+  export function canManageClub(role: ClubRole): boolean {
+    return hasMinRole(role, 'SECRETARY')
+  }
+
+  export function canChangeMemberRole(actorRole: ClubRole, targetRole: ClubRole): boolean {
+    if (actorRole === 'PRESIDENT' || actorRole === 'FACULTY') {
+      return true
+    }
+    if (actorRole === 'SECRETARY') {
+      return targetRole === 'MEMBER' || targetRole === 'CORE_MEMBER'
+    }
+    return false
+  }
+
+  export function canRemoveMember(
+    actorRole: ClubRole,
+    targetRole: ClubRole,
+    isSelf: boolean
+  ): boolean {
+    if (isSelf) return true
+    return canChangeMemberRole(actorRole, targetRole)
+  }
+}
+
+// --- club/club.service.ts ---
+namespace ClubService {
+  async function getAuthenticatedUser(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, collegeId: true, role: true },
+    })
+    if (!user) {
+      throw notFound('USER_NOT_FOUND')
+    }
+    return user
+  }
+
+  export async function listClubs(userId: string, query: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    if (!user.collegeId) {
+      throw badRequest('COLLEGE_REQUIRED', 'User must be associated with a college')
+    }
+
+    const parsed = clubQuerySchema.safeParse(query ?? {})
+    if (!parsed.success) {
+      throw badRequest('INVALID_QUERY', parsed.error.issues[0]?.message)
+    }
+
+    const limit = parsed.data.limit ? Math.min(Math.max(1, Number(parsed.data.limit)), 50) : 20
+    const rawClubs = await ClubRepo.listClubs(user.collegeId, {
+      q: parsed.data.q,
+      category: parsed.data.category,
+      status: parsed.data.status,
+      limit,
+      cursor: parsed.data.cursor,
+    })
+
+    let nextCursor: string | undefined = undefined
+    if (rawClubs.length > limit) {
+      const nextItem = rawClubs.pop()
+      nextCursor = nextItem?.id
+    }
+
+    return { clubs: rawClubs, nextCursor }
+  }
+
+  export async function getClubById(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    return {
+      ...club,
+      currentUserMembership: membership ?? null,
+    }
+  }
+
+  export async function createClub(userId: string, body: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    if (!user.collegeId) {
+      throw badRequest('COLLEGE_REQUIRED', 'User must belong to a college to create a club')
+    }
+
+    const parsed = createClubSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_CLUB_PAYLOAD', parsed.error.issues[0]?.message)
+    }
+
+    return ClubRepo.createClub(userId, user.collegeId, parsed.data)
+  }
+
+  export async function updateClub(userId: string, clubId: string, body: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('NOT_CLUB_ADMIN')
+    }
+
+    const parsed = updateClubSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_CLUB_PAYLOAD', parsed.error.issues[0]?.message)
+    }
+
+    return ClubRepo.updateClub(clubId, parsed.data)
+  }
+
+  export async function archiveClub(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || (membership.role !== 'PRESIDENT' && membership.role !== 'FACULTY')) {
+      throw forbidden('ONLY_PRESIDENT_OR_FACULTY_CAN_ARCHIVE')
+    }
+
+    return ClubRepo.updateClub(clubId, { status: 'ARCHIVED' })
+  }
+
+  export async function joinClub(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+    if (club.status === 'ARCHIVED') {
+      throw badRequest('CLUB_ARCHIVED', 'Cannot join an archived club')
+    }
+
+    const existing = await ClubRepo.findMembership(clubId, userId)
+    if (existing) {
+      throw conflict('ALREADY_MEMBER', 'You are already a member of this club')
+    }
+
+    return ClubRepo.addMember(clubId, userId, 'MEMBER')
+  }
+
+  export async function leaveClub(userId: string, clubId: string) {
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership) {
+      throw badRequest('NOT_A_MEMBER', 'You are not a member of this club')
+    }
+
+    if (membership.role === 'PRESIDENT') {
+      const members = await ClubRepo.listMembers(clubId)
+      const otherPresidents = members.filter(
+        (m) => m.userId !== userId && (m.role === 'PRESIDENT' || m.role === 'FACULTY')
+      )
+      if (otherPresidents.length === 0 && members.length > 1) {
+        throw badRequest('PRESIDENT_MUST_TRANSFER', 'Assign another President before leaving')
+      }
+    }
+
+    return ClubRepo.removeMember(clubId, userId)
+  }
+
+  export async function listMembers(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    return ClubRepo.listMembers(clubId)
+  }
+
+  export async function inviteMember(userId: string, clubId: string, body: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('NOT_CLUB_ADMIN')
+    }
+
+    const parsed = clubInvitationSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_INVITATION_PAYLOAD', parsed.error.issues[0]?.message)
+    }
+
+    const targetUser = await prisma.user.findUnique({ where: { id: parsed.data.userId } })
+    if (!targetUser) {
+      throw notFound('TARGET_USER_NOT_FOUND')
+    }
+    if (targetUser.collegeId !== user.collegeId) {
+      throw forbidden('TARGET_USER_COLLEGE_MISMATCH')
+    }
+
+    const targetMembership = await ClubRepo.findMembership(clubId, targetUser.id)
+    if (targetMembership) {
+      throw conflict('USER_ALREADY_MEMBER')
+    }
+
+    return ClubRepo.createInvitation({
+      clubId,
+      inviterId: userId,
+      inviteeId: targetUser.id,
+      role: parsed.data.role,
+      message: parsed.data.message,
+    })
+  }
+
+  export async function respondInvitation(userId: string, invitationId: string, body: unknown) {
+    const invitation = await ClubRepo.findInvitationById(invitationId)
+    if (!invitation) {
+      throw notFound('INVITATION_NOT_FOUND')
+    }
+
+    if (invitation.inviteeId !== userId) {
+      throw forbidden('NOT_YOUR_INVITATION')
+    }
+
+    if (invitation.status !== 'PENDING') {
+      throw conflict('INVITATION_NOT_PENDING')
+    }
+
+    const parsed = respondClubInvitationSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_RESPONSE', parsed.error.issues[0]?.message)
+    }
+
+    if (parsed.data.response === 'REJECT') {
+      return ClubRepo.updateInvitationStatus(invitationId, 'REJECTED')
+    }
+
+    await ClubRepo.updateInvitationStatus(invitationId, 'ACCEPTED')
+    return ClubRepo.addMember(invitation.clubId, userId, invitation.role)
+  }
+
+  export async function updateMemberRole(
+    userId: string,
+    clubId: string,
+    targetUserId: string,
+    body: unknown
+  ) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const actorMembership = await ClubRepo.findMembership(clubId, userId)
+    if (!actorMembership) {
+      throw forbidden('NOT_CLUB_MEMBER')
+    }
+
+    const targetMembership = await ClubRepo.findMembership(clubId, targetUserId)
+    if (!targetMembership) {
+      throw notFound('MEMBER_NOT_FOUND')
+    }
+
+    const parsed = updateClubMemberRoleSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_ROLE_PAYLOAD', parsed.error.issues[0]?.message)
+    }
+
+    if (!ClubPermissions.canChangeMemberRole(actorMembership.role, targetMembership.role)) {
+      throw forbidden('CANNOT_CHANGE_MEMBER_ROLE')
+    }
+
+    return ClubRepo.updateMemberRole(clubId, targetUserId, parsed.data.role)
+  }
+
+  export async function removeMember(userId: string, clubId: string, targetUserId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const actorMembership = await ClubRepo.findMembership(clubId, userId)
+    if (!actorMembership) {
+      throw forbidden('NOT_CLUB_MEMBER')
+    }
+
+    const targetMembership = await ClubRepo.findMembership(clubId, targetUserId)
+    if (!targetMembership) {
+      throw notFound('MEMBER_NOT_FOUND')
+    }
+
+    const isSelf = userId === targetUserId
+    if (!ClubPermissions.canRemoveMember(actorMembership.role, targetMembership.role, isSelf)) {
+      throw forbidden('CANNOT_REMOVE_MEMBER')
+    }
+
+    return ClubRepo.removeMember(clubId, targetUserId)
+  }
+
+  export async function uploadClubLogo(userId: string, clubId: string, file: Express.Multer.File) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('NOT_CLUB_ADMIN')
+    }
+
+    if (!file || !file.buffer) {
+      throw badRequest('FILE_REQUIRED', 'Logo image file is required.')
+    }
+    assertDeclaredMimeMatchesContent(file.mimetype, file.buffer)
+
+    const uploaded = await uploadFile({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      folder: `clubs/${clubId}/logo`,
+    })
+
+    return ClubRepo.updateLogo(clubId, uploaded.url)
+  }
+
+  export async function uploadClubBanner(
+    userId: string,
+    clubId: string,
+    file: Express.Multer.File
+  ) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('NOT_CLUB_ADMIN')
+    }
+
+    if (!file || !file.buffer) {
+      throw badRequest('FILE_REQUIRED', 'Banner image file is required.')
+    }
+    assertDeclaredMimeMatchesContent(file.mimetype, file.buffer)
+
+    const uploaded = await uploadFile({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      folder: `clubs/${clubId}/banner`,
+    })
+
+    return ClubRepo.updateBanner(clubId, uploaded.url)
+  }
+}
+
+export const createClub = ClubService.createClub
+export const listClubs = ClubService.listClubs
+export const getClubById = ClubService.getClubById
+export const updateClub = ClubService.updateClub
+export const archiveClub = ClubService.archiveClub
+export const joinClub = ClubService.joinClub
+export const leaveClub = ClubService.leaveClub
+export const listClubMembers = ClubService.listMembers
+export const inviteClubMember = ClubService.inviteMember
+export const respondClubInvitation = ClubService.respondInvitation
+export const updateClubMemberRole = ClubService.updateMemberRole
+export const removeClubMember = ClubService.removeMember
+export const uploadClubLogo = ClubService.uploadClubLogo
+export const uploadClubBanner = ClubService.uploadClubBanner
+
+export const hasMinClubRole = ClubPermissions.hasMinRole
+export const canManageClub = ClubPermissions.canManageClub
+export const canChangeClubMemberRole = ClubPermissions.canChangeMemberRole
+export const canRemoveClubMember = ClubPermissions.canRemoveMember
