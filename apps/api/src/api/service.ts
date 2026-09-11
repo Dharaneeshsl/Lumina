@@ -33,6 +33,8 @@ import {
 import {
   clubInvitationSchema,
   clubQuerySchema,
+  createClubEventSchema,
+  createClubPostSchema,
   createClubSchema,
   createStudyGroupSchema,
   profileUpdateSchema,
@@ -4828,6 +4830,126 @@ namespace ClubRepo {
       include: clubInclude,
     })
   }
+
+  export async function createEvent(data: {
+    clubId: string
+    organizerId: string
+    title: string
+    description?: string | null
+    startTime: Date
+    endTime: Date
+    venue?: string | null
+  }) {
+    return prisma.event.create({
+      data: {
+        clubId: data.clubId,
+        organizerId: data.organizerId,
+        title: data.title,
+        description: data.description ?? null,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        venue: data.venue ?? null,
+      },
+      include: {
+        organizer: { select: userSelect },
+      },
+    })
+  }
+
+  export async function listEvents(clubId: string) {
+    return prisma.event.findMany({
+      where: { clubId },
+      include: {
+        organizer: { select: userSelect },
+        _count: { select: { attendees: true } },
+      },
+      orderBy: { startTime: 'asc' },
+    })
+  }
+
+  export async function deleteEvent(eventId: string) {
+    return prisma.event.delete({ where: { id: eventId } })
+  }
+
+  export async function createPost(data: {
+    clubId: string
+    authorId: string
+    content: string
+    isAnnouncement?: boolean
+  }) {
+    return prisma.post.create({
+      data: {
+        clubId: data.clubId,
+        authorId: data.authorId,
+        content: data.content,
+        isAnnouncement: data.isAnnouncement ?? false,
+      },
+      include: {
+        author: { select: userSelect },
+        media: true,
+      },
+    })
+  }
+
+  export async function listPosts(clubId: string) {
+    return prisma.post.findMany({
+      where: { clubId, deletedAt: null },
+      include: {
+        author: { select: userSelect },
+        media: true,
+        _count: { select: { comments: true, likes: true } },
+      },
+      orderBy: [{ isAnnouncement: 'desc' }, { createdAt: 'desc' }],
+    })
+  }
+
+  export async function sendMemberNotifications(
+    clubId: string,
+    excludeUserId: string,
+    title: string,
+    body: string,
+    type: string
+  ) {
+    const members = await prisma.clubMember.findMany({
+      where: { clubId, userId: { not: excludeUserId } },
+      select: { userId: true },
+    })
+    if (members.length === 0) return
+    await prisma.notification.createMany({
+      data: members.map((m) => ({
+        userId: m.userId,
+        title,
+        body,
+        type,
+      })),
+    })
+  }
+
+  export async function getAnalytics(clubId: string) {
+    const [club, members, eventsCount, postsCount] = await Promise.all([
+      prisma.club.findUnique({ where: { id: clubId }, select: { createdAt: true } }),
+      prisma.clubMember.findMany({
+        where: { clubId },
+        select: { role: true, joinedAt: true },
+      }),
+      prisma.event.count({ where: { clubId } }),
+      prisma.post.count({ where: { clubId } }),
+    ])
+
+    const totalMembers = members.length
+    const roleDistribution: Record<string, number> = {}
+    for (const m of members) {
+      roleDistribution[m.role] = (roleDistribution[m.role] || 0) + 1
+    }
+
+    return {
+      totalMembers,
+      eventsCount,
+      postsCount,
+      roleDistribution,
+      createdAt: club?.createdAt ?? new Date(),
+    }
+  }
 }
 
 // --- club/club.permissions.ts ---
@@ -5228,6 +5350,153 @@ namespace ClubService {
 
     return ClubRepo.updateBanner(clubId, uploaded.url)
   }
+
+  export async function createClubEvent(userId: string, clubId: string, body: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('NOT_CLUB_ADMIN')
+    }
+
+    const parsed = createClubEventSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_EVENT_PAYLOAD', parsed.error.issues[0]?.message)
+    }
+
+    const event = await ClubRepo.createEvent({
+      clubId,
+      organizerId: userId,
+      title: parsed.data.title,
+      description: parsed.data.description,
+      startTime: new Date(parsed.data.startTime),
+      endTime: new Date(parsed.data.endTime),
+      venue: parsed.data.venue,
+    })
+
+    await ClubRepo.sendMemberNotifications(
+      clubId,
+      userId,
+      `New Event: ${event.title}`,
+      `${club.name} has scheduled a new event on ${new Date(event.startTime).toLocaleDateString()}`,
+      'CLUB_EVENT'
+    )
+
+    return event
+  }
+
+  export async function listClubEvents(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    return ClubRepo.listEvents(clubId)
+  }
+
+  export async function deleteClubEvent(userId: string, clubId: string, eventId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership || !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('NOT_CLUB_ADMIN')
+    }
+
+    return ClubRepo.deleteEvent(eventId)
+  }
+
+  export async function createClubPost(userId: string, clubId: string, body: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership) {
+      throw forbidden('NOT_CLUB_MEMBER')
+    }
+
+    const parsed = createClubPostSchema.safeParse(body)
+    if (!parsed.success) {
+      throw badRequest('INVALID_POST_PAYLOAD', parsed.error.issues[0]?.message)
+    }
+
+    if (parsed.data.isAnnouncement && !ClubPermissions.canManageClub(membership.role)) {
+      throw forbidden('ONLY_ADMINS_CAN_ANNOUNCE')
+    }
+
+    const post = await ClubRepo.createPost({
+      clubId,
+      authorId: userId,
+      content: parsed.data.content,
+      isAnnouncement: parsed.data.isAnnouncement,
+    })
+
+    if (post.isAnnouncement) {
+      await ClubRepo.sendMemberNotifications(
+        clubId,
+        userId,
+        `Announcement in ${club.name}`,
+        post.content.slice(0, 100),
+        'CLUB_ANNOUNCEMENT'
+      )
+    }
+
+    return post
+  }
+
+  export async function listClubPosts(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    return ClubRepo.listPosts(clubId)
+  }
+
+  export async function getClubAnalytics(userId: string, clubId: string) {
+    const user = await getAuthenticatedUser(userId)
+    const club = await ClubRepo.findClubById(clubId)
+    if (!club) {
+      throw notFound('CLUB_NOT_FOUND')
+    }
+    if (club.collegeId !== user.collegeId) {
+      throw forbidden('COLLEGE_MISMATCH')
+    }
+
+    const membership = await ClubRepo.findMembership(clubId, userId)
+    if (!membership) {
+      throw forbidden('NOT_CLUB_MEMBER')
+    }
+
+    return ClubRepo.getAnalytics(clubId)
+  }
 }
 
 export const createClub = ClubService.createClub
@@ -5244,6 +5513,12 @@ export const updateClubMemberRole = ClubService.updateMemberRole
 export const removeClubMember = ClubService.removeMember
 export const uploadClubLogo = ClubService.uploadClubLogo
 export const uploadClubBanner = ClubService.uploadClubBanner
+export const createClubEvent = ClubService.createClubEvent
+export const listClubEvents = ClubService.listClubEvents
+export const deleteClubEvent = ClubService.deleteClubEvent
+export const createClubPost = ClubService.createClubPost
+export const listClubPosts = ClubService.listClubPosts
+export const getClubAnalytics = ClubService.getClubAnalytics
 
 export const hasMinClubRole = ClubPermissions.hasMinRole
 export const canManageClub = ClubPermissions.canManageClub

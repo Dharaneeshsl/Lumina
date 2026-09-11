@@ -142,6 +142,10 @@ function checkOpenApi() {
     '/api/v1/clubs/{clubId}/members/{userId}',
     '/api/v1/clubs/{clubId}/logo',
     '/api/v1/clubs/{clubId}/banner',
+    '/api/v1/clubs/{clubId}/events',
+    '/api/v1/clubs/{clubId}/events/{eventId}',
+    '/api/v1/clubs/{clubId}/posts',
+    '/api/v1/clubs/{clubId}/analytics',
   ]
 
   const declaredPaths = Object.keys(doc.paths)

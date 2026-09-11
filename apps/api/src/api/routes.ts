@@ -308,6 +308,12 @@ clubRouter.post(
   upload.single('image'),
   controller.uploadClubBanner
 )
+clubRouter.post('/:clubId/events', requireAuth, controller.createClubEvent)
+clubRouter.get('/:clubId/events', requireAuth, controller.listClubEvents)
+clubRouter.delete('/:clubId/events/:eventId', requireAuth, controller.deleteClubEvent)
+clubRouter.post('/:clubId/posts', requireAuth, controller.createClubPost)
+clubRouter.get('/:clubId/posts', requireAuth, controller.listClubPosts)
+clubRouter.get('/:clubId/analytics', requireAuth, controller.getClubAnalytics)
 
 apiRouter.use('/v1/clubs', clubRouter)
 apiRouter.use('/clubs', clubRouter)

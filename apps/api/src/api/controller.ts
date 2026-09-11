@@ -1171,3 +1171,23 @@ export const uploadClubBanner = async (req: Request, res: Response) => {
     return sendError(res, err)
   }
 }
+
+export const createClubEvent = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createClubEvent(userId(req), String(req.params.clubId), req.body))
+
+export const listClubEvents = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listClubEvents(userId(req), String(req.params.clubId)))
+
+export const deleteClubEvent = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.deleteClubEvent(userId(req), String(req.params.clubId), String(req.params.eventId))
+  )
+
+export const createClubPost = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createClubPost(userId(req), String(req.params.clubId), req.body))
+
+export const listClubPosts = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listClubPosts(userId(req), String(req.params.clubId)))
+
+export const getClubAnalytics = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getClubAnalytics(userId(req), String(req.params.clubId)))

@@ -1176,6 +1176,72 @@ paths:
       responses:
         '200': { description: Banner uploaded }
 
+  /api/v1/clubs/{clubId}/events:
+    parameters:
+      - name: clubId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: List events for a club
+      responses:
+        '200': { description: Events listed }
+    post:
+      summary: Create an event for a club
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Event created }
+
+  /api/v1/clubs/{clubId}/events/{eventId}:
+    parameters:
+      - name: clubId
+        in: path
+        required: true
+        schema: { type: string }
+      - name: eventId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      summary: Delete a club event
+      responses:
+        '200': { description: Event deleted }
+
+  /api/v1/clubs/{clubId}/posts:
+    parameters:
+      - name: clubId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: List posts and announcements for a club
+      responses:
+        '200': { description: Posts listed }
+    post:
+      summary: Create a post or announcement for a club
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Post created }
+
+  /api/v1/clubs/{clubId}/analytics:
+    get:
+      summary: Get analytics and engagement metrics for a club
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Club analytics returned }
+
 components:
   securitySchemes:
     sessionCookie:
