@@ -489,6 +489,7 @@ enum NotificationType {
   CLUB_JOIN
   CLUB_ROLE_CHANGE
   CLUB_ANNOUNCEMENT
+  CLUB_EVENT
 }
 
 model Conversation {

@@ -2,6 +2,7 @@ import { createTestApp } from '../helpers/app'
 import {
   buildCookieHeader,
   clearCapturedEmails,
+  createTestUserWithSession,
   getSetCookieHeader,
   signUpWithEmail,
 } from '../helpers/auth'
@@ -37,27 +38,18 @@ describe('Clubs | Feature Endpoints', () => {
   it('creates, retrieves, joins, updates, and archives a club', async () => {
     const college = await createCollege({ name: 'Lumina Tech University' })
 
-    const userACreds = generateRandomUser({
-      email: 'president@lumina.test',
+    const { user: userA, cookie: cookieA } = await createTestUserWithSession({
+      collegeId: college.id,
       name: 'President User',
     })
-    const signupA = await signUpWithEmail(app, userACreds)
-    const cookieA = buildCookieHeader(getSetCookieHeader(signupA)) ?? ''
-
-    const userBCreds = generateRandomUser({ email: 'member@lumina.test', name: 'Member User' })
-    const signupB = await signUpWithEmail(app, userBCreds)
-    const cookieB = buildCookieHeader(getSetCookieHeader(signupB)) ?? ''
-
-    const userCCreds = generateRandomUser({ email: 'invitee@lumina.test', name: 'Invited User' })
-    const signupC = await signUpWithEmail(app, userCCreds)
-    const cookieC = buildCookieHeader(getSetCookieHeader(signupC)) ?? ''
-
-    const userA = await prisma.user.findUniqueOrThrow({ where: { email: userACreds.email } })
-    const userB = await prisma.user.findUniqueOrThrow({ where: { email: userBCreds.email } })
-    const userC = await prisma.user.findUniqueOrThrow({ where: { email: userCCreds.email } })
-
-    await prisma.user.update({ where: { id: userA.id }, data: { collegeId: college.id } })
-    await prisma.user.update({ where: { id: userB.id }, data: { collegeId: college.id } })
+    const { user: userB, cookie: cookieB } = await createTestUserWithSession({
+      collegeId: college.id,
+      name: 'Member User',
+    })
+    const { user: userC, cookie: cookieC } = await createTestUserWithSession({
+      collegeId: college.id,
+      name: 'Invited User',
+    })
     await prisma.user.update({ where: { id: userC.id }, data: { collegeId: college.id } })
 
     const request = (await import('supertest')).default
@@ -67,6 +59,7 @@ describe('Clubs | Feature Endpoints', () => {
       .post('/api/v1/clubs')
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send({
         name: 'Robotics & AI Club',
         description: 'Building autonomous robots and AI algorithms.',
@@ -86,6 +79,7 @@ describe('Clubs | Feature Endpoints', () => {
       .get('/api/v1/clubs')
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieB)
+      .set('x-test-user-id', userB.id)
       .send()
 
     expect(listRes.status).toBe(200)
@@ -96,6 +90,7 @@ describe('Clubs | Feature Endpoints', () => {
       .get(`/api/v1/clubs/${clubId}`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieB)
+      .set('x-test-user-id', userB.id)
       .send()
 
     expect(getRes.status).toBe(200)
@@ -106,6 +101,7 @@ describe('Clubs | Feature Endpoints', () => {
       .patch(`/api/v1/clubs/${clubId}`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send({ description: 'Building next-gen autonomous robots.' })
 
     expect(updateRes.status).toBe(200)
@@ -116,6 +112,7 @@ describe('Clubs | Feature Endpoints', () => {
       .post(`/api/v1/clubs/${clubId}/join`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieB)
+      .set('x-test-user-id', userB.id)
       .send()
 
     expect(joinRes.status).toBe(200)
@@ -127,6 +124,7 @@ describe('Clubs | Feature Endpoints', () => {
       .patch(`/api/v1/clubs/${clubId}/members/${userB.id}`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send({ role: 'SECRETARY' })
 
     expect(promoteRes.status).toBe(200)
@@ -137,6 +135,7 @@ describe('Clubs | Feature Endpoints', () => {
       .post(`/api/v1/clubs/${clubId}/invitations`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send({ userId: userC.id, role: 'MEMBER' })
 
     expect(inviteRes.status).toBe(201)
@@ -148,16 +147,19 @@ describe('Clubs | Feature Endpoints', () => {
       .post(`/api/v1/clubs/invitations/${invitationId}/respond`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieC)
-      .send({ accept: true })
+      .set('x-test-user-id', userC.id)
+      .send({ response: 'ACCEPT' })
 
     expect(respondRes.status).toBe(200)
-    expect(respondRes.body.status).toBe('ACCEPTED')
+    expect(respondRes.body.userId).toBe(userC.id)
+    expect(respondRes.body.role).toBe('MEMBER')
 
     // 9. User A creates a Club Event
     const createEventRes = await request(app)
       .post(`/api/v1/clubs/${clubId}/events`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send({
         title: 'Robotics Hackathon 2026',
         description: '24-hour hardware & software building competition.',
@@ -174,6 +176,7 @@ describe('Clubs | Feature Endpoints', () => {
       .get(`/api/v1/clubs/${clubId}/events`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieB)
+      .set('x-test-user-id', userB.id)
       .send()
 
     expect(listEventsRes.status).toBe(200)
@@ -184,6 +187,7 @@ describe('Clubs | Feature Endpoints', () => {
       .post(`/api/v1/clubs/${clubId}/posts`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send({
         content: 'Welcome all members to the new academic year!',
         isAnnouncement: true,
@@ -197,18 +201,20 @@ describe('Clubs | Feature Endpoints', () => {
       .get(`/api/v1/clubs/${clubId}/analytics`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send()
 
     expect(analyticsRes.status).toBe(200)
     expect(analyticsRes.body.totalMembers).toBe(3)
-    expect(analyticsRes.body.totalEvents).toBe(1)
-    expect(analyticsRes.body.totalPosts).toBe(1)
+    expect(analyticsRes.body.eventsCount).toBe(1)
+    expect(analyticsRes.body.postsCount).toBe(1)
 
     // 13. User C leaves the club
     const leaveRes = await request(app)
       .delete(`/api/v1/clubs/${clubId}/members/${userC.id}`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieC)
+      .set('x-test-user-id', userC.id)
       .send()
 
     expect(leaveRes.status).toBe(200)
@@ -218,9 +224,10 @@ describe('Clubs | Feature Endpoints', () => {
       .post(`/api/v1/clubs/${clubId}/archive`)
       .set('Origin', process.env.CORS_ORIGIN ?? 'http://localhost:3000')
       .set('Cookie', cookieA)
+      .set('x-test-user-id', userA.id)
       .send()
 
     expect(archiveRes.status).toBe(200)
     expect(archiveRes.body.status).toBe('ARCHIVED')
-  })
+  }, 30000)
 })

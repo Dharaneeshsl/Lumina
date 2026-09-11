@@ -4622,7 +4622,7 @@ namespace ClubRepo {
   } as const
 
   const clubInclude = {
-    college: { select: { id: true, name: true, code: true } },
+    college: { select: { id: true, name: true, shortName: true } },
     members: {
       include: { user: { select: userSelect } },
       orderBy: { joinedAt: 'asc' as const },
