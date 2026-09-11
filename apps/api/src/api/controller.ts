@@ -1173,7 +1173,9 @@ export const uploadClubBanner = async (req: Request, res: Response) => {
 }
 
 export const createClubEvent = (req: Request, res: Response) =>
-  respond(req, res, 201, () => api.createClubEvent(userId(req), String(req.params.clubId), req.body))
+  respond(req, res, 201, () =>
+    api.createClubEvent(userId(req), String(req.params.clubId), req.body)
+  )
 
 export const listClubEvents = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listClubEvents(userId(req), String(req.params.clubId)))

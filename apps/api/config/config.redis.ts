@@ -45,9 +45,15 @@ function createMemoryRedis() {
     },
     pipeline() {
       return {
-        zadd() { return this },
-        zrem() { return this },
-        async exec() { return [] },
+        zadd() {
+          return this
+        },
+        zrem() {
+          return this
+        },
+        async exec() {
+          return []
+        },
       }
     },
     on() {

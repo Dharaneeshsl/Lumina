@@ -74,6 +74,8 @@ describe('storage package env and bucket resolution', () => {
     const commandCall = (s3.send as any).mock.calls[0][0]
     expect(commandCall.input.Bucket).toBe('test-bucket')
     expect(commandCall.input.Key).toMatch(/^uploads\/.*\.bin$/)
-    expect(result.url).toMatch(/^https:\/\/test-bucket\.s3\.eu-north-1\.amazonaws\.com\/uploads\/.*\.bin$/)
+    expect(result.url).toMatch(
+      /^https:\/\/test-bucket\.s3\.eu-north-1\.amazonaws\.com\/uploads\/.*\.bin$/
+    )
   })
 })

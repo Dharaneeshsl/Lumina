@@ -6,7 +6,9 @@ import { useState } from 'react'
 import './App.css'
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'signup' | 'login' | 'clubs'>('landing')
+  const [currentView, setCurrentView] = useState<'landing' | 'signup' | 'login' | 'clubs'>(
+    'landing'
+  )
 
   if (currentView === 'clubs') {
     return <ClubsView onBackToHome={() => setCurrentView('landing')} />

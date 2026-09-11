@@ -61,7 +61,8 @@ const SAMPLE_CLUBS: ClubData[] = [
     category: 'TECHNOLOGY',
     status: 'ACTIVE',
     logo: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=150&auto=format&fit=crop&q=80',
-    banner: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80',
+    banner:
+      'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80',
     collegeId: 'college-1',
     members: [
       {
@@ -88,7 +89,8 @@ const SAMPLE_CLUBS: ClubData[] = [
     category: 'CODING',
     status: 'ACTIVE',
     logo: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=150&auto=format&fit=crop&q=80',
-    banner: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
+    banner:
+      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80',
     collegeId: 'college-1',
     members: [
       {
@@ -108,7 +110,8 @@ const SAMPLE_CLUBS: ClubData[] = [
     category: 'STARTUP',
     status: 'ACTIVE',
     logo: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=150&auto=format&fit=crop&q=80',
-    banner: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80',
+    banner:
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80',
     collegeId: 'college-1',
     members: [
       {
@@ -139,14 +142,16 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
   const [posts, setPosts] = useState<ClubPost[]>([
     {
       id: 'p1',
-      content: '📢 Official Announcement: Registrations for the 24-Hour Hackathon are now OPEN! Check out the Events tab to RSVP.',
+      content:
+        '📢 Official Announcement: Registrations for the 24-Hour Hackathon are now OPEN! Check out the Events tab to RSVP.',
       isAnnouncement: true,
       createdAt: '2 hours ago',
       author: { name: 'Aarav Kumar (President)', username: 'aarav_k', image: null },
     },
     {
       id: 'p2',
-      content: 'Great workshop session today on ROS2 and LIDAR integration! Special thanks to everyone who attended.',
+      content:
+        'Great workshop session today on ROS2 and LIDAR integration! Special thanks to everyone who attended.',
       isAnnouncement: false,
       createdAt: '1 day ago',
       author: { name: 'Riya Sharma', username: 'riya_s', image: null },
@@ -189,7 +194,8 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
       description: newClubDescription.trim() || null,
       status: 'ACTIVE',
       logo: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&auto=format&fit=crop&q=80',
-      banner: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
+      banner:
+        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
       collegeId: 'college-1',
       members: [
         {
@@ -232,11 +238,17 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
       {/* Top Navbar */}
       <header style={styles.header}>
         <div style={styles.headerInner}>
-          <button onClick={onBackToHome} style={styles.backBtn}>
+          <button
+            onClick={onBackToHome}
+            style={styles.backBtn}
+          >
             ← Home
           </button>
           <h1 style={styles.title}>Campus Clubs & Societies</h1>
-          <button onClick={() => setShowCreateModal(true)} style={styles.primaryBtn}>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            style={styles.primaryBtn}
+          >
             + Create Club
           </button>
         </div>
@@ -314,7 +326,10 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
         ) : (
           /* Selected Club Profile Detail View */
           <div>
-            <button onClick={() => setActiveClub(null)} style={styles.backLink}>
+            <button
+              onClick={() => setActiveClub(null)}
+              style={styles.backLink}
+            >
               ← Back to All Clubs
             </button>
 
@@ -369,7 +384,10 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
               {activeTab === 'feed' && (
                 <div>
                   {/* Post Composer */}
-                  <form onSubmit={handleCreatePost} style={styles.composerForm}>
+                  <form
+                    onSubmit={handleCreatePost}
+                    style={styles.composerForm}
+                  >
                     <textarea
                       placeholder="Share an update or announcement with the club..."
                       value={newPostContent}
@@ -386,7 +404,10 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
                         />
                         📢 Mark as Official Announcement
                       </label>
-                      <button type="submit" style={styles.primaryBtn}>
+                      <button
+                        type="submit"
+                        style={styles.primaryBtn}
+                      >
                         Publish Post
                       </button>
                     </div>
@@ -429,7 +450,10 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
                   </div>
                   <div style={styles.eventsGrid}>
                     {events.map((evt) => (
-                      <div key={evt.id} style={styles.eventCard}>
+                      <div
+                        key={evt.id}
+                        style={styles.eventCard}
+                      >
                         <div style={styles.eventDateBadge}>OCT 15</div>
                         <h3>{evt.title}</h3>
                         <p>{evt.description}</p>
@@ -453,7 +477,10 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
                   </div>
                   <div style={styles.membersTable}>
                     {activeClub.members.map((m) => (
-                      <div key={m.id} style={styles.memberRow}>
+                      <div
+                        key={m.id}
+                        style={styles.memberRow}
+                      >
                         <div style={styles.memberInfo}>
                           <div style={styles.avatarCircle}>
                             {m.user.name.slice(0, 2).toUpperCase()}
@@ -546,7 +573,10 @@ export default function ClubsView({ onBackToHome }: { onBackToHome: () => void }
                 >
                   Cancel
                 </button>
-                <button type="submit" style={styles.primaryBtn}>
+                <button
+                  type="submit"
+                  style={styles.primaryBtn}
+                >
                   Create Club
                 </button>
               </div>

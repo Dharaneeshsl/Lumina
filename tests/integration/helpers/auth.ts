@@ -124,9 +124,14 @@ export function buildCookieHeader(setCookieHeaders: string[], cookieName = SESSI
   return value ? `${cookieName}=${value}` : null
 }
 
-export async function createTestUserWithSession(overrides: { collegeId?: string; name?: string; email?: string } = {}) {
+export async function createTestUserWithSession(
+  overrides: { collegeId?: string; name?: string; email?: string } = {}
+) {
   const { prisma } = await import('@db/client')
-  const token = createHash('sha256').update(`${Math.random()}:${Date.now()}`).digest('hex').slice(0, 8)
+  const token = createHash('sha256')
+    .update(`${Math.random()}:${Date.now()}`)
+    .digest('hex')
+    .slice(0, 8)
   const user = await prisma.user.create({
     data: {
       email: overrides.email ?? `user.${token}@lumina.test`,
