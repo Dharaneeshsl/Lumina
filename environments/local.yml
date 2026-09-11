@@ -76,7 +76,7 @@ variables:
     secret: false
     type: text
   - name: noteVersion
-    value: "1"
+    value: '1'
     enabled: true
     secret: false
     type: text
@@ -86,12 +86,12 @@ variables:
     secret: false
     type: text
   - name: groupVersion
-    value: "1"
+    value: '1'
     enabled: true
     secret: false
     type: text
   - name: timetableVersion
-    value: "1"
+    value: '1'
     enabled: true
     secret: false
     type: text
