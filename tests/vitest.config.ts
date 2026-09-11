@@ -21,6 +21,10 @@ export default {
       },
       { find: '@db', replacement: path.resolve(repoRoot, 'packages/db/src') },
       { find: '@test', replacement: path.resolve(repoRoot, 'tests') },
+      {
+        find: '@stream-io/node-sdk',
+        replacement: path.resolve(repoRoot, 'apps/api/node_modules/@stream-io/node-sdk'),
+      },
     ],
   },
   test: {
