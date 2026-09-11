@@ -90,6 +90,8 @@ model User {
   studyGroupMembers             StudyGroupMember[]
   studyGroupInvitesSent         StudyGroupInvitation[]      @relation("StudyGroupInviter")
   studyGroupInvitesReceived     StudyGroupInvitation[]      @relation("StudyGroupInvitee")
+  clubInvitesSent               ClubInvitation[]            @relation("ClubInviter")
+  clubInvitesReceived           ClubInvitation[]            @relation("ClubInvitee")
   studyGroupDiscussions         StudyGroupDiscussion[]
   studyGroupDiscussionReplies   StudyGroupDiscussionReply[]
   studyGroupNotes               StudyGroupNote[]
@@ -595,16 +597,20 @@ model CommunityPost {
 }
 
 model Club {
-  id          String       @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
   description String?
+  category    String?
+  status      String           @default("ACTIVE")
   logo        String?
   banner      String?
   collegeId   String
-  createdAt   DateTime     @default(now())
-  college     College      @relation(fields: [collegeId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
+  college     College          @relation(fields: [collegeId], references: [id])
   members     ClubMember[]
   events      Event[]
+  invitations ClubInvitation[]
 }
 
 model ClubMember {
@@ -613,10 +619,27 @@ model ClubMember {
   userId   String
   role     ClubRole
   joinedAt DateTime @default(now())
-  club     Club     @relation(fields: [clubId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
+  club     Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([clubId, userId])
+}
+
+model ClubInvitation {
+  id        String               @id @default(cuid())
+  clubId    String
+  inviterId String
+  inviteeId String
+  role      ClubRole             @default(MEMBER)
+  message   String?
+  status    ClubInvitationStatus @default(PENDING)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  club      Club                 @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  inviter   User                 @relation("ClubInviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee   User                 @relation("ClubInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, inviteeId])
 }
 
 model Event {
@@ -1023,6 +1046,13 @@ enum ClubRole {
   SECRETARY
   PRESIDENT
   FACULTY
+}
+
+enum ClubInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
 }
 
 enum EventType {

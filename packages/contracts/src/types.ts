@@ -56,9 +56,19 @@ export interface LeaderboardEntry {
   name: string | null
   profilePicture: string | null
   leetcodeUsername: string | null
-  easySolved: number | null
-  mediumSolved: number | null
-  hardSolved: number | null
   leetcodeRating: number | null
   lastSyncedAt: Date | null
+}
+
+export interface CreateClubInput {
+  name: string
+  description?: string | null
+  category?: string | null
+}
+
+export interface UpdateClubInput {
+  name?: string
+  description?: string | null
+  category?: string | null
+  status?: 'ACTIVE' | 'ARCHIVED'
 }
