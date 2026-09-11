@@ -131,6 +131,17 @@ function checkOpenApi() {
     '/api/v1/study-groups/{groupId}/search',
     '/api/v1/study-groups/{groupId}/chat',
     '/api/v1/study-groups/{groupId}/audit',
+    '/api/v1/clubs',
+    '/api/v1/clubs/{clubId}',
+    '/api/v1/clubs/{clubId}/archive',
+    '/api/v1/clubs/{clubId}/join',
+    '/api/v1/clubs/{clubId}/leave',
+    '/api/v1/clubs/{clubId}/members',
+    '/api/v1/clubs/{clubId}/invitations',
+    '/api/v1/clubs/invitations/{invitationId}/respond',
+    '/api/v1/clubs/{clubId}/members/{userId}',
+    '/api/v1/clubs/{clubId}/logo',
+    '/api/v1/clubs/{clubId}/banner',
   ]
 
   const declaredPaths = Object.keys(doc.paths)

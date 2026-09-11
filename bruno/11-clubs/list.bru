@@ -1,0 +1,17 @@
+meta {
+  name: List clubs
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/clubs
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}

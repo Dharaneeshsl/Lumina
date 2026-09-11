@@ -1013,6 +1013,169 @@ paths:
         '200': { description: Audit events returned }
         '403': { description: Insufficient permissions }
 
+  /api/v1/clubs:
+    get:
+      summary: List clubs in current user's college
+      responses:
+        '200': { description: Clubs returned }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      summary: Create a new club in user's college
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Club created }
+        '400': { description: Invalid payload }
+
+  /api/v1/clubs/{clubId}:
+    parameters:
+      - name: clubId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get details of a club
+      responses:
+        '200': { description: Club details returned }
+        '404': { description: Club not found }
+    patch:
+      summary: Update club details
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Club updated }
+        '403': { description: Not authorized }
+
+  /api/v1/clubs/{clubId}/archive:
+    post:
+      summary: Archive a club
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Club archived }
+        '403': { description: Only President or Faculty can archive }
+
+  /api/v1/clubs/{clubId}/join:
+    post:
+      summary: Join a club as a member
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Joined club }
+        '409': { description: Already a member }
+
+  /api/v1/clubs/{clubId}/leave:
+    post:
+      summary: Leave a club
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Left club }
+
+  /api/v1/clubs/{clubId}/members:
+    get:
+      summary: List members of a club
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Members list returned }
+
+  /api/v1/clubs/{clubId}/invitations:
+    post:
+      summary: Invite a user to join a club
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Invitation sent }
+
+  /api/v1/clubs/invitations/{invitationId}/respond:
+    post:
+      summary: Respond to a club invitation
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Invitation response recorded }
+
+  /api/v1/clubs/{clubId}/members/{userId}:
+    parameters:
+      - name: clubId
+        in: path
+        required: true
+        schema: { type: string }
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      summary: Update member role in club
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Member role updated }
+    delete:
+      summary: Remove member from club
+      responses:
+        '200': { description: Member removed }
+
+  /api/v1/clubs/{clubId}/logo:
+    post:
+      summary: Upload club logo image
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Logo uploaded }
+
+  /api/v1/clubs/{clubId}/banner:
+    post:
+      summary: Upload club banner image
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Banner uploaded }
+
 components:
   securitySchemes:
     sessionCookie:
