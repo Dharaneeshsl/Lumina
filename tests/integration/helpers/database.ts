@@ -8,15 +8,10 @@ const databasePackagePath = fileURLToPath(new URL('../../../packages/db/', impor
 let testDatabaseUrl = process.env.TEST_DATABASE_URL
 
 export function setTestDatabaseUrl() {
+  testDatabaseUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL
   if (!testDatabaseUrl) {
     throw new Error('TEST_DATABASE_URL is required to run integration tests.')
   }
-
-  const workerId = process.env.VITEST_WORKER_ID ?? '1'
-  const schema = `lumina_test_${workerId}`
-  const url = new URL(testDatabaseUrl)
-  url.searchParams.set('schema', schema)
-  testDatabaseUrl = url.toString()
   process.env.DATABASE_URL = testDatabaseUrl
   return testDatabaseUrl
 }
