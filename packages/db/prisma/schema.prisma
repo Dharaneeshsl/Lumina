@@ -283,27 +283,31 @@ model FriendRequest {
 }
 
 model Post {
-  id           String      @id @default(cuid())
-  authorId     String
-  content      String?
-  visibility   Visibility  @default(PUBLIC)
-  anonymous    Boolean     @default(false)
-  location     String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  deletedAt    DateTime?
-  author       User        @relation(fields: [authorId], references: [id])
-  media        PostMedia[]
-  comments     Comment[]
-  likes        Like[]
-  likeCount    Int         @default(0)
-  commentCount Int         @default(0)
-  viewCount    Int         @default(0)
-  shareCount   Int         @default(0)
-  saveCount    Int         @default(0)
-  savedBy      SavedPost[]
+  id             String      @id @default(cuid())
+  authorId       String
+  clubId         String?
+  content        String?
+  visibility     Visibility  @default(PUBLIC)
+  anonymous      Boolean     @default(false)
+  isAnnouncement Boolean     @default(false)
+  location       String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+  author         User        @relation(fields: [authorId], references: [id])
+  club           Club?       @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  media          PostMedia[]
+  comments       Comment[]
+  likes          Like[]
+  likeCount      Int         @default(0)
+  commentCount   Int         @default(0)
+  viewCount      Int         @default(0)
+  shareCount     Int         @default(0)
+  saveCount      Int         @default(0)
+  savedBy        SavedPost[]
 
   @@index([authorId])
+  @@index([clubId])
   @@index([createdAt])
   @@index([visibility])
 }
@@ -475,6 +479,14 @@ enum NotificationType {
   FRIEND_REQUEST
   VIDEO_CALL_INVITE
   VIDEO_CALL_START
+  MESSAGE
+  EVENT
+  CLUB
+  SYSTEM
+  CLUB_INVITATION
+  CLUB_JOIN
+  CLUB_ROLE_CHANGE
+  CLUB_ANNOUNCEMENT
 }
 
 model Conversation {
@@ -610,6 +622,7 @@ model Club {
   college     College          @relation(fields: [collegeId], references: [id])
   members     ClubMember[]
   events      Event[]
+  posts       Post[]
   invitations ClubInvitation[]
 }
 

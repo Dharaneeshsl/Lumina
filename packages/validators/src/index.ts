@@ -245,3 +245,20 @@ export const clubQuerySchema = z.object({
   limit: z.union([z.string(), z.number()]).optional(),
   cursor: z.string().optional(),
 })
+
+export const createClubEventSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150),
+    description: z.string().trim().max(3000).nullable().optional(),
+    startTime: z.string(),
+    endTime: z.string(),
+    venue: z.string().trim().max(200).nullable().optional(),
+  })
+  .strict()
+
+export const createClubPostSchema = z
+  .object({
+    content: z.string().trim().min(1).max(4000),
+    isAnnouncement: z.boolean().optional(),
+  })
+  .strict()
