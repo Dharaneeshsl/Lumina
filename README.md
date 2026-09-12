@@ -74,6 +74,12 @@ configurable per institution, with an explicit path from a single-college deploy
 module is independently extensible yet seamlessly integrated, giving institutions a modern foundation to digitize campus
 life while delivering a fast, intuitive experience for students, faculty, alumni, and administrators.
 
+---
+
+<img width="1703" height="982" alt="Screenshot 2026-08-09 at 10 10 03 PM" src="https://github.com/user-attachments/assets/b588f2dd-84e5-41c0-aadb-febc1c07c59f" />
+
+---
+
 ## Why Lumino Exists
 
 Campus life today is fragmented. Students bounce between WhatsApp groups, Google Forms, LinkedIn, Discord, and a dozen
