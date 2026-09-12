@@ -262,3 +262,94 @@ export const createClubPostSchema = z
     isAnnouncement: z.boolean().optional(),
   })
   .strict()
+
+// --- Section 14: Internship Portal Validation Schemas ---
+export const createCompanySchema = z
+  .object({
+    name: z.string().trim().min(1).max(150),
+    logo: z.string().url().max(500).nullable().optional(),
+    website: z.string().url().max(300).nullable().optional(),
+    description: z.string().trim().max(3000).nullable().optional(),
+    industry: z.string().trim().max(100).nullable().optional(),
+    location: z.string().trim().max(150).nullable().optional(),
+  })
+  .strict()
+
+export const updateCompanySchema = z
+  .object({
+    name: z.string().trim().min(1).max(150).optional(),
+    logo: z.string().url().max(500).nullable().optional(),
+    website: z.string().url().max(300).nullable().optional(),
+    description: z.string().trim().max(3000).nullable().optional(),
+    industry: z.string().trim().max(100).nullable().optional(),
+    location: z.string().trim().max(150).nullable().optional(),
+  })
+  .strict()
+
+export const createInternshipSchema = z
+  .object({
+    companyId: z.string().min(1).max(64),
+    title: z.string().trim().min(1).max(150),
+    description: z.string().trim().max(5000).nullable().optional(),
+    location: z.string().trim().max(150).nullable().optional(),
+    stipend: z.number().min(0).nullable().optional(),
+    type: z.enum(['FULL_TIME', 'PART_TIME', 'REMOTE']).optional(),
+    mode: z.enum(['REMOTE', 'ONSITE', 'HYBRID']).optional(),
+    status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED']).optional(),
+    requirements: z.array(z.string().max(200)).max(50).optional(),
+    skills: z.array(z.string().max(100)).max(50).optional(),
+    deadline: z.string().datetime().or(z.string().date()).nullable().optional(),
+    contactEmail: z.string().email().nullable().optional(),
+  })
+  .strict()
+
+export const updateInternshipSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150).optional(),
+    description: z.string().trim().max(5000).nullable().optional(),
+    location: z.string().trim().max(150).nullable().optional(),
+    stipend: z.number().min(0).nullable().optional(),
+    type: z.enum(['FULL_TIME', 'PART_TIME', 'REMOTE']).optional(),
+    mode: z.enum(['REMOTE', 'ONSITE', 'HYBRID']).optional(),
+    status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED']).optional(),
+    requirements: z.array(z.string().max(200)).max(50).optional(),
+    skills: z.array(z.string().max(100)).max(50).optional(),
+    deadline: z.string().datetime().or(z.string().date()).nullable().optional(),
+    contactEmail: z.string().email().nullable().optional(),
+  })
+  .strict()
+
+export const internshipQuerySchema = z.object({
+  q: z.string().trim().max(200).optional(),
+  location: z.string().trim().max(150).optional(),
+  mode: z.enum(['REMOTE', 'ONSITE', 'HYBRID']).optional(),
+  type: z.enum(['FULL_TIME', 'PART_TIME', 'REMOTE']).optional(),
+  status: z.enum(['DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED']).optional(),
+  companyId: z.string().max(64).optional(),
+  limit: z.union([z.string(), z.number()]).optional(),
+  cursor: z.string().optional(),
+})
+
+export const createInternshipApplicationSchema = z
+  .object({
+    resumeUrl: z.string().url().max(500).optional(),
+    coverLetter: z.string().trim().max(3000).nullable().optional(),
+    notes: z.string().trim().max(1000).nullable().optional(),
+  })
+  .strict()
+
+export const updateApplicationStatusSchema = z
+  .object({
+    status: z.enum([
+      'APPLIED',
+      'REVIEWING',
+      'SHORTLISTED',
+      'INTERVIEW',
+      'OFFERED',
+      'SELECTED',
+      'REJECTED',
+      'WITHDRAWN',
+    ]),
+    notes: z.string().trim().max(1000).nullable().optional(),
+  })
+  .strict()

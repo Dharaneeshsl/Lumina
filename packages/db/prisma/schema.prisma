@@ -490,6 +490,9 @@ enum NotificationType {
   CLUB_ROLE_CHANGE
   CLUB_ANNOUNCEMENT
   CLUB_EVENT
+  INTERNSHIP
+  INTERNSHIP_APPLICATION
+  INTERNSHIP_STATUS_CHANGE
 }
 
 model Conversation {
@@ -882,6 +885,11 @@ model Company {
   name        String
   logo        String?
   website     String?
+  description String?
+  industry    String?
+  location    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
   internships Internship[]
 }
 
@@ -892,8 +900,22 @@ model Internship {
   description  String?
   location     String?
   stipend      Float?
-  company      Company                 @relation(fields: [companyId], references: [id])
+  type         String                  @default("FULL_TIME")
+  mode         String                  @default("HYBRID")
+  status       String                  @default("PUBLISHED")
+  requirements String[]                @default([])
+  skills       String[]                @default([])
+  deadline     DateTime?
+  contactEmail String?
+  collegeId    String?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @default(now()) @updatedAt
+  company      Company                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
   applications InternshipApplication[]
+
+  @@index([companyId])
+  @@index([status])
+  @@index([title])
 }
 
 model InternshipApplication {
@@ -901,11 +923,20 @@ model InternshipApplication {
   internshipId String
   userId       String
   resumeUrl    String?
+  coverLetter  String?
   status       ApplicationStatus @default(APPLIED)
-  internship   Internship        @relation(fields: [internshipId], references: [id])
-  user         User              @relation(fields: [userId], references: [id])
+  notes        String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now()) @updatedAt
+  internship   Internship        @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([internshipId, userId])
+  @@index([userId])
+  @@index([internshipId])
+  @@index([status])
 }
 
 model VideoCall {
@@ -1121,10 +1152,13 @@ enum ListingCategory {
 
 enum ApplicationStatus {
   APPLIED
+  REVIEWING
   SHORTLISTED
   INTERVIEW
-  REJECTED
   OFFERED
+  SELECTED
+  REJECTED
+  WITHDRAWN
 }
 
 enum LeetcodeSyncStatus {
