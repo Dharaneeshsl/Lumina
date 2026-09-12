@@ -1,6 +1,6 @@
 name: Bruno API Tests
 
-on:
+'on':
   pull_request:
     branches: [main]
   push:
@@ -44,6 +44,7 @@ jobs:
       BETTER_AUTH_SECRET: lumina-super-secret-key-123456789
       SERVER_PORT: "3002"
       NODE_ENV: test
+      RESEND_API_KEY: re_ci_test_key
 
     steps:
       - uses: actions/checkout@v4
@@ -62,11 +63,17 @@ jobs:
       - name: Start API Server
         run: |
           nohup bun --cwd apps/api server.ts > api-server.log 2>&1 &
-          echo $! > api-server.pid
+          API_PID=$!
+          echo "$API_PID" > api-server.pid
 
       - name: Wait for API Ready
         run: |
           for i in {1..30}; do
+            if ! kill -0 "$(cat api-server.pid)" 2>/dev/null; then
+              echo "API server exited during startup"
+              cat api-server.log
+              exit 1
+            fi
             if curl -fsS http://127.0.0.1:3002/ready | grep -q '"status":"ready"'; then
               echo "API Server is healthy and ready!"
               exit 0
