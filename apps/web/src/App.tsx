@@ -1,5 +1,5 @@
 import ClubsView from './components/clubs/ClubsView'
-import InternshipsView from './components/internships/InternshipsView'
+import InternshipsPage from './pages/InternshipsPage'
 import LoginPage from './LoginPage'
 import SignupPage from './SignupPage'
 import { useState } from 'react'
@@ -16,7 +16,7 @@ export default function App() {
   }
 
   if (currentView === 'internships') {
-    return <InternshipsView onBackToHome={() => setCurrentView('landing')} />
+    return <InternshipsPage />
   }
 
   if (currentView === 'signup') {
