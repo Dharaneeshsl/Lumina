@@ -28,7 +28,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
       redis:
         image: redis:7-alpine
         ports:
@@ -40,11 +39,11 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: 'postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev'
-      REDIS_URL: 'redis://localhost:6379'
-      BETTER_AUTH_SECRET: 'lumina-super-secret-key-123456789'
-      SERVER_PORT: '3002'
-      NODE_ENV: 'test'
+      DATABASE_URL: postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev
+      REDIS_URL: redis://localhost:6379
+      BETTER_AUTH_SECRET: lumina-super-secret-key-123456789
+      SERVER_PORT: "3002"
+      NODE_ENV: test
 
     steps:
       - uses: actions/checkout@v4
@@ -55,22 +54,28 @@ jobs:
 
       - run: bun install --frozen-lockfile || bun install
 
-      - name: Generate Prisma Client & Push DB Schema
+      - name: Generate Prisma Client and Push DB Schema
         run: |
           bun run --filter @lumina/db generate
           bun run --filter @lumina/db push
 
-      - name: Start API Server & Wait for Ready
+      - name: Start API Server
         run: |
-          (cd apps/api && bun server.ts) &
+          nohup bun --cwd apps/api server.ts > api-server.log 2>&1 &
+          echo $! > api-server.pid
+
+      - name: Wait for API Ready
+        run: |
           for i in {1..30}; do
-            if curl -s http://127.0.0.1:3002/ready | grep -q '"status":"ready"'; then
+            if curl -fsS http://127.0.0.1:3002/ready | grep -q '"status":"ready"'; then
               echo "API Server is healthy and ready!"
-              break
+              exit 0
             fi
-            echo "Waiting for API server to become ready..."
             sleep 1
           done
+          echo "API failed to become ready"
+          cat api-server.log
+          exit 1
 
       - run: mkdir -p reports
 
