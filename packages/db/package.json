@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "generate": "prisma generate",
+    "push": "prisma db push --accept-data-loss",
     "dev": "prisma generate --watch",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",

@@ -1,6 +1,6 @@
 name: Bruno API Tests
 
-on:
+'on':
   pull_request:
     branches: [main]
   push:
@@ -13,8 +13,76 @@ permissions:
 jobs:
   bruno-tests:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: lumina_user
+          POSTGRES_PASSWORD: lumina_password
+          POSTGRES_DB: lumina_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev
+      REDIS_URL: redis://localhost:6379
+      BETTER_AUTH_SECRET: lumina-super-secret-key-123456789
+      SERVER_PORT: "3002"
+      NODE_ENV: test
+      RESEND_API_KEY: re_ci_test_key
+
     steps:
       - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
+
+      - run: bun install --frozen-lockfile || bun install
+
+      - name: Generate Prisma Client and Push DB Schema
+        run: |
+          bun run --filter @lumina/db generate
+          bun run --filter @lumina/db push
+
+      - name: Start API Server
+        run: |
+          nohup bun --cwd apps/api server.ts > api-server.log 2>&1 &
+          API_PID=$!
+          echo "$API_PID" > api-server.pid
+
+      - name: Wait for API Ready
+        run: |
+          for i in {1..30}; do
+            if ! kill -0 "$(cat api-server.pid)" 2>/dev/null; then
+              echo "API server exited during startup"
+              cat api-server.log
+              exit 1
+            fi
+            if curl -fsS http://127.0.0.1:3002/ready | grep -q '"status":"ready"'; then
+              echo "API Server is healthy and ready!"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to become ready"
+          cat api-server.log
+          exit 1
 
       - run: mkdir -p reports
 
