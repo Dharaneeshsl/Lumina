@@ -1,11 +1,10 @@
 import { useState } from 'react'
 
+import './App.css'
 import ClubsView from './components/clubs/ClubsView'
 import LoginPage from './LoginPage'
 import InternshipsPage from './pages/InternshipsPage'
 import SignupPage from './SignupPage'
-
-import './App.css'
 
 export default function App() {
   const [currentView, setCurrentView] = useState<
