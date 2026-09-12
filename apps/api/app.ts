@@ -76,6 +76,13 @@ export function createApp() {
     })
   })
 
+  function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs)),
+    ])
+  }
+
   app.get('/ready', async (_req: Request, res: Response) => {
     const checks: Record<string, string> = {
       database: 'unknown',
@@ -84,7 +91,7 @@ export function createApp() {
     let isReady = true
 
     try {
-      await prisma.$queryRaw`SELECT 1`
+      await withTimeout(prisma.$queryRaw`SELECT 1`, 2000)
       checks.database = 'ok'
     } catch {
       checks.database = 'unavailable'
@@ -92,7 +99,7 @@ export function createApp() {
     }
 
     try {
-      const redisPong = await redis.ping()
+      const redisPong = await withTimeout(redis.ping(), 2000)
       checks.redis = redisPong === 'PONG' ? 'ok' : 'unavailable'
       if (checks.redis !== 'ok') {
         isReady = false

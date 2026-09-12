@@ -62,7 +62,7 @@ jobs:
 
       - name: Start API Server & Wait for Ready
         run: |
-          bun run --filter api dev &
+          (cd apps/api && bun server.ts) &
           for i in {1..30}; do
             if curl -s http://127.0.0.1:3002/ready | grep -q '"status":"ready"'; then
               echo "API Server is healthy and ready!"
