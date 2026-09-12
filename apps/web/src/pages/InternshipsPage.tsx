@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import './InternshipsPage.css'
 
 const API = import.meta.env.VITE_API_URL ?? '/api/v1'
 
@@ -12,12 +13,12 @@ export default function InternshipsPage() {
     try {
       const r = await fetch(API + '/internships?q=' + encodeURIComponent(q), { credentials: 'include' })
       const data = await r.json()
-      setItems(data.items ?? data)
+      setItems(data.internships ?? data.items ?? data.data ?? (Array.isArray(data) ? data : []))
     } finally { setLoading(false) }
   }
   const loadApplications = async () => {
     const r = await fetch(API + '/internships/my-applications', { credentials: 'include' })
-    if (r.ok) setApplications(await r.json())
+    if (r.ok) { const data = await r.json(); setApplications(data.applications ?? data.items ?? data.data ?? (Array.isArray(data) ? data : [])) }
   }
   useEffect(() => { load(); loadApplications() }, [])
   const apply = async (id: string) => {
