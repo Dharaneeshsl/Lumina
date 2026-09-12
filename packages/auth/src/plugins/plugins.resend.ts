@@ -2,4 +2,8 @@ import '@lumina/env'
 
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+/**
+ * Resend accepts an API key at construction time. Keep startup resilient in
+ * local and CI environments where email delivery is not exercised.
+ */
+export const resend = new Resend(process.env.RESEND_API_KEY ?? '')
