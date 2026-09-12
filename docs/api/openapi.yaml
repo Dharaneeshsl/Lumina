@@ -1242,6 +1242,146 @@ paths:
       responses:
         '200': { description: Club analytics returned }
 
+  /api/v1/internships/companies:
+    get:
+      summary: List registered companies
+      responses:
+        '200': { description: Companies listed }
+    post:
+      summary: Create a company record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Company created }
+
+  /api/v1/internships/companies/{companyId}:
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get company profile and listings
+      responses:
+        '200': { description: Company profile returned }
+    patch:
+      summary: Update company profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Company updated }
+
+  /api/v1/internships:
+    get:
+      summary: Search and filter published internships
+      responses:
+        '200': { description: Internships listed }
+    post:
+      summary: Post a new internship listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Internship created }
+
+  /api/v1/internships/my-applications:
+    get:
+      summary: Get student submitted applications
+      responses:
+        '200': { description: Applications list returned }
+
+  /api/v1/internships/applications/me:
+    get:
+      summary: Alias for getting student submitted applications
+      responses:
+        '200': { description: Applications list returned }
+
+  /api/v1/internships/{internshipId}:
+    parameters:
+      - name: internshipId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get internship details
+      responses:
+        '200': { description: Internship details returned }
+    patch:
+      summary: Update internship listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Internship updated }
+    delete:
+      summary: Delete an internship listing
+      responses:
+        '200': { description: Internship deleted }
+
+  /api/v1/internships/{internshipId}/apply:
+    post:
+      summary: Submit student internship application
+      parameters:
+        - name: internshipId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Application submitted }
+
+  /api/v1/internships/{internshipId}/withdraw:
+    post:
+      summary: Withdraw submitted internship application
+      parameters:
+        - name: internshipId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Application withdrawn }
+
+  /api/v1/internships/{internshipId}/applications:
+    get:
+      summary: List all applications submitted to an internship (Reviewer view)
+      parameters:
+        - name: internshipId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Applicants list returned }
+
+  /api/v1/internships/applications/{applicationId}/status:
+    patch:
+      summary: Update applicant status (Reviewer action)
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Application status updated }
+
 components:
   securitySchemes:
     sessionCookie:

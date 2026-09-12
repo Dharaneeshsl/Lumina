@@ -318,4 +318,35 @@ clubRouter.get('/:clubId/analytics', requireAuth, controller.getClubAnalytics)
 apiRouter.use('/v1/clubs', clubRouter)
 apiRouter.use('/clubs', clubRouter)
 
+// Section 14: Internships mounted on /api/v1/internships and /api/internships
+const internshipRouter = Router()
+internshipRouter.post('/companies', requireAuth, controller.createCompany)
+internshipRouter.get('/companies', requireAuth, controller.listCompanies)
+internshipRouter.get('/companies/:companyId', requireAuth, controller.getCompanyById)
+internshipRouter.patch('/companies/:companyId', requireAuth, controller.updateCompany)
+
+internshipRouter.post('/', requireAuth, controller.createInternship)
+internshipRouter.get('/', optionalAuth, controller.listInternships)
+internshipRouter.get('/my-applications', requireAuth, controller.getMyApplications)
+internshipRouter.get('/applications/me', requireAuth, controller.getMyApplications)
+internshipRouter.get('/:internshipId', optionalAuth, controller.getInternshipById)
+internshipRouter.patch('/:internshipId', requireAuth, controller.updateInternship)
+internshipRouter.delete('/:internshipId', requireAuth, controller.deleteInternship)
+
+internshipRouter.post('/:internshipId/apply', requireAuth, controller.applyForInternship)
+internshipRouter.post('/:internshipId/withdraw', requireAuth, controller.withdrawApplication)
+internshipRouter.get(
+  '/:internshipId/applications',
+  requireAuth,
+  controller.listInternshipApplications
+)
+internshipRouter.patch(
+  '/applications/:applicationId/status',
+  requireAuth,
+  controller.updateApplicationStatus
+)
+
+apiRouter.use('/v1/internships', internshipRouter)
+apiRouter.use('/internships', internshipRouter)
+
 export default apiRouter

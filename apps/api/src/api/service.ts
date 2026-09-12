@@ -36,7 +36,11 @@ import {
   createClubEventSchema,
   createClubPostSchema,
   createClubSchema,
+  createCompanySchema,
+  createInternshipApplicationSchema,
+  createInternshipSchema,
   createStudyGroupSchema,
+  internshipQuerySchema,
   profileUpdateSchema,
   protectedProfileFields,
   respondClubInvitationSchema,
@@ -48,8 +52,11 @@ import {
   studyGroupReplySchema,
   studyGroupSearchQuerySchema,
   studyGroupTimetableSchema,
+  updateApplicationStatusSchema,
   updateClubMemberRoleSchema,
   updateClubSchema,
+  updateCompanySchema,
+  updateInternshipSchema,
   updateStudyGroupDiscussionSchema,
   updateStudyGroupMemberSchema,
   updateStudyGroupNoteSchema,
@@ -5524,3 +5531,578 @@ export const hasMinClubRole = ClubPermissions.hasMinRole
 export const canManageClub = ClubPermissions.canManageClub
 export const canChangeClubMemberRole = ClubPermissions.canChangeMemberRole
 export const canRemoveClubMember = ClubPermissions.canRemoveMember
+
+// --- Section 14: Internship Portal Repositories & Services ---
+
+export namespace InternshipRepo {
+  export async function createCompany(data: {
+    name: string
+    logo?: string | null
+    website?: string | null
+    description?: string | null
+    industry?: string | null
+    location?: string | null
+  }) {
+    return prisma.company.create({
+      data: {
+        name: data.name,
+        logo: data.logo,
+        website: data.website,
+        description: data.description,
+        industry: data.industry,
+        location: data.location,
+      },
+    })
+  }
+
+  export async function updateCompany(
+    id: string,
+    data: {
+      name?: string
+      logo?: string | null
+      website?: string | null
+      description?: string | null
+      industry?: string | null
+      location?: string | null
+    }
+  ) {
+    return prisma.company.update({
+      where: { id },
+      data,
+    })
+  }
+
+  export async function listCompanies() {
+    return prisma.company.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { internships: true },
+        },
+      },
+    })
+  }
+
+  export async function getCompanyById(id: string) {
+    return prisma.company.findUnique({
+      where: { id },
+      include: {
+        internships: {
+          orderBy: { createdAt: 'desc' },
+        },
+        _count: {
+          select: { internships: true },
+        },
+      },
+    })
+  }
+
+  export async function createInternship(data: {
+    companyId: string
+    title: string
+    description?: string | null
+    location?: string | null
+    stipend?: number | null
+    type?: string
+    mode?: string
+    status?: string
+    requirements?: string[]
+    skills?: string[]
+    deadline?: Date | null
+    contactEmail?: string | null
+    collegeId?: string | null
+  }) {
+    return prisma.internship.create({
+      data: {
+        companyId: data.companyId,
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        stipend: data.stipend,
+        type: data.type ?? 'FULL_TIME',
+        mode: data.mode ?? 'HYBRID',
+        status: data.status ?? 'PUBLISHED',
+        requirements: data.requirements ?? [],
+        skills: data.skills ?? [],
+        deadline: data.deadline,
+        contactEmail: data.contactEmail,
+        collegeId: data.collegeId,
+      },
+      include: {
+        company: true,
+      },
+    })
+  }
+
+  export async function updateInternship(
+    id: string,
+    data: {
+      title?: string
+      description?: string | null
+      location?: string | null
+      stipend?: number | null
+      type?: string
+      mode?: string
+      status?: string
+      requirements?: string[]
+      skills?: string[]
+      deadline?: Date | null
+      contactEmail?: string | null
+    }
+  ) {
+    return prisma.internship.update({
+      where: { id },
+      data,
+      include: {
+        company: true,
+      },
+    })
+  }
+
+  export async function deleteInternship(id: string) {
+    return prisma.internship.delete({
+      where: { id },
+    })
+  }
+
+  export async function getInternshipById(id: string) {
+    return prisma.internship.findUnique({
+      where: { id },
+      include: {
+        company: true,
+        _count: {
+          select: { applications: true },
+        },
+      },
+    })
+  }
+
+  export async function listInternships(params: {
+    q?: string
+    location?: string
+    mode?: string
+    type?: string
+    status?: string
+    companyId?: string
+    limit?: number
+    cursor?: string
+  }) {
+    const limit = Math.min(params.limit ?? 20, 50)
+    const where: Prisma.InternshipWhereInput = {}
+
+    if (params.q) {
+      where.OR = [
+        { title: { contains: params.q, mode: 'insensitive' } },
+        { description: { contains: params.q, mode: 'insensitive' } },
+        { company: { name: { contains: params.q, mode: 'insensitive' } } },
+      ]
+    }
+
+    if (params.location) {
+      where.location = { contains: params.location, mode: 'insensitive' }
+    }
+
+    if (params.mode) {
+      where.mode = params.mode
+    }
+
+    if (params.type) {
+      where.type = params.type
+    }
+
+    if (params.status) {
+      where.status = params.status
+    } else {
+      where.status = 'PUBLISHED'
+    }
+
+    if (params.companyId) {
+      where.companyId = params.companyId
+    }
+
+    const items = await prisma.internship.findMany({
+      where,
+      take: limit + 1,
+      ...(params.cursor ? { cursor: { id: params.cursor }, skip: 1 } : {}),
+      orderBy: { createdAt: 'desc' },
+      include: {
+        company: true,
+        _count: {
+          select: { applications: true },
+        },
+      },
+    })
+
+    let nextCursor: string | undefined = undefined
+    if (items.length > limit) {
+      const nextItem = items.pop()
+      nextCursor = nextItem?.id
+    }
+
+    return {
+      items,
+      nextCursor,
+    }
+  }
+
+  export async function applyForInternship(data: {
+    internshipId: string
+    userId: string
+    resumeUrl?: string
+    coverLetter?: string | null
+    notes?: string | null
+  }) {
+    return prisma.internshipApplication.create({
+      data: {
+        internshipId: data.internshipId,
+        userId: data.userId,
+        resumeUrl: data.resumeUrl,
+        coverLetter: data.coverLetter,
+        notes: data.notes,
+        status: 'APPLIED',
+      },
+      include: {
+        internship: {
+          include: { company: true },
+        },
+      },
+    })
+  }
+
+  export async function findApplication(internshipId: string, userId: string) {
+    return prisma.internshipApplication.findUnique({
+      where: {
+        internshipId_userId: {
+          internshipId,
+          userId,
+        },
+      },
+      include: {
+        internship: {
+          include: { company: true },
+        },
+      },
+    })
+  }
+
+  export async function getApplicationById(id: string) {
+    return prisma.internshipApplication.findUnique({
+      where: { id },
+      include: {
+        internship: {
+          include: { company: true },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            username: true,
+            image: true,
+            profile: true,
+          },
+        },
+      },
+    })
+  }
+
+  export async function withdrawApplication(internshipId: string, userId: string) {
+    return prisma.internshipApplication.update({
+      where: {
+        internshipId_userId: {
+          internshipId,
+          userId,
+        },
+      },
+      data: {
+        status: 'WITHDRAWN',
+      },
+    })
+  }
+
+  export async function listStudentApplications(userId: string) {
+    return prisma.internshipApplication.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        internship: {
+          include: { company: true },
+        },
+      },
+    })
+  }
+
+  export async function listInternshipApplications(internshipId: string) {
+    return prisma.internshipApplication.findMany({
+      where: { internshipId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            username: true,
+            image: true,
+            profile: true,
+          },
+        },
+      },
+    })
+  }
+
+  export async function updateApplicationStatus(
+    applicationId: string,
+    reviewerId: string,
+    status:
+      | 'APPLIED'
+      | 'REVIEWING'
+      | 'SHORTLISTED'
+      | 'INTERVIEW'
+      | 'OFFERED'
+      | 'SELECTED'
+      | 'REJECTED'
+      | 'WITHDRAWN',
+    notes?: string | null
+  ) {
+    return prisma.internshipApplication.update({
+      where: { id: applicationId },
+      data: {
+        status,
+        notes,
+        reviewedAt: new Date(),
+        reviewedById: reviewerId,
+      },
+      include: {
+        internship: {
+          include: { company: true },
+        },
+        user: true,
+      },
+    })
+  }
+}
+
+export namespace InternshipService {
+  async function getAuthenticatedUser(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, collegeId: true, role: true },
+    })
+    if (!user) {
+      throw notFound('USER_NOT_FOUND')
+    }
+    return user
+  }
+
+  export async function createCompany(userId: string, input: unknown) {
+    const parsed = createCompanySchema.parse(input)
+    return InternshipRepo.createCompany(parsed)
+  }
+
+  export async function updateCompany(userId: string, companyId: string, input: unknown) {
+    const company = await InternshipRepo.getCompanyById(companyId)
+    if (!company) {
+      throw notFound('COMPANY_NOT_FOUND')
+    }
+    const parsed = updateCompanySchema.parse(input)
+    return InternshipRepo.updateCompany(companyId, parsed)
+  }
+
+  export async function listCompanies() {
+    return InternshipRepo.listCompanies()
+  }
+
+  export async function getCompanyById(companyId: string) {
+    const company = await InternshipRepo.getCompanyById(companyId)
+    if (!company) {
+      throw notFound('COMPANY_NOT_FOUND')
+    }
+    return company
+  }
+
+  export async function createInternship(userId: string, input: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    const parsed = createInternshipSchema.parse(input)
+    const company = await InternshipRepo.getCompanyById(parsed.companyId)
+    if (!company) {
+      throw notFound('COMPANY_NOT_FOUND')
+    }
+
+    return InternshipRepo.createInternship({
+      ...parsed,
+      collegeId: user.collegeId,
+      deadline: parsed.deadline ? new Date(parsed.deadline) : null,
+    })
+  }
+
+  export async function updateInternship(userId: string, internshipId: string, input: unknown) {
+    const internship = await InternshipRepo.getInternshipById(internshipId)
+    if (!internship) {
+      throw notFound('INTERNSHIP_NOT_FOUND')
+    }
+    const parsed = updateInternshipSchema.parse(input)
+    return InternshipRepo.updateInternship(internshipId, {
+      ...parsed,
+      deadline: parsed.deadline
+        ? new Date(parsed.deadline)
+        : parsed.deadline === null
+          ? null
+          : undefined,
+    })
+  }
+
+  export async function deleteInternship(userId: string, internshipId: string) {
+    const internship = await InternshipRepo.getInternshipById(internshipId)
+    if (!internship) {
+      throw notFound('INTERNSHIP_NOT_FOUND')
+    }
+    await InternshipRepo.deleteInternship(internshipId)
+    return { success: true }
+  }
+
+  export async function listInternships(input: unknown) {
+    const parsed = internshipQuerySchema.parse(input)
+    const limit = parsed.limit ? Number(parsed.limit) : 20
+    return InternshipRepo.listInternships({
+      ...parsed,
+      limit,
+    })
+  }
+
+  export async function getInternshipById(internshipId: string, userId?: string) {
+    const internship = await InternshipRepo.getInternshipById(internshipId)
+    if (!internship) {
+      throw notFound('INTERNSHIP_NOT_FOUND')
+    }
+
+    let myApplication = null
+    if (userId) {
+      myApplication = await InternshipRepo.findApplication(internshipId, userId)
+    }
+
+    return {
+      ...internship,
+      myApplication,
+    }
+  }
+
+  export async function applyForInternship(userId: string, internshipId: string, input: unknown) {
+    const user = await getAuthenticatedUser(userId)
+    if (user.role !== 'STUDENT' && user.role !== 'COLLEGE_ADMIN' && user.role !== 'SUPER_ADMIN') {
+      // allow student applicants
+    }
+
+    const internship = await InternshipRepo.getInternshipById(internshipId)
+    if (!internship) {
+      throw notFound('INTERNSHIP_NOT_FOUND')
+    }
+
+    if (internship.status !== 'PUBLISHED') {
+      throw badRequest('INTERNSHIP_NOT_ACCEPTING_APPLICATIONS')
+    }
+
+    if (internship.deadline && new Date() > new Date(internship.deadline)) {
+      throw badRequest('INTERNSHIP_APPLICATION_DEADLINE_PASSED')
+    }
+
+    const existing = await InternshipRepo.findApplication(internshipId, userId)
+    if (existing) {
+      throw conflict('ALREADY_APPLIED')
+    }
+
+    const parsed = createInternshipApplicationSchema.parse(input)
+    const application = await InternshipRepo.applyForInternship({
+      internshipId,
+      userId,
+      resumeUrl: parsed.resumeUrl,
+      coverLetter: parsed.coverLetter,
+      notes: parsed.notes,
+    })
+
+    // Create notification for applicant
+    await prisma.notification.create({
+      data: {
+        userId,
+        title: 'Application Submitted',
+        body: `Your application for ${internship.title} at ${internship.company.name} has been submitted successfully.`,
+        type: 'INTERNSHIP_APPLICATION',
+      },
+    })
+
+    return application
+  }
+
+  export async function withdrawApplication(userId: string, internshipId: string) {
+    const existing = await InternshipRepo.findApplication(internshipId, userId)
+    if (!existing) {
+      throw notFound('APPLICATION_NOT_FOUND')
+    }
+
+    if (existing.status === 'WITHDRAWN') {
+      throw badRequest('APPLICATION_ALREADY_WITHDRAWN')
+    }
+
+    return InternshipRepo.withdrawApplication(internshipId, userId)
+  }
+
+  export async function getMyApplications(userId: string) {
+    return InternshipRepo.listStudentApplications(userId)
+  }
+
+  export async function listInternshipApplications(userId: string, internshipId: string) {
+    const internship = await InternshipRepo.getInternshipById(internshipId)
+    if (!internship) {
+      throw notFound('INTERNSHIP_NOT_FOUND')
+    }
+    return InternshipRepo.listInternshipApplications(internshipId)
+  }
+
+  export async function updateApplicationStatus(
+    userId: string,
+    applicationId: string,
+    input: unknown
+  ) {
+    const application = await InternshipRepo.getApplicationById(applicationId)
+    if (!application) {
+      throw notFound('APPLICATION_NOT_FOUND')
+    }
+
+    const parsed = updateApplicationStatusSchema.parse(input)
+    const updated = await InternshipRepo.updateApplicationStatus(
+      applicationId,
+      userId,
+      parsed.status,
+      parsed.notes
+    )
+
+    // Send notification to applicant regarding status update
+    await prisma.notification.create({
+      data: {
+        userId: application.userId,
+        title: `Application Status Updated: ${parsed.status}`,
+        body: `Your application status for ${application.internship.title} at ${application.internship.company.name} has been updated to ${parsed.status}.`,
+        type: 'INTERNSHIP_STATUS_CHANGE',
+      },
+    })
+
+    return updated
+  }
+}
+
+export const createCompany = InternshipService.createCompany
+export const updateCompany = InternshipService.updateCompany
+export const listCompanies = InternshipService.listCompanies
+export const getCompanyById = InternshipService.getCompanyById
+
+export const createInternship = InternshipService.createInternship
+export const updateInternship = InternshipService.updateInternship
+export const deleteInternship = InternshipService.deleteInternship
+export const listInternships = InternshipService.listInternships
+export const getInternshipById = InternshipService.getInternshipById
+
+export const applyForInternship = InternshipService.applyForInternship
+export const withdrawApplication = InternshipService.withdrawApplication
+export const getMyApplications = InternshipService.getMyApplications
+export const listInternshipApplications = InternshipService.listInternshipApplications
+export const updateApplicationStatus = InternshipService.updateApplicationStatus
