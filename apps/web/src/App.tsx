@@ -1,3 +1,4 @@
+import ClubsView from './components/clubs/ClubsView'
 import LoginPage from './LoginPage'
 import SignupPage from './SignupPage'
 import { useState } from 'react'
@@ -5,7 +6,13 @@ import { useState } from 'react'
 import './App.css'
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'signup' | 'login'>('landing')
+  const [currentView, setCurrentView] = useState<'landing' | 'signup' | 'login' | 'clubs'>(
+    'landing'
+  )
+
+  if (currentView === 'clubs') {
+    return <ClubsView onBackToHome={() => setCurrentView('landing')} />
+  }
 
   if (currentView === 'signup') {
     return (
@@ -111,6 +118,10 @@ export default function App() {
                   <a
                     href="#clubs"
                     className="nav-link"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setCurrentView('clubs')
+                    }}
                   >
                     Clubs
                   </a>

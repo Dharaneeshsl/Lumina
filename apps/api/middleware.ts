@@ -13,6 +13,21 @@ export type AuthRequest = AuthenticatedRequest
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
+    if (process.env.NODE_ENV === 'test' && req.headers['x-test-user-id']) {
+      const { prisma } = await import('@lumina/db')
+      const mockUser = await prisma.user.findUnique({
+        where: { id: req.headers['x-test-user-id'] as string },
+      })
+      if (mockUser) {
+        ;(req as AuthenticatedRequest).user = {
+          id: mockUser.id,
+          email: mockUser.email,
+          role: String(mockUser.role) as never,
+        }
+        return next()
+      }
+    }
+
     const session = await auth.api.getSession({
       headers: req.headers,
     })

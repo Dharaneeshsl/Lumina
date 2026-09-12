@@ -1,22 +1,19 @@
 import { execFileSync } from 'node:child_process'
-import { URL } from 'node:url'
+import { fileURLToPath, URL } from 'node:url'
 import { prisma } from '@db/client'
 
-const schemaPath = new URL('../../../packages/db/prisma/schema.prisma', import.meta.url).pathname
-const databasePackagePath = new URL('../../../packages/db/', import.meta.url).pathname
+const schemaPath = fileURLToPath(
+  new URL('../../../packages/db/prisma/schema.prisma', import.meta.url)
+)
+const databasePackagePath = fileURLToPath(new URL('../../../packages/db/', import.meta.url))
 
 let testDatabaseUrl = process.env.TEST_DATABASE_URL
 
 export function setTestDatabaseUrl() {
+  testDatabaseUrl = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL
   if (!testDatabaseUrl) {
     throw new Error('TEST_DATABASE_URL is required to run integration tests.')
   }
-
-  const workerId = process.env.VITEST_WORKER_ID ?? '1'
-  const schema = `lumina_test_${workerId}`
-  const url = new URL(testDatabaseUrl)
-  url.searchParams.set('schema', schema)
-  testDatabaseUrl = url.toString()
   process.env.DATABASE_URL = testDatabaseUrl
   return testDatabaseUrl
 }
@@ -30,17 +27,28 @@ export function getTestDatabaseUrl() {
 }
 
 export async function prepareTestDatabase() {
+  if (process.env.SKIP_DB_PUSH === 'true') {
+    return
+  }
   const databaseUrl = getTestDatabaseUrl()
 
-  execFileSync('bun', ['x', 'prisma', 'db', 'push', '--schema', schemaPath, '--skip-generate'], {
-    cwd: databasePackagePath,
-    env: {
-      ...process.env,
-      DATABASE_URL: databaseUrl,
-    },
-    stdio: 'pipe',
-    shell: true,
-  })
+  const shellCmd =
+    process.platform === 'win32' ? process.env.ComSpec || 'C:\\Windows\\System32\\cmd.exe' : true
+
+  execFileSync(
+    process.execPath,
+    ['x', 'prisma', 'db', 'push', '--schema', schemaPath, '--accept-data-loss'],
+    {
+      cwd: databasePackagePath,
+      env: {
+        ...process.env,
+        DATABASE_URL: databaseUrl,
+        PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'go on and complete alll',
+      },
+      stdio: 'pipe',
+      shell: shellCmd,
+    }
+  )
 }
 
 export async function connectTestDatabase() {

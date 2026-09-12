@@ -4,9 +4,8 @@ import {
   LEETCODE_JOB_SYNC_PROFILE,
   LEETCODE_QUEUE_NAME,
 } from '../../../apps/api/config/leetcode.queue'
-import { syncProfileById } from '../../../apps/api/src/api/service'
 import { runLeetcodeDailySync } from '../../../apps/api/cron/leetcode.daily-sync.job'
-import { syncProfileById } from '../../../apps/api/src/api/service'
+import { syncProfileById, syncProfileById } from '../../../apps/api/src/api/service'
 import {
   backgroundJobFailuresTotal,
   generateCorrelationContext,

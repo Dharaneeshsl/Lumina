@@ -280,4 +280,42 @@ studyGroupRouter.delete('/:groupId', requireAuth, controller.deleteStudyGroup)
 apiRouter.use('/v1/study-groups', studyGroupRouter)
 apiRouter.use('/study-group', studyGroupRouter)
 
+// Clubs: mounted on /api/v1/clubs and /api/clubs
+const clubRouter = Router()
+clubRouter.post('/', requireAuth, controller.createClub)
+clubRouter.get('/', requireAuth, controller.listClubs)
+clubRouter.get('/:clubId', requireAuth, controller.getClubById)
+clubRouter.patch('/:clubId', requireAuth, controller.updateClub)
+clubRouter.post('/:clubId/archive', requireAuth, controller.archiveClub)
+clubRouter.post('/:clubId/join', requireAuth, controller.joinClub)
+clubRouter.post('/:clubId/leave', requireAuth, controller.leaveClub)
+clubRouter.get('/:clubId/members', requireAuth, controller.listClubMembers)
+clubRouter.post('/:clubId/invitations', requireAuth, controller.inviteClubMember)
+clubRouter.post('/invitations/:invitationId/respond', requireAuth, controller.respondClubInvitation)
+clubRouter.patch('/:clubId/members/:userId', requireAuth, controller.updateClubMemberRole)
+clubRouter.delete('/:clubId/members/:userId', requireAuth, controller.removeClubMember)
+clubRouter.post(
+  '/:clubId/logo',
+  requireAuth,
+  boundConcurrentUploads,
+  upload.single('image'),
+  controller.uploadClubLogo
+)
+clubRouter.post(
+  '/:clubId/banner',
+  requireAuth,
+  boundConcurrentUploads,
+  upload.single('image'),
+  controller.uploadClubBanner
+)
+clubRouter.post('/:clubId/events', requireAuth, controller.createClubEvent)
+clubRouter.get('/:clubId/events', requireAuth, controller.listClubEvents)
+clubRouter.delete('/:clubId/events/:eventId', requireAuth, controller.deleteClubEvent)
+clubRouter.post('/:clubId/posts', requireAuth, controller.createClubPost)
+clubRouter.get('/:clubId/posts', requireAuth, controller.listClubPosts)
+clubRouter.get('/:clubId/analytics', requireAuth, controller.getClubAnalytics)
+
+apiRouter.use('/v1/clubs', clubRouter)
+apiRouter.use('/clubs', clubRouter)
+
 export default apiRouter

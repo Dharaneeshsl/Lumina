@@ -200,3 +200,65 @@ export const studyGroupTimetableSchema = z
 export const studyGroupSearchQuerySchema = z.object({
   q: z.string().trim().min(1).max(200),
 })
+
+export const createClubSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    description: z.string().trim().max(2000).nullable().optional(),
+    category: z.string().trim().max(80).nullable().optional(),
+  })
+  .strict()
+
+export const updateClubSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120).optional(),
+    description: z.string().trim().max(2000).nullable().optional(),
+    category: z.string().trim().max(80).nullable().optional(),
+    status: z.enum(['ACTIVE', 'ARCHIVED']).optional(),
+  })
+  .strict()
+
+export const clubInvitationSchema = z
+  .object({
+    userId: z.string().min(1).max(64),
+    role: z.enum(['MEMBER', 'CORE_MEMBER', 'SECRETARY', 'PRESIDENT', 'FACULTY']).optional(),
+    message: z.string().trim().max(2000).optional(),
+  })
+  .strict()
+
+export const respondClubInvitationSchema = z
+  .object({
+    response: z.enum(['ACCEPT', 'REJECT']),
+  })
+  .strict()
+
+export const updateClubMemberRoleSchema = z
+  .object({
+    role: z.enum(['MEMBER', 'CORE_MEMBER', 'SECRETARY', 'PRESIDENT', 'FACULTY']),
+  })
+  .strict()
+
+export const clubQuerySchema = z.object({
+  q: z.string().trim().max(200).optional(),
+  category: z.string().trim().max(80).optional(),
+  status: z.enum(['ACTIVE', 'ARCHIVED']).optional(),
+  limit: z.union([z.string(), z.number()]).optional(),
+  cursor: z.string().optional(),
+})
+
+export const createClubEventSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150),
+    description: z.string().trim().max(3000).nullable().optional(),
+    startTime: z.string(),
+    endTime: z.string(),
+    venue: z.string().trim().max(200).nullable().optional(),
+  })
+  .strict()
+
+export const createClubPostSchema = z
+  .object({
+    content: z.string().trim().min(1).max(4000),
+    isAnnouncement: z.boolean().optional(),
+  })
+  .strict()

@@ -1,0 +1,27 @@
+meta {
+  name: Create club event
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/clubs/{{clubId}}/events
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "title": "Annual Autonomous Robotics Hackathon",
+    "description": "24-hour hardware and software competition for student teams.",
+    "startTime": "2026-10-15T09:00:00.000Z",
+    "endTime": "2026-10-16T09:00:00.000Z",
+    "venue": "Main Auditorium & Innovation Lab"
+  }
+}
