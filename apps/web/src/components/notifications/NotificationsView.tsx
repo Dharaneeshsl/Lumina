@@ -49,7 +49,9 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   })
-  if (!response.ok) throw new Error((await response.text()) || `Request failed: ${response.status}`)
+  if (!response.ok) {
+    throw new Error((await response.text()) || `Request failed: ${response.status}`)
+  }
   return response.status === 204 ? (undefined as T) : response.json()
 }
 
@@ -81,47 +83,119 @@ export const NotificationsView: React.FC = () => {
 
   const unreadCount = notifications.filter((n) => !n.read && !n.archived).length
 
-  const refresh = () => {
-    void load()
-  }
-
   const load = useCallback(async () => {
-    setLoading(true); setError(null)
+    setLoading(true)
+    setError(null)
     try {
       const [items, prefs, devices] = await Promise.all([
         api<NotificationItem[]>('/notifications'),
         api<NotificationPreferenceData>('/notifications/preferences'),
         api<Array<{ id: string; token: string; platform: string }>>('/notifications/devices'),
       ])
-      setNotifications(items); setPreferences(prefs); setDeviceTokens(devices)
-    } catch (e: any) { setError(e?.message || 'Unable to load notifications') }
-    finally { setLoading(false) }
+      setNotifications(items)
+      setPreferences(prefs)
+      setDeviceTokens(devices)
+    } catch (e: any) {
+      setError(e?.message || 'Unable to load notifications')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  const refresh = () => {
+    void load()
+  }
 
   const handleMarkAsRead = async (id: string) => {
-    try { await api('/notifications/read', { method: 'POST', body: JSON.stringify({ notificationIds: [id] }) }); setNotifications(p => p.map(n => n.id === id ? { ...n, read: true } : n)) } catch (e: any) { setError(e.message) }
+    try {
+      await api('/notifications/read', {
+        method: 'POST',
+        body: JSON.stringify({ notificationIds: [id] }),
+      })
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification.id === id ? { ...notification, read: true } : notification,
+        ),
+      )
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
+
   const handleMarkAllAsRead = async () => {
-    try { await api('/notifications/read-all', { method: 'POST' }); setNotifications(p => p.map(n => ({ ...n, read: true }))) } catch (e: any) { setError(e.message) }
+    try {
+      await api('/notifications/read-all', { method: 'POST' })
+      setNotifications((current) => current.map((notification) => ({ ...notification, read: true })))
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
+
   const handleArchive = async (id: string) => {
-    try { await api('/notifications/' + encodeURIComponent(id) + '/archive', { method: 'PATCH' }); setNotifications(p => p.map(n => n.id === id ? { ...n, archived: true } : n)) } catch (e: any) { setError(e.message) }
+    try {
+      await api(`/notifications/${encodeURIComponent(id)}/archive`, { method: 'PATCH' })
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification.id === id ? { ...notification, archived: true } : notification,
+        ),
+      )
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
+
   const handleDelete = async (id: string) => {
-    try { await api('/notifications/' + encodeURIComponent(id), { method: 'DELETE' }); setNotifications(p => p.filter(n => n.id !== id)) } catch (e: any) { setError(e.message) }
+    try {
+      await api(`/notifications/${encodeURIComponent(id)}`, { method: 'DELETE' })
+      setNotifications((current) => current.filter((notification) => notification.id !== id))
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
+
   const updatePreferences = async (next: NotificationPreferenceData) => {
     setPreferences(next)
-    try { const saved = await api<NotificationPreferenceData>('/notifications/preferences', { method: 'PATCH', body: JSON.stringify(next) }); setPreferences(saved) } catch (e: any) { setError(e.message); void load() }
+    try {
+      const saved = await api<NotificationPreferenceData>('/notifications/preferences', {
+        method: 'PATCH',
+        body: JSON.stringify(next),
+      })
+      setPreferences(saved)
+    } catch (e: any) {
+      setError(e.message)
+      void load()
+    }
   }
+
   const handleRegisterToken = async (e: React.FormEvent) => {
-    e.preventDefault(); if (!newToken.trim()) return
-    try { const created = await api<{ id: string; token: string; platform: string }>('/notifications/devices', { method: 'POST', body: JSON.stringify({ token: newToken.trim(), platform: 'WEB' }) }); setDeviceTokens(p => [created, ...p.filter(d => d.id !== created.id)]); setNewToken('') } catch (e: any) { setError(e.message) }
+    e.preventDefault()
+    if (!newToken.trim()) return
+    try {
+      const created = await api<{ id: string; token: string; platform: string }>(
+        '/notifications/devices',
+        {
+          method: 'POST',
+          body: JSON.stringify({ token: newToken.trim(), platform: 'WEB' }),
+        },
+      )
+      setDeviceTokens((current) => [created, ...current.filter((device) => device.id !== created.id)])
+      setNewToken('')
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
+
   const revokeToken = async (token: string) => {
-    try { await api('/notifications/devices/' + encodeURIComponent(token), { method: 'DELETE' }); setDeviceTokens(p => p.filter(d => d.token !== token)) } catch (e: any) { setError(e.message) }
+    try {
+      await api(`/notifications/devices/${encodeURIComponent(token)}`, { method: 'DELETE' })
+      setDeviceTokens((current) => current.filter((device) => device.token !== token))
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
 
   const filteredNotifications = notifications.filter((n) => {
