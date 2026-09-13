@@ -377,4 +377,21 @@ alumniRouter.get('/events', optionalAuth, controller.listAlumniEvents)
 apiRouter.use('/v1/alumni', alumniRouter)
 apiRouter.use('/alumni', alumniRouter)
 
+// Section 21: Notifications mounted on /api/v1/notifications and /api/notifications
+const notificationRouter = Router()
+notificationRouter.get('/', requireAuth, controller.listNotifications)
+notificationRouter.get('/unread-count', requireAuth, controller.getNotificationUnreadCount)
+notificationRouter.post('/read', requireAuth, controller.markNotificationsAsRead)
+notificationRouter.post('/read-all', requireAuth, controller.markAllNotificationsAsRead)
+notificationRouter.patch('/:notificationId/archive', requireAuth, controller.archiveNotification)
+notificationRouter.delete('/:notificationId', requireAuth, controller.deleteNotification)
+notificationRouter.get('/preferences', requireAuth, controller.getNotificationPreferences)
+notificationRouter.patch('/preferences', requireAuth, controller.updateNotificationPreferences)
+notificationRouter.post('/devices', requireAuth, controller.registerDeviceToken)
+notificationRouter.get('/devices', requireAuth, controller.listDeviceTokens)
+notificationRouter.delete('/devices/:token', requireAuth, controller.revokeDeviceToken)
+
+apiRouter.use('/v1/notifications', notificationRouter)
+apiRouter.use('/notifications', notificationRouter)
+
 export default apiRouter

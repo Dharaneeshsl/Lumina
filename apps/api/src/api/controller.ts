@@ -1297,3 +1297,40 @@ export const createAlumniEvent = (req: Request, res: Response) =>
 
 export const listAlumniEvents = (_req: Request, res: Response) =>
   respond(_req, res, 200, () => api.listAlumniEvents())
+
+export const listNotifications = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listNotifications(userId(req), req.query))
+
+export const getNotificationUnreadCount = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getNotificationUnreadCount(userId(req)))
+
+export const markNotificationsAsRead = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.markNotificationsAsRead(userId(req), req.body))
+
+export const markAllNotificationsAsRead = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.markAllNotificationsAsRead(userId(req)))
+
+export const archiveNotification = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.archiveNotification(userId(req), String(req.params.notificationId))
+  )
+
+export const deleteNotification = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.deleteNotification(userId(req), String(req.params.notificationId))
+  )
+
+export const getNotificationPreferences = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getNotificationPreferences(userId(req)))
+
+export const updateNotificationPreferences = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.updateNotificationPreferences(userId(req), req.body))
+
+export const registerDeviceToken = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.registerDeviceToken(userId(req), req.body))
+
+export const listDeviceTokens = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listDeviceTokens(userId(req)))
+
+export const revokeDeviceToken = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.revokeDeviceToken(userId(req), String(req.params.token)))

@@ -3,13 +3,14 @@ import { useState } from 'react'
 import './App.css'
 import ClubsView from './components/clubs/ClubsView'
 import AlumniPage from './pages/AlumniPage'
+import { NotificationsView } from './components/notifications/NotificationsView'
 import LoginPage from './LoginPage'
 import InternshipsPage from './pages/InternshipsPage'
 import SignupPage from './SignupPage'
 
 export default function App() {
   const [currentView, setCurrentView] = useState<
-    'landing' | 'signup' | 'login' | 'clubs' | 'internships' | 'alumni'
+    'landing' | 'signup' | 'login' | 'clubs' | 'internships' | 'alumni' | 'notifications'
   >('landing')
 
   if (currentView === 'clubs') {
@@ -30,6 +31,18 @@ export default function App() {
       </div>
     )
   }
+
+  if (currentView === 'notifications') {
+    return (
+      <div>
+        <div style={{ background: '#111827', padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button onClick={() => setCurrentView('landing')} style={{ background: 'transparent', color: '#818cf8', border: '1px solid rgba(129, 140, 248, 0.4)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer' }}>← Back to Home</button>
+        </div>
+        <NotificationsView />
+      </div>
+    )
+  }
+
 
 
   if (currentView === 'signup') {
@@ -168,6 +181,19 @@ export default function App() {
                     Alumni Network
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="#notifications"
+                    className="nav-link"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setCurrentView('notifications')
+                    }}
+                  >
+                    Notifications 🔔
+                  </a>
+                </li>
+
 
                 <li>
                   <a
