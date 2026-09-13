@@ -129,7 +129,9 @@ export const NotificationsView: React.FC = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await api('/notifications/read-all', { method: 'POST' })
-      setNotifications((current) => current.map((notification) => ({ ...notification, read: true })))
+      setNotifications((current) =>
+        current.map((notification) => ({ ...notification, read: true })),
+      )
     } catch (e: any) {
       setError(e.message)
     }
@@ -182,7 +184,10 @@ export const NotificationsView: React.FC = () => {
           body: JSON.stringify({ token: newToken.trim(), platform: 'WEB' }),
         },
       )
-      setDeviceTokens((current) => [created, ...current.filter((device) => device.id !== created.id)])
+      setDeviceTokens((current) => [
+        created,
+        ...current.filter((device) => device.id !== created.id),
+      ])
       setNewToken('')
     } catch (e: any) {
       setError(e.message)
@@ -230,7 +235,8 @@ export const NotificationsView: React.FC = () => {
       <div
         style={{
           background:
-            'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 50%, rgba(236, 72, 153, 0.15) 100%)',
+            'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 50%, ' +
+            'rgba(236, 72, 153, 0.15) 100%)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '16px',
           padding: '32px',
@@ -628,7 +634,9 @@ export const NotificationsView: React.FC = () => {
                     type="checkbox"
                     checked={(preferences as any)[chan.key]}
                     onChange={(e) =>
-                      void updatePreferences({ ...preferences, [chan.key]: e.target.checked } as NotificationPreferenceData)
+                      void updatePreferences(
+                        { ...preferences, [chan.key]: e.target.checked } as NotificationPreferenceData,
+                      )
                     }
                     style={{
                       width: '18px',
