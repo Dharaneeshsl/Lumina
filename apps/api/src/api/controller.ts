@@ -1193,3 +1193,61 @@ export const listClubPosts = (req: Request, res: Response) =>
 
 export const getClubAnalytics = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.getClubAnalytics(userId(req), String(req.params.clubId)))
+
+// --- Section 14: Internship Portal HTTP Controllers ---
+
+export const createCompany = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createCompany(userId(req), req.body))
+
+export const updateCompany = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateCompany(userId(req), String(req.params.companyId), req.body)
+  )
+
+export const listCompanies = (_req: Request, res: Response) =>
+  respond(_req, res, 200, () => api.listCompanies())
+
+export const getCompanyById = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getCompanyById(String(req.params.companyId)))
+
+export const createInternship = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createInternship(userId(req), req.body))
+
+export const updateInternship = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateInternship(userId(req), String(req.params.internshipId), req.body)
+  )
+
+export const deleteInternship = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.deleteInternship(userId(req), String(req.params.internshipId)))
+
+export const listInternships = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listInternships(req.query))
+
+export const getInternshipById = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.getInternshipById(String(req.params.internshipId), (req as AuthenticatedRequest).user?.id)
+  )
+
+export const applyForInternship = (req: Request, res: Response) =>
+  respond(req, res, 201, () =>
+    api.applyForInternship(userId(req), String(req.params.internshipId), req.body)
+  )
+
+export const withdrawApplication = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.withdrawApplication(userId(req), String(req.params.internshipId))
+  )
+
+export const getMyApplications = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getMyApplications(userId(req)))
+
+export const listInternshipApplications = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.listInternshipApplications(userId(req), String(req.params.internshipId))
+  )
+
+export const updateApplicationStatus = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateApplicationStatus(userId(req), String(req.params.applicationId), req.body)
+  )

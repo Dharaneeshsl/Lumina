@@ -1,17 +1,22 @@
-import ClubsView from './components/clubs/ClubsView'
-import LoginPage from './LoginPage'
-import SignupPage from './SignupPage'
 import { useState } from 'react'
 
 import './App.css'
+import ClubsView from './components/clubs/ClubsView'
+import LoginPage from './LoginPage'
+import InternshipsPage from './pages/InternshipsPage'
+import SignupPage from './SignupPage'
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'signup' | 'login' | 'clubs'>(
-    'landing'
-  )
+  const [currentView, setCurrentView] = useState<
+    'landing' | 'signup' | 'login' | 'clubs' | 'internships'
+  >('landing')
 
   if (currentView === 'clubs') {
     return <ClubsView onBackToHome={() => setCurrentView('landing')} />
+  }
+
+  if (currentView === 'internships') {
+    return <InternshipsPage />
   }
 
   if (currentView === 'signup') {
@@ -124,6 +129,18 @@ export default function App() {
                     }}
                   >
                     Clubs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#internships"
+                    className="nav-link"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setCurrentView('internships')
+                    }}
+                  >
+                    Internships
                   </a>
                 </li>
                 <li>
