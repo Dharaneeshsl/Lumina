@@ -1,4 +1,5 @@
 {
   "extends": "@lumina/typescript-config/base.json",
-  "include": ["src"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }
