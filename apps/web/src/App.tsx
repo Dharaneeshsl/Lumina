@@ -26,7 +26,7 @@ export default function App() {
         <div style={{ background: '#111827', padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button onClick={() => setCurrentView('landing')} style={{ background: 'transparent', color: '#818cf8', border: '1px solid rgba(129, 140, 248, 0.4)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer' }}>← Back to Home</button>
         </div>
-        <AlumniView />
+        <AlumniPage />
       </div>
     )
   }
