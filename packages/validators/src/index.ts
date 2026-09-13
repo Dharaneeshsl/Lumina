@@ -440,3 +440,40 @@ export const alumniVerificationApproveSchema = z
     approve: z.boolean(),
   })
   .strict()
+
+export const notificationQuerySchema = z.object({
+  unreadOnly: z.union([z.string(), z.boolean()]).optional(),
+  archived: z.union([z.string(), z.boolean()]).optional(),
+  type: z.string().optional(),
+  limit: z.union([z.string(), z.number()]).optional(),
+  cursor: z.string().optional(),
+})
+
+export const markNotificationsReadSchema = z
+  .object({
+    notificationIds: z.array(z.string().min(1).max(64)).min(1).max(100),
+  })
+  .strict()
+
+export const notificationPreferenceSchema = z
+  .object({
+    emailEnabled: z.boolean().optional(),
+    pushEnabled: z.boolean().optional(),
+    inAppEnabled: z.boolean().optional(),
+    comments: z.boolean().optional(),
+    likes: z.boolean().optional(),
+    mentions: z.boolean().optional(),
+    events: z.boolean().optional(),
+    clubs: z.boolean().optional(),
+    internships: z.boolean().optional(),
+    alumni: z.boolean().optional(),
+    system: z.boolean().optional(),
+  })
+  .strict()
+
+export const registerDeviceTokenSchema = z
+  .object({
+    token: z.string().trim().min(1).max(500),
+    platform: z.enum(['WEB', 'IOS', 'ANDROID']).optional(),
+  })
+  .strict()

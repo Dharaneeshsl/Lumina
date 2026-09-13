@@ -47,9 +47,13 @@ import {
   createInternshipSchema,
   createStudyGroupSchema,
   internshipQuerySchema,
+  markNotificationsReadSchema,
   mentorshipRequestSchema,
+  notificationPreferenceSchema,
+  notificationQuerySchema,
   profileUpdateSchema,
   protectedProfileFields,
+  registerDeviceTokenSchema,
   respondClubInvitationSchema,
   studyGroupDiscussionSchema,
   studyGroupFileRegisterSchema,
@@ -6636,3 +6640,165 @@ export const createAlumniReferral = AlumniService.createReferral
 export const listAlumniReferrals = AlumniService.listReferrals
 export const createAlumniEvent = AlumniService.createAlumniEvent
 export const listAlumniEvents = AlumniService.listAlumniEvents
+
+export namespace NotificationRepo {
+  export async function listUserNotifications(
+    userId: string,
+    params: { unreadOnly?: boolean; archived?: boolean; type?: string; limit?: number }
+  ) {
+    const where: any = { userId }
+    if (params.unreadOnly) where.read = false
+    if (params.archived !== undefined) where.archived = params.archived
+    else where.archived = false
+    if (params.type) where.type = params.type
+
+    return prisma.notification.findMany({
+      where,
+      take: params.limit || 50,
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  export async function getUnreadCount(userId: string) {
+    return prisma.notification.count({
+      where: { userId, read: false, archived: false },
+    })
+  }
+
+  export async function markAsRead(userId: string, notificationIds: string[]) {
+    return prisma.notification.updateMany({
+      where: { id: { in: notificationIds }, userId },
+      data: { read: true },
+    })
+  }
+
+  export async function markAllAsRead(userId: string) {
+    return prisma.notification.updateMany({
+      where: { userId, read: false },
+      data: { read: true },
+    })
+  }
+
+  export async function archiveNotification(userId: string, notificationId: string) {
+    return prisma.notification.updateMany({
+      where: { id: notificationId, userId },
+      data: { archived: true },
+    })
+  }
+
+  export async function deleteNotification(userId: string, notificationId: string) {
+    return prisma.notification.deleteMany({
+      where: { id: notificationId, userId },
+    })
+  }
+
+  export async function getNotificationPreferences(userId: string) {
+    return prisma.notificationPreference.upsert({
+      where: { userId },
+      create: { userId },
+      update: {},
+    })
+  }
+
+  export async function updateNotificationPreferences(userId: string, data: any) {
+    return prisma.notificationPreference.upsert({
+      where: { userId },
+      create: { userId, ...data },
+      update: data,
+    })
+  }
+
+  export async function registerDeviceToken(userId: string, token: string, platform = 'WEB') {
+    return prisma.deviceToken.upsert({
+      where: { token },
+      create: { userId, token, platform },
+      update: { userId, platform, updatedAt: new Date() },
+    })
+  }
+
+  export async function revokeDeviceToken(userId: string, token: string) {
+    return prisma.deviceToken.deleteMany({
+      where: { token, userId },
+    })
+  }
+
+  export async function listDeviceTokens(userId: string) {
+    return prisma.deviceToken.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+    })
+  }
+}
+
+export namespace NotificationService {
+  export async function listNotifications(userId: string, input: unknown) {
+    const parsed = notificationQuerySchema.parse(input)
+    return NotificationRepo.listUserNotifications(userId, {
+      unreadOnly: parsed.unreadOnly === 'true' || parsed.unreadOnly === true,
+      archived: parsed.archived === 'true' || parsed.archived === true,
+      type: parsed.type,
+      limit: parsed.limit ? Number(parsed.limit) : 50,
+    })
+  }
+
+  export async function getUnreadCount(userId: string) {
+    const count = await NotificationRepo.getUnreadCount(userId)
+    return { unreadCount: count }
+  }
+
+  export async function markAsRead(userId: string, input: unknown) {
+    const parsed = markNotificationsReadSchema.parse(input)
+    await NotificationRepo.markAsRead(userId, parsed.notificationIds)
+    return { success: true }
+  }
+
+  export async function markAllAsRead(userId: string) {
+    await NotificationRepo.markAllAsRead(userId)
+    return { success: true }
+  }
+
+  export async function archiveNotification(userId: string, notificationId: string) {
+    await NotificationRepo.archiveNotification(userId, notificationId)
+    return { success: true }
+  }
+
+  export async function deleteNotification(userId: string, notificationId: string) {
+    await NotificationRepo.deleteNotification(userId, notificationId)
+    return { success: true }
+  }
+
+  export async function getPreferences(userId: string) {
+    return NotificationRepo.getNotificationPreferences(userId)
+  }
+
+  export async function updatePreferences(userId: string, input: unknown) {
+    const parsed = notificationPreferenceSchema.parse(input)
+    return NotificationRepo.updateNotificationPreferences(userId, parsed)
+  }
+
+  export async function registerDeviceToken(userId: string, input: unknown) {
+    const parsed = registerDeviceTokenSchema.parse(input)
+    return NotificationRepo.registerDeviceToken(userId, parsed.token, parsed.platform)
+  }
+
+  export async function listDeviceTokens(userId: string) {
+    return NotificationRepo.listDeviceTokens(userId)
+  }
+
+  export async function revokeDeviceToken(userId: string, token: string) {
+    await NotificationRepo.revokeDeviceToken(userId, token)
+    return { success: true }
+  }
+}
+
+export const listNotifications = NotificationService.listNotifications
+export const getNotificationUnreadCount = NotificationService.getUnreadCount
+export const markNotificationsAsRead = NotificationService.markAsRead
+export const markAllNotificationsAsRead = NotificationService.markAllAsRead
+export const archiveNotification = NotificationService.archiveNotification
+export const deleteNotification = NotificationService.deleteNotification
+export const getNotificationPreferences = NotificationService.getPreferences
+export const updateNotificationPreferences = NotificationService.updatePreferences
+export const registerDeviceToken = NotificationService.registerDeviceToken
+export const listDeviceTokens = NotificationService.listDeviceTokens
+export const revokeDeviceToken = NotificationService.revokeDeviceToken

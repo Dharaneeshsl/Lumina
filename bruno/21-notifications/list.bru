@@ -1,0 +1,20 @@
+meta {
+  name: List User Notifications
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notifications
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+}

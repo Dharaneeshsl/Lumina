@@ -1513,6 +1513,98 @@ paths:
       responses:
         '200': { description: Events list returned }
 
+  /api/v1/notifications:
+    get:
+      summary: List user notifications
+      responses:
+        '200': { description: Notifications list returned }
+
+  /api/v1/notifications/unread-count:
+    get:
+      summary: Get unread notification count
+      responses:
+        '200': { description: Unread count returned }
+
+  /api/v1/notifications/read:
+    post:
+      summary: Mark specific notifications as read
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Notifications marked as read }
+
+  /api/v1/notifications/read-all:
+    post:
+      summary: Mark all notifications as read
+      responses:
+        '200': { description: All notifications marked as read }
+
+  /api/v1/notifications/{notificationId}/archive:
+    patch:
+      summary: Archive a notification
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Notification archived }
+
+  /api/v1/notifications/{notificationId}:
+    delete:
+      summary: Delete a notification
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Notification deleted }
+
+  /api/v1/notifications/preferences:
+    get:
+      summary: Get notification channel and category preferences
+      responses:
+        '200': { description: Notification preferences returned }
+    patch:
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Notification preferences updated }
+
+  /api/v1/notifications/devices:
+    post:
+      summary: Register device token for push notifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Device token registered }
+    get:
+      summary: List registered device tokens
+      responses:
+        '200': { description: Device tokens list returned }
+
+  /api/v1/notifications/devices/{token}:
+    delete:
+      summary: Revoke device token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Device token revoked }
+
 components:
   securitySchemes:
     sessionCookie:

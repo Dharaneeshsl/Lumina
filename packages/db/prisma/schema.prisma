@@ -40,79 +40,81 @@ model Department {
 }
 
 model User {
-  id                     String                  @id @default(cuid())
-  email                  String                  @unique
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
-  collegeId              String?
-  departmentId           String?
-  emailVerified          Boolean                 @default(false)
-  password               String?
-  phone                  String?                 @unique
-  phoneVerified          Boolean                 @default(false)
-  provider               Provider                @default(EMAIL)
-  role                   UserRole                @default(STUDENT)
-  status                 UserStatus              @default(PENDING)
-  twoFactorEnabled       Boolean                 @default(false)
-  username               String?                 @unique
-  name                   String                  @default("")
-  image                  String?
-  accounts               Account[]
-  clubMembers            ClubMember[]
-  comments               Comment[]
-  commentReactions       CommentReaction[]
-  commentMentions        CommentMention[]
-  commentEditHistory     CommentEditHistory[]
-  commentReports         CommentReport[]
-  communityMembers       CommunityMember[]
-  communityPosts         CommunityPost[]
-  conversations          Conversation[]
-  conversationMembers    ConversationMember[]
-  devices                Device[]
-  events                 Event[]
-  eventRegistrations     EventRegistration[]
-  receivedFriendRequests FriendRequest[]         @relation("Received")
-  sentFriendRequests     FriendRequest[]         @relation("Sent")
-  internshipApplications InternshipApplication[]
-  likes                  Like[]
-  loginHistory           LoginHistory[]
-  marketplaceListings    MarketplaceListing[]
-  messages               Message[]
-  messageReactions       MessageReaction[]
-  messageReads           MessageRead[]
-  notifications          Notification[]
-  otps                   OTP[]
-  posts                  Post[]
-  profile                Profile?
-  refreshTokens          RefreshToken[]
-  sessions               Session[]
-  studyGroups                   StudyGroup[]
-  studyGroupMembers             StudyGroupMember[]
-  studyGroupInvitesSent         StudyGroupInvitation[]      @relation("StudyGroupInviter")
-  studyGroupInvitesReceived     StudyGroupInvitation[]      @relation("StudyGroupInvitee")
-  clubInvitesSent               ClubInvitation[]            @relation("ClubInviter")
-  clubInvitesReceived           ClubInvitation[]            @relation("ClubInvitee")
-  studyGroupDiscussions         StudyGroupDiscussion[]
-  studyGroupDiscussionReplies   StudyGroupDiscussionReply[]
-  studyGroupNotes               StudyGroupNote[]
-  studyGroupNoteVersions        StudyGroupNoteVersion[]
-  studyGroupFiles               StudyGroupFile[]
-  studyGroupTimetableVersions   StudyGroupTimetableVersion[]
-  studyGroupAuditEvents         StudyGroupAuditEvent[]
-  college                College?                @relation(fields: [collegeId], references: [id])
-  department             Department?             @relation(fields: [departmentId], references: [id])
-  verification           Verification?
-  wishlists              Wishlist[]
-  savedPosts             SavedPost[]
-  createdVideoCalls      VideoCall[]             @relation("CreatedCalls")
-  videoCallParticipants  VideoCallParticipant[]
+  id                          String                       @id @default(cuid())
+  email                       String                       @unique
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  collegeId                   String?
+  departmentId                String?
+  emailVerified               Boolean                      @default(false)
+  password                    String?
+  phone                       String?                      @unique
+  phoneVerified               Boolean                      @default(false)
+  provider                    Provider                     @default(EMAIL)
+  role                        UserRole                     @default(STUDENT)
+  status                      UserStatus                   @default(PENDING)
+  twoFactorEnabled            Boolean                      @default(false)
+  username                    String?                      @unique
+  name                        String                       @default("")
+  image                       String?
+  accounts                    Account[]
+  clubMembers                 ClubMember[]
+  comments                    Comment[]
+  commentReactions            CommentReaction[]
+  commentMentions             CommentMention[]
+  commentEditHistory          CommentEditHistory[]
+  commentReports              CommentReport[]
+  communityMembers            CommunityMember[]
+  communityPosts              CommunityPost[]
+  conversations               Conversation[]
+  conversationMembers         ConversationMember[]
+  devices                     Device[]
+  events                      Event[]
+  eventRegistrations          EventRegistration[]
+  receivedFriendRequests      FriendRequest[]              @relation("Received")
+  sentFriendRequests          FriendRequest[]              @relation("Sent")
+  internshipApplications      InternshipApplication[]
+  likes                       Like[]
+  loginHistory                LoginHistory[]
+  marketplaceListings         MarketplaceListing[]
+  messages                    Message[]
+  messageReactions            MessageReaction[]
+  messageReads                MessageRead[]
+  notifications               Notification[]
+  otps                        OTP[]
+  posts                       Post[]
+  profile                     Profile?
+  refreshTokens               RefreshToken[]
+  sessions                    Session[]
+  studyGroups                 StudyGroup[]
+  studyGroupMembers           StudyGroupMember[]
+  studyGroupInvitesSent       StudyGroupInvitation[]       @relation("StudyGroupInviter")
+  studyGroupInvitesReceived   StudyGroupInvitation[]       @relation("StudyGroupInvitee")
+  clubInvitesSent             ClubInvitation[]             @relation("ClubInviter")
+  clubInvitesReceived         ClubInvitation[]             @relation("ClubInvitee")
+  studyGroupDiscussions       StudyGroupDiscussion[]
+  studyGroupDiscussionReplies StudyGroupDiscussionReply[]
+  studyGroupNotes             StudyGroupNote[]
+  studyGroupNoteVersions      StudyGroupNoteVersion[]
+  studyGroupFiles             StudyGroupFile[]
+  studyGroupTimetableVersions StudyGroupTimetableVersion[]
+  studyGroupAuditEvents       StudyGroupAuditEvent[]
+  college                     College?                     @relation(fields: [collegeId], references: [id])
+  department                  Department?                  @relation(fields: [departmentId], references: [id])
+  verification                Verification?
+  wishlists                   Wishlist[]
+  savedPosts                  SavedPost[]
+  createdVideoCalls           VideoCall[]                  @relation("CreatedCalls")
+  videoCallParticipants       VideoCallParticipant[]
   alumniProfile               AlumniProfile?
-  sentAlumniConnections       AlumniConnection[]     @relation("StudentConnections")
-  receivedAlumniConnections   AlumniConnection[]     @relation("AlumniConnections")
-  studentMentorshipSessions   MentorshipSession[]    @relation("StudentMentorships")
-  alumniMentorshipSessions    MentorshipSession[]    @relation("AlumniMentorships")
-  alumniReferrals             AlumniReferral[]       @relation("AlumniReferrals")
-  organizedAlumniEvents       AlumniEvent[]          @relation("AlumniEventOrganizer")
+  sentAlumniConnections       AlumniConnection[]           @relation("StudentConnections")
+  receivedAlumniConnections   AlumniConnection[]           @relation("AlumniConnections")
+  studentMentorshipSessions   MentorshipSession[]          @relation("StudentMentorships")
+  alumniMentorshipSessions    MentorshipSession[]          @relation("AlumniMentorships")
+  alumniReferrals             AlumniReferral[]             @relation("AlumniReferrals")
+  organizedAlumniEvents       AlumniEvent[]                @relation("AlumniEventOrganizer")
+  notificationPreference      NotificationPreference?
+  deviceTokens                DeviceToken[]
 
   @@index([collegeId])
   @@index([departmentId])
@@ -470,11 +472,48 @@ model Notification {
   userId    String
   title     String
   body      String
+  link      String?
   read      Boolean          @default(false)
+  archived  Boolean          @default(false)
+  data      Json?
   type      NotificationType
   createdAt DateTime         @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+model NotificationPreference {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  emailEnabled Boolean  @default(true)
+  pushEnabled  Boolean  @default(true)
+  inAppEnabled Boolean  @default(true)
+  comments     Boolean  @default(true)
+  likes        Boolean  @default(true)
+  mentions     Boolean  @default(true)
+  events       Boolean  @default(true)
+  clubs        Boolean  @default(true)
+  internships  Boolean  @default(true)
+  alumni       Boolean  @default(true)
+  system       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   @default("WEB")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 enum NotificationType {
@@ -701,19 +740,19 @@ model EventRegistration {
 }
 
 model StudyGroup {
-  id            String               @id @default(cuid())
+  id            String                 @id @default(cuid())
   name          String
   type          StudyGroupType
-  visibility    StudyGroupVisibility @default(PRIVATE)
+  visibility    StudyGroupVisibility   @default(PRIVATE)
   subject       String
   semester      Int
   description   String?
   ownerId       String
-  version       Int                  @default(1)
+  version       Int                    @default(1)
   chatChannelId String?
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  owner         User                 @relation(fields: [ownerId], references: [id])
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  owner         User                   @relation(fields: [ownerId], references: [id])
   members       StudyGroupMember[]
   invitations   StudyGroupInvitation[]
   discussions   StudyGroupDiscussion[]
@@ -728,73 +767,73 @@ model StudyGroup {
 }
 
 model StudyGroupMember {
-  id           String                @id @default(cuid())
+  id           String               @id @default(cuid())
   studyGroupId String
   userId       String
-  role         StudyGroupMemberRole  @default(MEMBER)
-  joinedAt     DateTime              @default(now())
-  studyGroup   StudyGroup            @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
-  user         User                  @relation(fields: [userId], references: [id])
+  role         StudyGroupMemberRole @default(MEMBER)
+  joinedAt     DateTime             @default(now())
+  studyGroup   StudyGroup           @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id])
 
   @@unique([studyGroupId, userId])
   @@index([userId])
 }
 
 model StudyGroupInvitation {
-  id           String                       @id @default(cuid())
+  id           String                     @id @default(cuid())
   studyGroupId String
   inviterId    String
   inviteeId    String
   message      String?
-  status       StudyGroupInvitationStatus   @default(PENDING)
-  createdAt    DateTime                     @default(now())
-  studyGroup   StudyGroup                   @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
-  inviter      User                         @relation("StudyGroupInviter", fields: [inviterId], references: [id])
-  invitee      User                         @relation("StudyGroupInvitee", fields: [inviteeId], references: [id])
+  status       StudyGroupInvitationStatus @default(PENDING)
+  createdAt    DateTime                   @default(now())
+  studyGroup   StudyGroup                 @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
+  inviter      User                       @relation("StudyGroupInviter", fields: [inviterId], references: [id])
+  invitee      User                       @relation("StudyGroupInvitee", fields: [inviteeId], references: [id])
 
   @@unique([studyGroupId, inviteeId])
   @@index([inviteeId, status])
 }
 
 model StudyGroupDiscussion {
-  id           String                       @id @default(cuid())
+  id           String                      @id @default(cuid())
   studyGroupId String
   authorId     String
   title        String
   body         String
-  createdAt    DateTime                     @default(now())
-  updatedAt    DateTime                     @updatedAt
-  studyGroup   StudyGroup                   @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
-  author       User                         @relation(fields: [authorId], references: [id])
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+  studyGroup   StudyGroup                  @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
+  author       User                        @relation(fields: [authorId], references: [id])
   replies      StudyGroupDiscussionReply[]
 
   @@index([studyGroupId, createdAt])
 }
 
 model StudyGroupDiscussionReply {
-  id           String                 @id @default(cuid())
+  id           String               @id @default(cuid())
   discussionId String
   authorId     String
   body         String
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @updatedAt
-  discussion   StudyGroupDiscussion   @relation(fields: [discussionId], references: [id], onDelete: Cascade)
-  author       User                   @relation(fields: [authorId], references: [id])
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  discussion   StudyGroupDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  author       User                 @relation(fields: [authorId], references: [id])
 
   @@index([discussionId, createdAt])
 }
 
 model StudyGroupNote {
-  id           String                 @id @default(cuid())
+  id           String                  @id @default(cuid())
   studyGroupId String
   authorId     String
   title        String
   body         String
-  version      Int                    @default(1)
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @updatedAt
-  studyGroup   StudyGroup             @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
-  author       User                   @relation(fields: [authorId], references: [id])
+  version      Int                     @default(1)
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  studyGroup   StudyGroup              @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
+  author       User                    @relation(fields: [authorId], references: [id])
   versions     StudyGroupNoteVersion[]
 
   @@index([studyGroupId, updatedAt])
@@ -842,14 +881,14 @@ model StudyGroupTimetable {
 }
 
 model StudyGroupTimetableVersion {
-  id          String               @id @default(cuid())
+  id          String              @id @default(cuid())
   timetableId String
   editorId    String
   version     Int
   content     Json
-  createdAt   DateTime             @default(now())
-  timetable   StudyGroupTimetable  @relation(fields: [timetableId], references: [id], onDelete: Cascade)
-  editor      User                 @relation(fields: [editorId], references: [id])
+  createdAt   DateTime            @default(now())
+  timetable   StudyGroupTimetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  editor      User                @relation(fields: [editorId], references: [id])
 
   @@unique([timetableId, version])
 }
@@ -1287,4 +1326,3 @@ model AlumniEvent {
   @@index([organizerId])
   @@index([eventDate])
 }
-
