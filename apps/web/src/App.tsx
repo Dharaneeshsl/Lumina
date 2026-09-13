@@ -4,13 +4,14 @@ import './App.css'
 import ClubsView from './components/clubs/ClubsView'
 import AlumniPage from './pages/AlumniPage'
 import { NotificationsView } from './components/notifications/NotificationsView'
+import AdminDashboardView from './components/admin/AdminDashboardView'
 import LoginPage from './LoginPage'
 import InternshipsPage from './pages/InternshipsPage'
 import SignupPage from './SignupPage'
 
 export default function App() {
   const [currentView, setCurrentView] = useState<
-    'landing' | 'signup' | 'login' | 'clubs' | 'internships' | 'alumni' | 'notifications'
+    'landing' | 'signup' | 'login' | 'clubs' | 'internships' | 'alumni' | 'notifications' | 'admin'
   >('landing')
 
   if (currentView === 'clubs') {
@@ -39,6 +40,18 @@ export default function App() {
           <button onClick={() => setCurrentView('landing')} style={{ background: 'transparent', color: '#818cf8', border: '1px solid rgba(129, 140, 248, 0.4)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer' }}>← Back to Home</button>
         </div>
         <NotificationsView />
+      </div>
+    )
+  }
+
+  if (currentView === 'admin') {
+    return (
+      <div>
+        <div style={{ background: '#0b0f17', padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button onClick={() => setCurrentView('landing')} style={{ background: 'transparent', color: '#818cf8', border: '1px solid rgba(129, 140, 248, 0.4)', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer' }}>← Back to Home</button>
+          <span style={{ color: '#94a3b8', fontSize: '13px' }}>Admin Workspace</span>
+        </div>
+        <AdminDashboardView />
       </div>
     )
   }
@@ -191,6 +204,18 @@ export default function App() {
                     }}
                   >
                     Notifications 🔔
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#admin"
+                    className="nav-link"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setCurrentView('admin')
+                    }}
+                  >
+                    Admin Console 🛡️
                   </a>
                 </li>
 

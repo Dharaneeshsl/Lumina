@@ -394,4 +394,31 @@ notificationRouter.delete('/devices/:token', requireAuth, controller.revokeDevic
 apiRouter.use('/v1/notifications', notificationRouter)
 apiRouter.use('/notifications', notificationRouter)
 
+// Section 25: Admin Dashboard mounted on /api/v1/admin and /api/admin
+const adminRouter = Router()
+adminRouter.get('/summary', requireAuth, controller.getAdminDashboardMetrics)
+adminRouter.get('/metrics', requireAuth, controller.getAdminDashboardMetrics)
+adminRouter.get('/users', requireAuth, controller.listAdminUsers)
+adminRouter.patch('/users/:targetUserId', requireAuth, controller.updateAdminUserRoleStatus)
+adminRouter.patch(
+  '/users/:targetUserId/role-status',
+  requireAuth,
+  controller.updateAdminUserRoleStatus
+)
+adminRouter.get('/verification/queue', requireAuth, controller.listAdminVerificationQueue)
+adminRouter.get('/verification-queue', requireAuth, controller.listAdminVerificationQueue)
+adminRouter.get('/reports/queue', requireAuth, controller.listAdminReportsQueue)
+adminRouter.get('/reports', requireAuth, controller.listAdminReportsQueue)
+adminRouter.post('/moderation/action', requireAuth, controller.applyAdminModerationAction)
+adminRouter.post('/moderation', requireAuth, controller.applyAdminModerationAction)
+adminRouter.get('/audit-logs', requireAuth, controller.listAdminAuditLogs)
+adminRouter.get('/settings', requireAuth, controller.getAdminSystemSettings)
+adminRouter.patch('/settings', requireAuth, controller.updateAdminSystemSetting)
+adminRouter.put('/settings', requireAuth, controller.updateAdminSystemSetting)
+adminRouter.post('/announcements', requireAuth, controller.createAdminAnnouncement)
+adminRouter.get('/announcements', requireAuth, controller.listAdminAnnouncements)
+
+apiRouter.use('/v1/admin', adminRouter)
+apiRouter.use('/admin', adminRouter)
+
 export default apiRouter

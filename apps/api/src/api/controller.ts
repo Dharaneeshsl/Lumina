@@ -1334,3 +1334,38 @@ export const listDeviceTokens = (req: Request, res: Response) =>
 
 export const revokeDeviceToken = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.revokeDeviceToken(userId(req), String(req.params.token)))
+
+export const getAdminDashboardMetrics = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getAdminDashboardMetrics(userId(req)))
+
+export const listAdminUsers = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listAdminUsers(userId(req), req.query))
+
+export const updateAdminUserRoleStatus = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateAdminUserRoleStatus(userId(req), String(req.params.targetUserId), req.body)
+  )
+
+export const listAdminVerificationQueue = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listAdminVerificationQueue(userId(req)))
+
+export const listAdminReportsQueue = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listAdminReportsQueue(userId(req)))
+
+export const applyAdminModerationAction = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.applyAdminModerationAction(userId(req), req.body))
+
+export const listAdminAuditLogs = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listAdminAuditLogs(userId(req), req.query))
+
+export const getAdminSystemSettings = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getAdminSystemSettings(userId(req)))
+
+export const updateAdminSystemSetting = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.updateAdminSystemSetting(userId(req), req.body))
+
+export const createAdminAnnouncement = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createAdminAnnouncement(userId(req), req.body))
+
+export const listAdminAnnouncements = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listAdminAnnouncements(userId(req)))

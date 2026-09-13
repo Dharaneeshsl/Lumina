@@ -32,11 +32,12 @@ export async function prepareTestDatabase() {
   }
   const databaseUrl = getTestDatabaseUrl()
 
+  const execPath = process.platform === 'win32' ? `"${process.execPath}"` : process.execPath
   const shellCmd =
-    process.platform === 'win32' ? process.env.ComSpec || 'C:\\Windows\\System32\\cmd.exe' : true
+    process.platform === 'win32' ? process.env.ComSpec || 'C:\\Windows\\System32\\cmd.exe' : false
 
   execFileSync(
-    process.execPath,
+    execPath,
     ['x', 'prisma', 'db', 'push', '--schema', schemaPath, '--accept-data-loss'],
     {
       cwd: databasePackagePath,

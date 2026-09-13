@@ -1605,6 +1605,93 @@ paths:
       responses:
         '200': { description: Device token revoked }
 
+  /api/v1/admin/summary:
+    get:
+      summary: Get admin dashboard metrics summary
+      responses:
+        '200': { description: Metrics summary returned }
+
+  /api/v1/admin/users:
+    get:
+      summary: List users for admin management
+      responses:
+        '200': { description: Users list returned }
+
+  /api/v1/admin/users/{targetUserId}:
+    patch:
+      summary: Update user role or status (Admin action)
+      parameters:
+        - name: targetUserId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: User updated }
+
+  /api/v1/admin/verification/queue:
+    get:
+      summary: List pending student/alumni verification requests
+      responses:
+        '200': { description: Verification queue returned }
+
+  /api/v1/admin/reports/queue:
+    get:
+      summary: List content reports queue
+      responses:
+        '200': { description: Reports queue returned }
+
+  /api/v1/admin/moderation/action:
+    post:
+      summary: Apply moderation action (warn, hide, suspend, ban)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Moderation action applied }
+
+  /api/v1/admin/audit-logs:
+    get:
+      summary: List admin audit log history
+      responses:
+        '200': { description: Audit logs returned }
+
+  /api/v1/admin/settings:
+    get:
+      summary: List system settings and feature flags
+      responses:
+        '200': { description: System settings returned }
+    patch:
+      summary: Update system setting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: System setting updated }
+
+  /api/v1/admin/announcements:
+    post:
+      summary: Broadcast admin global announcement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Announcement created }
+    get:
+      summary: List announcements
+      responses:
+        '200': { description: Announcements list returned }
+
 components:
   securitySchemes:
     sessionCookie:

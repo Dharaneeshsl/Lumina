@@ -115,6 +115,8 @@ model User {
   organizedAlumniEvents       AlumniEvent[]                @relation("AlumniEventOrganizer")
   notificationPreference      NotificationPreference?
   deviceTokens                DeviceToken[]
+  adminAuditLogs              AdminAuditLog[]              @relation("AdminAuditLogs")
+  adminAnnouncements          Announcement[]               @relation("AdminAnnouncements")
 
   @@index([collegeId])
   @@index([departmentId])
@@ -1325,4 +1327,44 @@ model AlumniEvent {
 
   @@index([organizerId])
   @@index([eventDate])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  targetId   String?
+  targetType String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedById String?
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  type        String   @default("INFO")
+  targetRole  String   @default("ALL")
+  isActive    Boolean  @default(true)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  createdBy   User     @relation("AdminAnnouncements", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
 }

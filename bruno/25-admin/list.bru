@@ -1,0 +1,20 @@
+meta {
+  name: Get Admin Dashboard Summary
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/admin/summary
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+}
