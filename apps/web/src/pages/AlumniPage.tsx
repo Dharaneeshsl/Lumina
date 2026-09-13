@@ -28,6 +28,12 @@ type Item = {
 const list = <T,>(data: Record<string, unknown>, key: string): T[] =>
   (data[key] ?? data.items ?? data.data ?? []) as T[]
 
+const tabPaths: Record<string, { path: string; key: string }> = {
+  connections: { path: '/alumni/connections', key: 'connections' },
+  mentorship: { path: '/alumni/mentorship/sessions', key: 'sessions' },
+  opportunities: { path: '/alumni/referrals', key: 'referrals' },
+}
+
 export default function AlumniPage() {
   const [tab, setTab] = useState('directory')
   const [alumni, setAlumni] = useState<Alumni[]>([])
@@ -41,15 +47,18 @@ export default function AlumniPage() {
       ...init,
     })
     const data = await response.json().catch(() => ({}))
-    if (!response.ok) throw new Error(data.message ?? 'Request failed')
+
+    if (!response.ok) {
+      throw new Error(data.message ?? 'Request failed')
+    }
+
     return data
   }
 
-  const load = async () => {
+  const loadDirectory = async () => {
     try {
-      const directory = await request(
-        '/alumni/directory?q=' + encodeURIComponent(query)
-      )
+      const path = '/alumni/directory?q=' + encodeURIComponent(query)
+      const directory = await request(path)
       setAlumni(list<Alumni>(directory, 'alumni'))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load alumni')
@@ -57,28 +66,22 @@ export default function AlumniPage() {
   }
 
   const loadTab = async (name: string) => {
-    const paths: Record<string, string> = {
-      connections: '/alumni/connections',
-      mentorship: '/alumni/mentorship/sessions',
-      opportunities: '/alumni/referrals',
+    const config = tabPaths[name]
+
+    if (!config) {
+      return
     }
-    if (!paths[name]) return
+
     try {
-      const data = await request(paths[name])
-      const key =
-        name === 'connections'
-          ? 'connections'
-          : name === 'mentorship'
-            ? 'sessions'
-            : 'referrals'
-      setItems(list<Item>(data, key))
+      const data = await request(config.path)
+      setItems(list<Item>(data, config.key))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load data')
     }
   }
 
   useEffect(() => {
-    void load()
+    void loadDirectory()
   }, [])
 
   const connect = async (alumniId: string) => {
@@ -95,7 +98,11 @@ export default function AlumniPage() {
 
   const mentor = async (alumniId: string) => {
     const topic = window.prompt('What would you like guidance on?')
-    if (!topic) return
+
+    if (!topic) {
+      return
+    }
+
     try {
       await request('/alumni/mentorship/sessions', {
         method: 'POST',
@@ -138,7 +145,7 @@ export default function AlumniPage() {
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search alumni"
             />
-            <button onClick={() => void load()}>Search</button>
+            <button onClick={() => void loadDirectory()}>Search</button>
 
             {alumni.map((item) => (
               <article key={item.id}>
@@ -146,12 +153,15 @@ export default function AlumniPage() {
                 <p>{item.jobTitle ?? 'Alumnus'}</p>
                 <p>{item.company ?? 'Company private'}</p>
                 <p>Class of {item.graduationYear}</p>
+
                 {item.user.verification?.alumniVerified && (
                   <p>✓ Verified alumni</p>
                 )}
+
                 <button onClick={() => void connect(item.userId)}>
                   Connect
                 </button>
+
                 {item.isAvailableForMentorship && (
                   <button onClick={() => void mentor(item.userId)}>
                     Request mentorship
