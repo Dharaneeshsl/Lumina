@@ -8,10 +8,8 @@ type Alumni = {
   graduationYear: number
   company?: string | null
   jobTitle?: string | null
-  skills: string[]
   isAvailableForMentorship: boolean
   user: {
-    id: string
     name: string
     verification?: { alumniVerified: boolean }
   }
@@ -27,63 +25,55 @@ type Item = {
   durationMinutes?: number
 }
 
-const card = {
-  background: '#111827',
-  border: '1px solid #263244',
-  borderRadius: 12,
-  padding: 18,
-  marginBottom: 12,
-}
+const list = <T,>(data: Record<string, unknown>, key: string): T[] =>
+  (data[key] ?? data.items ?? data.data ?? []) as T[]
 
 export default function AlumniPage() {
   const [tab, setTab] = useState('directory')
   const [alumni, setAlumni] = useState<Alumni[]>([])
-  const [connections, setConnections] = useState<Item[]>([])
-  const [sessions, setSessions] = useState<Item[]>([])
-  const [opportunities, setOpportunities] = useState<Item[]>([])
+  const [items, setItems] = useState<Item[]>([])
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
 
   const request = async (path: string, init?: RequestInit) => {
     const response = await fetch(API + path, {
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...init?.headers,
-      },
       ...init,
     })
     const data = await response.json().catch(() => ({}))
-    if (!response.ok) {
-      throw new Error(data.message ?? 'Request failed')
-    }
+    if (!response.ok) throw new Error(data.message ?? 'Request failed')
     return data
-  }
-
-  const toList = <T,>(data: Record<string, unknown>, key: string): T[] => {
-    return (data[key] ?? data.items ?? data.data ?? []) as T[]
   }
 
   const load = async () => {
     try {
-      const [directory, connectionData, sessionData, referralData, eventData] =
-        await Promise.all([
-          request('/alumni/directory?q=' + encodeURIComponent(query)),
-          request('/alumni/connections'),
-          request('/alumni/mentorship/sessions'),
-          request('/alumni/referrals'),
-          request('/alumni/events'),
-        ])
-
-      setAlumni(toList<Alumni>(directory, 'alumni'))
-      setConnections(toList<Item>(connectionData, 'connections'))
-      setSessions(toList<Item>(sessionData, 'sessions'))
-      setOpportunities([
-        ...toList<Item>(referralData, 'referrals'),
-        ...toList<Item>(eventData, 'events'),
-      ])
+      const directory = await request(
+        '/alumni/directory?q=' + encodeURIComponent(query)
+      )
+      setAlumni(list<Alumni>(directory, 'alumni'))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load alumni data')
+      setError(err instanceof Error ? err.message : 'Unable to load alumni')
+    }
+  }
+
+  const loadTab = async (name: string) => {
+    const paths: Record<string, string> = {
+      connections: '/alumni/connections',
+      mentorship: '/alumni/mentorship/sessions',
+      opportunities: '/alumni/referrals',
+    }
+    if (!paths[name]) return
+    try {
+      const data = await request(paths[name])
+      const key =
+        name === 'connections'
+          ? 'connections'
+          : name === 'mentorship'
+            ? 'sessions'
+            : 'referrals'
+      setItems(list<Item>(data, key))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load data')
     }
   }
 
@@ -97,7 +87,7 @@ export default function AlumniPage() {
         method: 'POST',
         body: JSON.stringify({ alumniId }),
       })
-      await load()
+      await loadTab('connections')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connection request failed')
     }
@@ -106,13 +96,12 @@ export default function AlumniPage() {
   const mentor = async (alumniId: string) => {
     const topic = window.prompt('What would you like guidance on?')
     if (!topic) return
-
     try {
       await request('/alumni/mentorship/sessions', {
         method: 'POST',
         body: JSON.stringify({ alumniId, topic }),
       })
-      await load()
+      await loadTab('mentorship')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Mentorship request failed')
     }
@@ -121,21 +110,20 @@ export default function AlumniPage() {
   const tabs = ['directory', 'connections', 'mentorship', 'opportunities']
 
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        padding: 24,
-        background: '#0b1020',
-        color: '#e5e7eb',
-      }}
-    >
-      <section style={{ maxWidth: 1180, margin: '0 auto' }}>
+    <main>
+      <section>
         <p>SECTION 20 · VERIFIED COMMUNITY</p>
         <h1>Lumina Alumni Network</h1>
 
-        <nav style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <nav>
           {tabs.map((name) => (
-            <button key={name} onClick={() => setTab(name)}>
+            <button
+              key={name}
+              onClick={() => {
+                setTab(name)
+                void loadTab(name)
+              }}
+            >
               {name}
             </button>
           ))}
@@ -153,14 +141,17 @@ export default function AlumniPage() {
             <button onClick={() => void load()}>Search</button>
 
             {alumni.map((item) => (
-              <article key={item.id} style={card}>
+              <article key={item.id}>
                 <h2>{item.user.name}</h2>
-                <p>
-                  {item.jobTitle ?? 'Alumnus'} · {item.company ?? 'Company private'}
-                </p>
+                <p>{item.jobTitle ?? 'Alumnus'}</p>
+                <p>{item.company ?? 'Company private'}</p>
                 <p>Class of {item.graduationYear}</p>
-                {item.user.verification?.alumniVerified && <p>✓ Verified alumni</p>}
-                <button onClick={() => void connect(item.userId)}>Connect</button>
+                {item.user.verification?.alumniVerified && (
+                  <p>✓ Verified alumni</p>
+                )}
+                <button onClick={() => void connect(item.userId)}>
+                  Connect
+                </button>
                 {item.isAvailableForMentorship && (
                   <button onClick={() => void mentor(item.userId)}>
                     Request mentorship
@@ -171,29 +162,14 @@ export default function AlumniPage() {
           </>
         )}
 
-        {tab === 'connections' &&
-          connections.map((item) => (
-            <article key={item.id} style={card}>
+        {tab !== 'directory' &&
+          items.map((item) => (
+            <article key={item.id}>
+              <h2>{item.title ?? item.topic}</h2>
               <p>{item.status}</p>
-              <p>{item.description}</p>
-            </article>
-          ))}
-
-        {tab === 'mentorship' &&
-          sessions.map((item) => (
-            <article key={item.id} style={card}>
-              <h2>{item.topic}</h2>
-              <p>{item.status}</p>
-              <p>{item.durationMinutes} minutes</p>
-            </article>
-          ))}
-
-        {tab === 'opportunities' &&
-          opportunities.map((item) => (
-            <article key={item.id} style={card}>
-              <h2>{item.title}</h2>
               <p>{item.company}</p>
               <p>{item.description}</p>
+              <p>{item.durationMinutes}</p>
             </article>
           ))}
       </section>
