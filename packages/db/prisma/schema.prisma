@@ -106,6 +106,13 @@ model User {
   savedPosts             SavedPost[]
   createdVideoCalls      VideoCall[]             @relation("CreatedCalls")
   videoCallParticipants  VideoCallParticipant[]
+  alumniProfile               AlumniProfile?
+  sentAlumniConnections       AlumniConnection[]     @relation("StudentConnections")
+  receivedAlumniConnections   AlumniConnection[]     @relation("AlumniConnections")
+  studentMentorshipSessions   MentorshipSession[]    @relation("StudentMentorships")
+  alumniMentorshipSessions    MentorshipSession[]    @relation("AlumniMentorships")
+  alumniReferrals             AlumniReferral[]       @relation("AlumniReferrals")
+  organizedAlumniEvents       AlumniEvent[]          @relation("AlumniEventOrganizer")
 
   @@index([collegeId])
   @@index([departmentId])
@@ -493,6 +500,10 @@ enum NotificationType {
   INTERNSHIP
   INTERNSHIP_APPLICATION
   INTERNSHIP_STATUS_CHANGE
+  ALUMNI_VERIFICATION
+  ALUMNI_CONNECTION
+  MENTORSHIP_REQUEST
+  MENTORSHIP_STATUS
 }
 
 model Conversation {
@@ -1166,3 +1177,114 @@ enum LeetcodeSyncStatus {
   SUCCESS
   FAILED
 }
+
+enum AlumniConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum MentorshipStatus {
+  REQUESTED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model AlumniProfile {
+  id                       String   @id @default(cuid())
+  userId                   String   @unique
+  graduationYear           Int
+  departmentName           String?
+  company                  String?
+  jobTitle                 String?
+  industry                 String?
+  location                 String?
+  bio                      String?
+  isAvailableForMentorship Boolean  @default(true)
+  directoryVisible         Boolean  @default(true)
+  linkedIn                 String?
+  github                   String?
+  skills                   String[] @default([])
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @default(now()) @updatedAt
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([graduationYear])
+  @@index([company])
+  @@index([industry])
+  @@index([isAvailableForMentorship])
+}
+
+model AlumniConnection {
+  id        String                 @id @default(cuid())
+  studentId String
+  alumniId  String
+  status    AlumniConnectionStatus @default(PENDING)
+  message   String?
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @default(now()) @updatedAt
+  student   User                   @relation("StudentConnections", fields: [studentId], references: [id], onDelete: Cascade)
+  alumni    User                   @relation("AlumniConnections", fields: [alumniId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, alumniId])
+  @@index([studentId])
+  @@index([alumniId])
+  @@index([status])
+}
+
+model MentorshipSession {
+  id              String           @id @default(cuid())
+  studentId       String
+  alumniId        String
+  topic           String
+  notes           String?
+  status          MentorshipStatus @default(REQUESTED)
+  scheduledAt     DateTime?
+  durationMinutes Int              @default(30)
+  meetingUrl      String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  student         User             @relation("StudentMentorships", fields: [studentId], references: [id], onDelete: Cascade)
+  alumni          User             @relation("AlumniMentorships", fields: [alumniId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([alumniId])
+  @@index([status])
+}
+
+model AlumniReferral {
+  id          String   @id @default(cuid())
+  alumniId    String
+  title       String
+  company     String
+  location    String?
+  description String?
+  link        String?
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  alumni      User     @relation("AlumniReferrals", fields: [alumniId], references: [id], onDelete: Cascade)
+
+  @@index([alumniId])
+  @@index([company])
+}
+
+model AlumniEvent {
+  id          String   @id @default(cuid())
+  collegeId   String?
+  organizerId String
+  title       String
+  description String?
+  eventDate   DateTime
+  location    String?
+  virtualLink String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  organizer   User     @relation("AlumniEventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+  @@index([eventDate])
+}
+

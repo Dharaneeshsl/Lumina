@@ -353,3 +353,90 @@ export const updateApplicationStatusSchema = z
     notes: z.string().trim().max(1000).nullable().optional(),
   })
   .strict()
+
+export const alumniProfileSchema = z
+  .object({
+    graduationYear: z.number().int().min(1950).max(2100),
+    departmentName: z.string().trim().max(150).nullable().optional(),
+    company: z.string().trim().max(150).nullable().optional(),
+    jobTitle: z.string().trim().max(150).nullable().optional(),
+    industry: z.string().trim().max(100).nullable().optional(),
+    location: z.string().trim().max(150).nullable().optional(),
+    bio: z.string().trim().max(2000).nullable().optional(),
+    isAvailableForMentorship: z.boolean().optional(),
+    directoryVisible: z.boolean().optional(),
+    linkedIn: z.string().url().max(300).nullable().optional(),
+    github: z.string().url().max(300).nullable().optional(),
+    skills: z.array(z.string().max(80)).max(50).optional(),
+  })
+  .strict()
+
+export const updateAlumniProfileSchema = alumniProfileSchema.partial().strict()
+
+export const alumniSearchQuerySchema = z.object({
+  q: z.string().trim().max(200).optional(),
+  company: z.string().trim().max(150).optional(),
+  industry: z.string().trim().max(100).optional(),
+  graduationYear: z.union([z.string(), z.number()]).optional(),
+  mentorshipOnly: z.union([z.string(), z.boolean()]).optional(),
+  limit: z.union([z.string(), z.number()]).optional(),
+  cursor: z.string().optional(),
+})
+
+export const alumniConnectionRequestSchema = z
+  .object({
+    alumniId: z.string().min(1).max(64),
+    message: z.string().trim().max(1000).nullable().optional(),
+  })
+  .strict()
+
+export const updateConnectionStatusSchema = z
+  .object({
+    status: z.enum(['ACCEPTED', 'REJECTED', 'WITHDRAWN']),
+  })
+  .strict()
+
+export const mentorshipRequestSchema = z
+  .object({
+    alumniId: z.string().min(1).max(64),
+    topic: z.string().trim().min(1).max(200),
+    notes: z.string().trim().max(2000).nullable().optional(),
+    scheduledAt: z.string().datetime().or(z.string().date()).nullable().optional(),
+    durationMinutes: z.number().int().min(15).max(180).optional(),
+  })
+  .strict()
+
+export const updateMentorshipStatusSchema = z
+  .object({
+    status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED']),
+    meetingUrl: z.string().url().max(500).nullable().optional(),
+    notes: z.string().trim().max(2000).nullable().optional(),
+  })
+  .strict()
+
+export const createAlumniReferralSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150),
+    company: z.string().trim().min(1).max(150),
+    location: z.string().trim().max(150).nullable().optional(),
+    description: z.string().trim().max(4000).nullable().optional(),
+    link: z.string().url().max(500).nullable().optional(),
+  })
+  .strict()
+
+export const createAlumniEventSchema = z
+  .object({
+    title: z.string().trim().min(1).max(150),
+    description: z.string().trim().max(4000).nullable().optional(),
+    eventDate: z.string().datetime().or(z.string().date()),
+    location: z.string().trim().max(150).nullable().optional(),
+    virtualLink: z.string().url().max(500).nullable().optional(),
+  })
+  .strict()
+
+export const alumniVerificationApproveSchema = z
+  .object({
+    userId: z.string().min(1).max(64),
+    approve: z.boolean(),
+  })
+  .strict()

@@ -125,7 +125,7 @@ export function buildCookieHeader(setCookieHeaders: string[], cookieName = SESSI
 }
 
 export async function createTestUserWithSession(
-  overrides: { collegeId?: string; name?: string; email?: string } = {}
+  overrides: { collegeId?: string; name?: string; email?: string; role?: string } = {}
 ) {
   const { prisma } = await import('@db/client')
   const token = createHash('sha256')
@@ -137,7 +137,7 @@ export async function createTestUserWithSession(
       email: overrides.email ?? `user.${token}@lumina.test`,
       name: overrides.name ?? `Test User ${token}`,
       username: `user_${token}`,
-      role: 'STUDENT',
+      role: (overrides.role as any) ?? 'STUDENT',
       status: 'ACTIVE',
       emailVerified: true,
       collegeId: overrides.collegeId ?? null,

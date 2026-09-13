@@ -349,4 +349,32 @@ internshipRouter.patch(
 apiRouter.use('/v1/internships', internshipRouter)
 apiRouter.use('/internships', internshipRouter)
 
+// Section 20: Alumni Network mounted on /api/v1/alumni and /api/alumni
+const alumniRouter = Router()
+alumniRouter.post('/profile', requireAuth, controller.upsertAlumniProfile)
+alumniRouter.get('/profile/:userId', optionalAuth, controller.getAlumniProfile)
+alumniRouter.get('/directory', optionalAuth, controller.searchAlumniDirectory)
+alumniRouter.post('/verification/approve', requireAuth, controller.approveAlumniVerification)
+alumniRouter.post('/connections', requireAuth, controller.sendAlumniConnectionRequest)
+alumniRouter.patch(
+  '/connections/:connectionId',
+  requireAuth,
+  controller.updateAlumniConnectionStatus
+)
+alumniRouter.get('/connections', requireAuth, controller.listUserAlumniConnections)
+alumniRouter.post('/mentorship/sessions', requireAuth, controller.requestMentorshipSession)
+alumniRouter.patch(
+  '/mentorship/sessions/:sessionId',
+  requireAuth,
+  controller.updateMentorshipSession
+)
+alumniRouter.get('/mentorship/sessions', requireAuth, controller.listMentorshipSessions)
+alumniRouter.post('/referrals', requireAuth, controller.createAlumniReferral)
+alumniRouter.get('/referrals', optionalAuth, controller.listAlumniReferrals)
+alumniRouter.post('/events', requireAuth, controller.createAlumniEvent)
+alumniRouter.get('/events', optionalAuth, controller.listAlumniEvents)
+
+apiRouter.use('/v1/alumni', alumniRouter)
+apiRouter.use('/alumni', alumniRouter)
+
 export default apiRouter
