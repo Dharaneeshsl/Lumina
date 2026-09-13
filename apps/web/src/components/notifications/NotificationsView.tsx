@@ -76,10 +76,14 @@ export const NotificationsView: React.FC = () => {
 
   const [deviceTokens, setDeviceTokens] = useState<
     Array<{ id: string; token: string; platform: string }>
-  >([{ id: 'dev-1', token: 'web-push-token-8921-xyz', platform: 'WEB' }])
+  >([])
   const [newToken, setNewToken] = useState('')
 
   const unreadCount = notifications.filter((n) => !n.read && !n.archived).length
+
+  const refresh = () => {
+    void load()
+  }
 
   const load = useCallback(async () => {
     setLoading(true); setError(null)
@@ -307,6 +311,29 @@ export const NotificationsView: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {loading && (
+        <div style={{ textAlign: 'center', color: '#9ca3af', padding: '16px' }}>
+          Loading notifications...
+        </div>
+      )}
+      {error && (
+        <div
+          style={{
+            maxWidth: '850px',
+            margin: '0 auto 16px',
+            padding: '12px',
+            borderRadius: '8px',
+            background: 'rgba(239, 68, 68, 0.12)',
+            color: '#fca5a5',
+          }}
+        >
+          {error}
+          <button onClick={refresh} style={{ marginLeft: '8px', cursor: 'pointer' }}>
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Notifications Inbox Stream */}
       {activeTab !== 'preferences' && (
