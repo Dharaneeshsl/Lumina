@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 export interface NotificationItem {
   id: string
@@ -41,62 +41,25 @@ export interface NotificationPreferenceData {
   system: boolean
 }
 
-const SAMPLE_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    userId: 'current-user',
-    title: 'Application Status Updated: SHORTLISTED',
-    body: 'Your application status for AI Systems & Agentic Workflows Intern at Aether AI Labs has been updated to SHORTLISTED.',
-    link: '#internships',
-    read: false,
-    archived: false,
-    data: { internshipId: 'int-1' },
-    type: 'INTERNSHIP_STATUS_CHANGE',
-    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-  },
-  {
-    id: 'notif-2',
-    userId: 'current-user',
-    title: 'Mentorship Session Scheduled',
-    body: 'Dr. Sarah Lin accepted your mentorship request on "AI Research Guidance & GPU Systems Preparation".',
-    link: '#alumni',
-    read: false,
-    archived: false,
-    data: { sessionId: 'sess-1' },
-    type: 'MENTORSHIP_STATUS',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-  },
-  {
-    id: 'notif-3',
-    userId: 'current-user',
-    title: 'New Club Announcement: Quantum Hackathon 2026',
-    body: 'AI & Robotics Society posted an announcement for the upcoming campus hackathon.',
-    link: '#clubs',
-    read: true,
-    archived: false,
-    data: { clubId: 'club-1' },
-    type: 'CLUB',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-  },
-  {
-    id: 'notif-4',
-    userId: 'current-user',
-    title: 'Alumni Status Verified!',
-    body: 'Your alumni verification request has been approved by the institution.',
-    link: '#alumni',
-    read: true,
-    archived: false,
-    data: {},
-    type: 'ALUMNI_VERIFICATION',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-  },
-]
+const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
+
+async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  })
+  if (!response.ok) throw new Error((await response.text()) || `Request failed: ${response.status}`)
+  return response.status === 204 ? (undefined as T) : response.json()
+}
 
 export const NotificationsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'all' | 'unread' | 'internships' | 'alumni' | 'clubs' | 'preferences'
   >('all')
-  const [notifications, setNotifications] = useState<NotificationItem[]>(SAMPLE_NOTIFICATIONS)
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [preferences, setPreferences] = useState<NotificationPreferenceData>({
     emailEnabled: true,
     pushEnabled: true,
@@ -118,30 +81,43 @@ export const NotificationsView: React.FC = () => {
 
   const unreadCount = notifications.filter((n) => !n.read && !n.archived).length
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }
+  const load = useCallback(async () => {
+    setLoading(true); setError(null)
+    try {
+      const [items, prefs, devices] = await Promise.all([
+        api<NotificationItem[]>('/notifications'),
+        api<NotificationPreferenceData>('/notifications/preferences'),
+        api<Array<{ id: string; token: string; platform: string }>>('/notifications/devices'),
+      ])
+      setNotifications(items); setPreferences(prefs); setDeviceTokens(devices)
+    } catch (e: any) { setError(e?.message || 'Unable to load notifications') }
+    finally { setLoading(false) }
+  }, [])
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }
+  useEffect(() => { void load() }, [load])
 
-  const handleArchive = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, archived: true } : n)))
+  const handleMarkAsRead = async (id: string) => {
+    try { await api('/notifications/read', { method: 'POST', body: JSON.stringify({ notificationIds: [id] }) }); setNotifications(p => p.map(n => n.id === id ? { ...n, read: true } : n)) } catch (e: any) { setError(e.message) }
   }
-
-  const handleDelete = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
+  const handleMarkAllAsRead = async () => {
+    try { await api('/notifications/read-all', { method: 'POST' }); setNotifications(p => p.map(n => ({ ...n, read: true }))) } catch (e: any) { setError(e.message) }
   }
-
-  const handleRegisterToken = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newToken.trim()) return
-    setDeviceTokens([
-      { id: `dev-${Date.now()}`, token: newToken.trim(), platform: 'WEB' },
-      ...deviceTokens,
-    ])
-    setNewToken('')
+  const handleArchive = async (id: string) => {
+    try { await api('/notifications/' + encodeURIComponent(id) + '/archive', { method: 'PATCH' }); setNotifications(p => p.map(n => n.id === id ? { ...n, archived: true } : n)) } catch (e: any) { setError(e.message) }
+  }
+  const handleDelete = async (id: string) => {
+    try { await api('/notifications/' + encodeURIComponent(id), { method: 'DELETE' }); setNotifications(p => p.filter(n => n.id !== id)) } catch (e: any) { setError(e.message) }
+  }
+  const updatePreferences = async (next: NotificationPreferenceData) => {
+    setPreferences(next)
+    try { const saved = await api<NotificationPreferenceData>('/notifications/preferences', { method: 'PATCH', body: JSON.stringify(next) }); setPreferences(saved) } catch (e: any) { setError(e.message); void load() }
+  }
+  const handleRegisterToken = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!newToken.trim()) return
+    try { const created = await api<{ id: string; token: string; platform: string }>('/notifications/devices', { method: 'POST', body: JSON.stringify({ token: newToken.trim(), platform: 'WEB' }) }); setDeviceTokens(p => [created, ...p.filter(d => d.id !== created.id)]); setNewToken('') } catch (e: any) { setError(e.message) }
+  }
+  const revokeToken = async (token: string) => {
+    try { await api('/notifications/devices/' + encodeURIComponent(token), { method: 'DELETE' }); setDeviceTokens(p => p.filter(d => d.token !== token)) } catch (e: any) { setError(e.message) }
   }
 
   const filteredNotifications = notifications.filter((n) => {
@@ -551,7 +527,7 @@ export const NotificationsView: React.FC = () => {
                     type="checkbox"
                     checked={(preferences as any)[chan.key]}
                     onChange={(e) =>
-                      setPreferences({ ...preferences, [chan.key]: e.target.checked })
+                      void updatePreferences({ ...preferences, [chan.key]: e.target.checked } as NotificationPreferenceData)
                     }
                     style={{
                       width: '18px',
@@ -650,7 +626,7 @@ export const NotificationsView: React.FC = () => {
                     </span>
                   </div>
                   <button
-                    onClick={() => setDeviceTokens(deviceTokens.filter((d) => d.id !== dev.id))}
+                    onClick={() => void revokeToken(dev.token)}
                     style={{
                       background: 'transparent',
                       color: '#ef4444',
