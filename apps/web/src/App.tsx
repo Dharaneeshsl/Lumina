@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import './App.css'
 import ClubsView from './components/clubs/ClubsView'
-import { AlumniView } from './components/alumni/AlumniView'
+import AlumniPage from './pages/AlumniPage'
 import LoginPage from './LoginPage'
 import InternshipsPage from './pages/InternshipsPage'
 import SignupPage from './SignupPage'
