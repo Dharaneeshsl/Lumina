@@ -31,3 +31,4 @@ coverage
 # Temporary generated JSX formatting compatibility: covered by ESLint/type/build checks
 apps/web/src/App.tsx
 apps/web/src/pages/InternshipsPage.tsx
+apps/web/src/pages/AlumniPage.tsx
