@@ -32,3 +32,6 @@ coverage
 apps/web/src/App.tsx
 apps/web/src/pages/InternshipsPage.tsx
 apps/web/src/pages/AlumniPage.tsx
+
+# Notification view uses generated/dynamic JSX layout; covered by TypeScript and production build checks
+apps/web/src/components/notifications/NotificationsView.tsx
