@@ -1382,6 +1382,137 @@ paths:
       responses:
         '200': { description: Application status updated }
 
+  /api/v1/alumni/profile:
+    post:
+      summary: Create or update alumni profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Alumni profile updated }
+
+  /api/v1/alumni/profile/{userId}:
+    get:
+      summary: Get alumni profile by user ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Alumni profile details returned }
+
+  /api/v1/alumni/directory:
+    get:
+      summary: Search alumni directory
+      responses:
+        '200': { description: List of alumni profiles returned }
+
+  /api/v1/alumni/verification/approve:
+    post:
+      summary: Approve or reject alumni verification (Admin / Career Office)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Alumni verification updated }
+
+  /api/v1/alumni/connections:
+    post:
+      summary: Send alumni connection request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Connection request created }
+    get:
+      summary: List user alumni connections
+      responses:
+        '200': { description: Connections list returned }
+
+  /api/v1/alumni/connections/{connectionId}:
+    patch:
+      summary: Respond to connection request
+      parameters:
+        - name: connectionId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Connection status updated }
+
+  /api/v1/alumni/mentorship/sessions:
+    post:
+      summary: Request mentorship session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Mentorship session requested }
+    get:
+      summary: List mentorship sessions
+      responses:
+        '200': { description: Mentorship sessions list returned }
+
+  /api/v1/alumni/mentorship/sessions/{sessionId}:
+    patch:
+      summary: Update mentorship session status or meeting details
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Mentorship session updated }
+
+  /api/v1/alumni/referrals:
+    post:
+      summary: Post alumni referral opportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Alumni referral created }
+    get:
+      summary: List active alumni referral opportunities
+      responses:
+        '200': { description: Referrals list returned }
+
+  /api/v1/alumni/events:
+    post:
+      summary: Post alumni event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Alumni event created }
+    get:
+      summary: List upcoming alumni events
+      responses:
+        '200': { description: Events list returned }
+
 components:
   securitySchemes:
     sessionCookie:

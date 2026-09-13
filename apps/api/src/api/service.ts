@@ -31,8 +31,14 @@ import {
   uploadFile,
 } from '@lumina/storage'
 import {
+  alumniConnectionRequestSchema,
+  alumniProfileSchema,
+  alumniSearchQuerySchema,
+  alumniVerificationApproveSchema,
   clubInvitationSchema,
   clubQuerySchema,
+  createAlumniEventSchema,
+  createAlumniReferralSchema,
   createClubEventSchema,
   createClubPostSchema,
   createClubSchema,
@@ -41,6 +47,7 @@ import {
   createInternshipSchema,
   createStudyGroupSchema,
   internshipQuerySchema,
+  mentorshipRequestSchema,
   profileUpdateSchema,
   protectedProfileFields,
   respondClubInvitationSchema,
@@ -52,11 +59,14 @@ import {
   studyGroupReplySchema,
   studyGroupSearchQuerySchema,
   studyGroupTimetableSchema,
+  updateAlumniProfileSchema,
   updateApplicationStatusSchema,
   updateClubMemberRoleSchema,
   updateClubSchema,
   updateCompanySchema,
+  updateConnectionStatusSchema,
   updateInternshipSchema,
+  updateMentorshipStatusSchema,
   updateStudyGroupDiscussionSchema,
   updateStudyGroupMemberSchema,
   updateStudyGroupNoteSchema,
@@ -6106,3 +6116,523 @@ export const withdrawApplication = InternshipService.withdrawApplication
 export const getMyApplications = InternshipService.getMyApplications
 export const listInternshipApplications = InternshipService.listInternshipApplications
 export const updateApplicationStatus = InternshipService.updateApplicationStatus
+
+export namespace AlumniRepo {
+  export async function getAuthenticatedUser(userId: string) {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        role: true,
+        collegeId: true,
+        verification: {
+          select: {
+            alumniVerified: true,
+            status: true,
+          },
+        },
+      },
+    })
+  }
+
+  export async function getAlumniProfileByUserId(userId: string) {
+    return prisma.alumniProfile.findUnique({
+      where: { userId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            collegeId: true,
+            role: true,
+            verification: {
+              select: { alumniVerified: true },
+            },
+          },
+        },
+      },
+    })
+  }
+
+  export async function upsertAlumniProfile(userId: string, data: any) {
+    return prisma.alumniProfile.upsert({
+      where: { userId },
+      create: {
+        userId,
+        graduationYear: Number(data.graduationYear),
+        departmentName: data.departmentName ?? null,
+        company: data.company ?? null,
+        jobTitle: data.jobTitle ?? null,
+        industry: data.industry ?? null,
+        location: data.location ?? null,
+        bio: data.bio ?? null,
+        isAvailableForMentorship: data.isAvailableForMentorship ?? true,
+        directoryVisible: data.directoryVisible ?? true,
+        linkedIn: data.linkedIn ?? null,
+        github: data.github ?? null,
+        skills: data.skills ?? [],
+      },
+      update: {
+        graduationYear: data.graduationYear !== undefined ? Number(data.graduationYear) : undefined,
+        departmentName: data.departmentName,
+        company: data.company,
+        jobTitle: data.jobTitle,
+        industry: data.industry,
+        location: data.location,
+        bio: data.bio,
+        isAvailableForMentorship: data.isAvailableForMentorship,
+        directoryVisible: data.directoryVisible,
+        linkedIn: data.linkedIn,
+        github: data.github,
+        skills: data.skills,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            verification: {
+              select: { alumniVerified: true },
+            },
+          },
+        },
+      },
+    })
+  }
+
+  export async function searchAlumniDirectory(params: {
+    q?: string
+    company?: string
+    industry?: string
+    graduationYear?: number
+    mentorshipOnly?: boolean
+    limit?: number
+  }) {
+    const where: any = {
+      directoryVisible: true,
+    }
+
+    if (params.company) {
+      where.company = { contains: params.company, mode: 'insensitive' }
+    }
+    if (params.industry) {
+      where.industry = { contains: params.industry, mode: 'insensitive' }
+    }
+    if (params.graduationYear) {
+      where.graduationYear = Number(params.graduationYear)
+    }
+    if (params.mentorshipOnly) {
+      where.isAvailableForMentorship = true
+    }
+
+    if (params.q) {
+      where.OR = [
+        { company: { contains: params.q, mode: 'insensitive' } },
+        { jobTitle: { contains: params.q, mode: 'insensitive' } },
+        { departmentName: { contains: params.q, mode: 'insensitive' } },
+        { bio: { contains: params.q, mode: 'insensitive' } },
+        { user: { name: { contains: params.q, mode: 'insensitive' } } },
+      ]
+    }
+
+    return prisma.alumniProfile.findMany({
+      where,
+      take: params.limit || 50,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            verification: { select: { alumniVerified: true } },
+          },
+        },
+      },
+    })
+  }
+
+  export async function setAlumniVerification(
+    targetUserId: string,
+    approve: boolean,
+    reviewerId: string
+  ) {
+    const verification = await prisma.verification.upsert({
+      where: { userId: targetUserId },
+      create: {
+        userId: targetUserId,
+        alumniVerified: approve,
+        verifiedBy: reviewerId,
+        status: approve ? 'VERIFIED' : 'REJECTED',
+      },
+      update: {
+        alumniVerified: approve,
+        verifiedBy: reviewerId,
+        status: approve ? 'VERIFIED' : 'REJECTED',
+      },
+    })
+
+    if (approve) {
+      await prisma.user.update({
+        where: { id: targetUserId },
+        data: { role: 'ALUMNI' },
+      })
+    }
+
+    return verification
+  }
+
+  export async function getConnectionById(id: string) {
+    return prisma.alumniConnection.findUnique({
+      where: { id },
+    })
+  }
+
+  export async function createConnection(
+    studentId: string,
+    alumniId: string,
+    message?: string | null
+  ) {
+    return prisma.alumniConnection.create({
+      data: {
+        studentId,
+        alumniId,
+        message: message ?? null,
+        status: 'PENDING',
+      },
+    })
+  }
+
+  export async function updateConnectionStatus(
+    connectionId: string,
+    status: 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN'
+  ) {
+    return prisma.alumniConnection.update({
+      where: { id: connectionId },
+      data: { status },
+    })
+  }
+
+  export async function listUserConnections(userId: string) {
+    return prisma.alumniConnection.findMany({
+      where: {
+        OR: [{ studentId: userId }, { alumniId: userId }],
+      },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        student: { select: { id: true, name: true, email: true, image: true } },
+        alumni: { select: { id: true, name: true, email: true, image: true } },
+      },
+    })
+  }
+
+  export async function getMentorshipSessionById(id: string) {
+    return prisma.mentorshipSession.findUnique({
+      where: { id },
+    })
+  }
+
+  export async function createMentorshipSession(data: {
+    studentId: string
+    alumniId: string
+    topic: string
+    notes?: string | null
+    scheduledAt?: Date | null
+    durationMinutes?: number
+  }) {
+    return prisma.mentorshipSession.create({
+      data: {
+        studentId: data.studentId,
+        alumniId: data.alumniId,
+        topic: data.topic,
+        notes: data.notes ?? null,
+        scheduledAt: data.scheduledAt ?? null,
+        durationMinutes: data.durationMinutes ?? 30,
+        status: 'REQUESTED',
+      },
+    })
+  }
+
+  export async function updateMentorshipSession(
+    sessionId: string,
+    status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
+    meetingUrl?: string | null,
+    notes?: string | null
+  ) {
+    return prisma.mentorshipSession.update({
+      where: { id: sessionId },
+      data: {
+        status,
+        ...(meetingUrl !== undefined && { meetingUrl }),
+        ...(notes !== undefined && { notes }),
+      },
+    })
+  }
+
+  export async function listMentorshipSessions(userId: string) {
+    return prisma.mentorshipSession.findMany({
+      where: {
+        OR: [{ studentId: userId }, { alumniId: userId }],
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        student: { select: { id: true, name: true, email: true, image: true } },
+        alumni: { select: { id: true, name: true, email: true, image: true } },
+      },
+    })
+  }
+
+  export async function createReferral(alumniId: string, data: any) {
+    return prisma.alumniReferral.create({
+      data: {
+        alumniId,
+        title: data.title,
+        company: data.company,
+        location: data.location ?? null,
+        description: data.description ?? null,
+        link: data.link ?? null,
+      },
+    })
+  }
+
+  export async function listReferrals() {
+    return prisma.alumniReferral.findMany({
+      where: { status: 'OPEN' },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        alumni: { select: { id: true, name: true, email: true, image: true } },
+      },
+    })
+  }
+
+  export async function createAlumniEvent(organizerId: string, data: any) {
+    return prisma.alumniEvent.create({
+      data: {
+        organizerId,
+        title: data.title,
+        description: data.description ?? null,
+        eventDate: new Date(data.eventDate),
+        location: data.location ?? null,
+        virtualLink: data.virtualLink ?? null,
+      },
+    })
+  }
+
+  export async function listAlumniEvents() {
+    return prisma.alumniEvent.findMany({
+      orderBy: { eventDate: 'asc' },
+      include: {
+        organizer: { select: { id: true, name: true, email: true, image: true } },
+      },
+    })
+  }
+}
+
+export namespace AlumniService {
+  export async function upsertAlumniProfile(userId: string, input: unknown) {
+    const parsed = alumniProfileSchema.parse(input)
+    return AlumniRepo.upsertAlumniProfile(userId, parsed)
+  }
+
+  export async function getAlumniProfile(targetUserId: string) {
+    const profile = await AlumniRepo.getAlumniProfileByUserId(targetUserId)
+    if (!profile) {
+      throw notFound('ALUMNI_PROFILE_NOT_FOUND')
+    }
+    return profile
+  }
+
+  export async function searchDirectory(input: unknown) {
+    const parsed = alumniSearchQuerySchema.parse(input)
+    return AlumniRepo.searchAlumniDirectory({
+      q: parsed.q,
+      company: parsed.company,
+      industry: parsed.industry,
+      graduationYear:
+        parsed.graduationYear !== undefined ? Number(parsed.graduationYear) : undefined,
+      mentorshipOnly: parsed.mentorshipOnly === 'true' || parsed.mentorshipOnly === true,
+      limit: parsed.limit ? Number(parsed.limit) : 50,
+    })
+  }
+
+  export async function approveAlumniVerification(reviewerId: string, input: unknown) {
+    const user = await AlumniRepo.getAuthenticatedUser(reviewerId)
+    if (
+      !user ||
+      (user.role !== 'ADMIN' &&
+        user.role !== 'CAREER_OFFICE' &&
+        user.role !== 'COLLEGE_ADMIN' &&
+        user.role !== 'SUPER_ADMIN')
+    ) {
+      throw forbidden('ONLY_ADMIN_OR_CAREER_OFFICE_CAN_APPROVE_ALUMNI_VERIFICATION')
+    }
+
+    const parsed = alumniVerificationApproveSchema.parse(input)
+    const verification = await AlumniRepo.setAlumniVerification(
+      parsed.userId,
+      parsed.approve,
+      reviewerId
+    )
+
+    await prisma.notification.create({
+      data: {
+        userId: parsed.userId,
+        title: parsed.approve ? 'Alumni Status Verified!' : 'Alumni Verification Update',
+        body: parsed.approve
+          ? 'Your alumni verification request has been approved by the institution.'
+          : 'Your alumni verification request was not approved.',
+        type: 'ALUMNI_VERIFICATION',
+      },
+    })
+
+    return verification
+  }
+
+  export async function sendConnectionRequest(studentId: string, input: unknown) {
+    const parsed = alumniConnectionRequestSchema.parse(input)
+    if (studentId === parsed.alumniId) {
+      throw badRequest('CANNOT_CONNECT_WITH_SELF')
+    }
+
+    const connection = await AlumniRepo.createConnection(studentId, parsed.alumniId, parsed.message)
+
+    await prisma.notification.create({
+      data: {
+        userId: parsed.alumniId,
+        title: 'New Connection Request',
+        body: 'A student has sent you an Alumni connection request.',
+        type: 'ALUMNI_CONNECTION',
+      },
+    })
+
+    return connection
+  }
+
+  export async function updateConnectionStatus(
+    userId: string,
+    connectionId: string,
+    input: unknown
+  ) {
+    const connection = await AlumniRepo.getConnectionById(connectionId)
+    if (!connection) {
+      throw notFound('CONNECTION_NOT_FOUND')
+    }
+    if (connection.studentId !== userId && connection.alumniId !== userId) {
+      throw forbidden('NOT_AUTHORIZED_TO_UPDATE_CONNECTION')
+    }
+
+    const parsed = updateConnectionStatusSchema.parse(input)
+    const updated = await AlumniRepo.updateConnectionStatus(connectionId, parsed.status)
+
+    const recipientId = userId === connection.studentId ? connection.alumniId : connection.studentId
+    await prisma.notification.create({
+      data: {
+        userId: recipientId,
+        title: `Connection Request ${parsed.status}`,
+        body: `Your connection request status was updated to ${parsed.status}.`,
+        type: 'ALUMNI_CONNECTION',
+      },
+    })
+
+    return updated
+  }
+
+  export async function listUserConnections(userId: string) {
+    return AlumniRepo.listUserConnections(userId)
+  }
+
+  export async function requestMentorshipSession(studentId: string, input: unknown) {
+    const parsed = mentorshipRequestSchema.parse(input)
+    const session = await AlumniRepo.createMentorshipSession({
+      studentId,
+      alumniId: parsed.alumniId,
+      topic: parsed.topic,
+      notes: parsed.notes,
+      scheduledAt: parsed.scheduledAt ? new Date(parsed.scheduledAt) : null,
+      durationMinutes: parsed.durationMinutes,
+    })
+
+    await prisma.notification.create({
+      data: {
+        userId: parsed.alumniId,
+        title: 'Mentorship Session Requested',
+        body: `A student requested a mentorship session on "${parsed.topic}".`,
+        type: 'MENTORSHIP_REQUEST',
+      },
+    })
+
+    return session
+  }
+
+  export async function updateMentorshipSession(userId: string, sessionId: string, input: unknown) {
+    const session = await AlumniRepo.getMentorshipSessionById(sessionId)
+    if (!session) {
+      throw notFound('SESSION_NOT_FOUND')
+    }
+    if (session.studentId !== userId && session.alumniId !== userId) {
+      throw forbidden('NOT_AUTHORIZED_TO_UPDATE_SESSION')
+    }
+
+    const parsed = updateMentorshipStatusSchema.parse(input)
+    const updated = await AlumniRepo.updateMentorshipSession(
+      sessionId,
+      parsed.status,
+      parsed.meetingUrl,
+      parsed.notes
+    )
+
+    const recipientId = userId === session.studentId ? session.alumniId : session.studentId
+    await prisma.notification.create({
+      data: {
+        userId: recipientId,
+        title: `Mentorship Session ${parsed.status}`,
+        body: `Mentorship session status updated to ${parsed.status}.`,
+        type: 'MENTORSHIP_STATUS',
+      },
+    })
+
+    return updated
+  }
+
+  export async function listMentorshipSessions(userId: string) {
+    return AlumniRepo.listMentorshipSessions(userId)
+  }
+
+  export async function createReferral(userId: string, input: unknown) {
+    const parsed = createAlumniReferralSchema.parse(input)
+    return AlumniRepo.createReferral(userId, parsed)
+  }
+
+  export async function listReferrals() {
+    return AlumniRepo.listReferrals()
+  }
+
+  export async function createAlumniEvent(userId: string, input: unknown) {
+    const parsed = createAlumniEventSchema.parse(input)
+    return AlumniRepo.createAlumniEvent(userId, parsed)
+  }
+
+  export async function listAlumniEvents() {
+    return AlumniRepo.listAlumniEvents()
+  }
+}
+
+export const upsertAlumniProfile = AlumniService.upsertAlumniProfile
+export const getAlumniProfile = AlumniService.getAlumniProfile
+export const searchAlumniDirectory = AlumniService.searchDirectory
+export const approveAlumniVerification = AlumniService.approveAlumniVerification
+export const sendAlumniConnectionRequest = AlumniService.sendConnectionRequest
+export const updateAlumniConnectionStatus = AlumniService.updateConnectionStatus
+export const listUserAlumniConnections = AlumniService.listUserConnections
+export const requestMentorshipSession = AlumniService.requestMentorshipSession
+export const updateMentorshipSession = AlumniService.updateMentorshipSession
+export const listMentorshipSessions = AlumniService.listMentorshipSessions
+export const createAlumniReferral = AlumniService.createReferral
+export const listAlumniReferrals = AlumniService.listReferrals
+export const createAlumniEvent = AlumniService.createAlumniEvent
+export const listAlumniEvents = AlumniService.listAlumniEvents

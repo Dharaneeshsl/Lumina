@@ -1251,3 +1251,49 @@ export const updateApplicationStatus = (req: Request, res: Response) =>
   respond(req, res, 200, () =>
     api.updateApplicationStatus(userId(req), String(req.params.applicationId), req.body)
   )
+
+export const upsertAlumniProfile = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.upsertAlumniProfile(userId(req), req.body))
+
+export const getAlumniProfile = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.getAlumniProfile(String(req.params.userId)))
+
+export const searchAlumniDirectory = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.searchAlumniDirectory(req.query))
+
+export const approveAlumniVerification = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.approveAlumniVerification(userId(req), req.body))
+
+export const sendAlumniConnectionRequest = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.sendAlumniConnectionRequest(userId(req), req.body))
+
+export const updateAlumniConnectionStatus = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateAlumniConnectionStatus(userId(req), String(req.params.connectionId), req.body)
+  )
+
+export const listUserAlumniConnections = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listUserAlumniConnections(userId(req)))
+
+export const requestMentorshipSession = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.requestMentorshipSession(userId(req), req.body))
+
+export const updateMentorshipSession = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.updateMentorshipSession(userId(req), String(req.params.sessionId), req.body)
+  )
+
+export const listMentorshipSessions = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.listMentorshipSessions(userId(req)))
+
+export const createAlumniReferral = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createAlumniReferral(userId(req), req.body))
+
+export const listAlumniReferrals = (_req: Request, res: Response) =>
+  respond(_req, res, 200, () => api.listAlumniReferrals())
+
+export const createAlumniEvent = (req: Request, res: Response) =>
+  respond(req, res, 201, () => api.createAlumniEvent(userId(req), req.body))
+
+export const listAlumniEvents = (_req: Request, res: Response) =>
+  respond(_req, res, 200, () => api.listAlumniEvents())
