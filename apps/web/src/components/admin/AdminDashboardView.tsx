@@ -72,7 +72,7 @@ export interface AnnouncementItem {
 
 export const AdminDashboardView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'users' | 'verification' | 'reports' | 'audit' | 'settings'
+    'overview' | 'users' | 'verification' | 'reports' | 'audit' | 'settings' | 'resources'
   >('overview')
   const [metrics, setMetrics] = useState<AdminMetricsData | null>(null)
   const [users, setUsers] = useState<AdminUserData[]>([])
@@ -80,6 +80,7 @@ export const AdminDashboardView: React.FC = () => {
   const [reports, setReports] = useState<AdminReportItem[]>([])
   const [auditLogs, setAuditLogs] = useState<AdminAuditLogItem[]>([])
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([])
+  const [managedResources, setManagedResources] = useState<Record<string, any[]>>({ COMMUNITIES: [], CLUBS: [], EVENTS: [], INTERNSHIPS: [], NOTIFICATIONS: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -93,8 +94,8 @@ export const AdminDashboardView: React.FC = () => {
     return unwrap(payload)
   }, [api])
   const loadAdmin = useCallback(async () => { setLoading(true); setError(null); try {
-    const [m,u,v,r,a,s,ann] = await Promise.all([request('/admin/metrics'), request('/admin/users'), request('/admin/verification/queue'), request('/admin/reports/queue'), request('/admin/audit-logs'), request('/admin/settings'), request('/admin/announcements')])
-    setMetrics(m); setUsers(asList(u,'users')); setVerifications(asList(v,'verifications')); setReports(asList(r,'reports')); setAuditLogs(asList(a,'logs')); setAnnouncements(asList(ann,'announcements'))
+    const [m,u,v,r,a,s,ann,communities,clubs,events,internships,notifications] = await Promise.all([request('/admin/summary'), request('/admin/users'), request('/admin/verification/queue'), request('/admin/reports/queue'), request('/admin/audit-logs'), request('/admin/settings'), request('/admin/announcements'), request('/communities'), request('/clubs'), request('/events'), request('/internships'), request('/notifications')])
+    setMetrics(m); setManagedResources({ COMMUNITIES: asList(communities,'communities'), CLUBS: asList(clubs,'clubs'), EVENTS: asList(events,'events'), INTERNSHIPS: asList(internships,'internships'), NOTIFICATIONS: asList(notifications,'notifications') }); setUsers(asList(u,'users')); setVerifications(asList(v,'verifications')); setReports(asList(r,'reports')); setAuditLogs(asList(a,'logs')); setAnnouncements(asList(ann,'announcements'))
     const settings = asList(s,'settings'); const getBool = (key: string, fallback: boolean) => { const item = settings.find((x:any) => x.key === key); return item ? String(item.value) === 'true' : fallback }
     setMaintenanceMode(getBool('maintenance_mode', false)); setRegistrationAllowed(getBool('registration_allowed', true))
   } catch (e:any) { setError(e.message) } finally { setLoading(false) } }, [request])
@@ -237,6 +238,7 @@ export const AdminDashboardView: React.FC = () => {
             { id: 'reports', label: `🚩 Moderation Queue (${reports.length})` },
             { id: 'audit', label: `📋 Audit Logs (${auditLogs.length})` },
             { id: 'settings', label: '⚙️ Settings & Broadcasts' },
+            { id: 'resources', label: '🗂️ Domain Management' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -912,6 +914,17 @@ export const AdminDashboardView: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'resources' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+          {Object.entries(managedResources).map(([name, items]) => (
+            <section key={name} style={{ background: 'rgba(17,24,39,.6)', border: '1px solid rgba(255,255,255,.08)', borderRadius: '14px', padding: '20px' }}>
+              <h2 style={{ marginTop: 0, fontSize: '17px' }}>{name} <span style={{ color: '#818cf8' }}>({items.length})</span></h2>
+              {items.length === 0 ? <p style={{ color: '#9ca3af' }}>No records available.</p> : items.slice(0, 10).map((item:any) => <div key={item.id || item.slug || JSON.stringify(item)} style={{ padding: '10px 0', borderTop: '1px solid rgba(255,255,255,.08)' }}><strong>{item.name || item.title || item.message || item.id}</strong><div style={{ color: '#9ca3af', fontSize: '12px' }}>{item.status || item.type || item.description || ''}</div></div>)}
+            </section>
+          ))}
         </div>
       )}
 
