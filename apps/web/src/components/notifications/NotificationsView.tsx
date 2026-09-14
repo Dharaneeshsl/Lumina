@@ -80,6 +80,8 @@ export const NotificationsView: React.FC = () => {
     Array<{ id: string; token: string; platform: string }>
   >([])
   const [newToken, setNewToken] = useState('')
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
 
   const unreadCount = notifications.filter((n) => !n.read && !n.archived).length
 
@@ -95,6 +97,7 @@ export const NotificationsView: React.FC = () => {
       setNotifications(items)
       setPreferences(prefs)
       setDeviceTokens(devices)
+      setLastSyncedAt(new Date().toISOString())
     } catch (e: any) {
       setError(e?.message || 'Unable to load notifications')
     } finally {
@@ -104,6 +107,10 @@ export const NotificationsView: React.FC = () => {
 
   useEffect(() => {
     void load()
+    const interval = window.setInterval(() => void load(), 30000)
+    const onFocus = () => void load()
+    window.addEventListener('focus', onFocus)
+    return () => { window.clearInterval(interval); window.removeEventListener('focus', onFocus) }
   }, [load])
 
   const refresh = () => {
@@ -204,6 +211,7 @@ export const NotificationsView: React.FC = () => {
   }
 
   const filteredNotifications = notifications.filter((n) => {
+    if (showArchived) return n.archived
     if (n.archived) return false
     if (activeTab === 'unread') return !n.read
     if (activeTab === 'internships') return n.type.includes('INTERNSHIP')
@@ -211,6 +219,12 @@ export const NotificationsView: React.FC = () => {
     if (activeTab === 'clubs') return n.type.includes('CLUB') || n.type.includes('EVENT')
     return true
   })
+
+  const groupedNotifications = filteredNotifications.reduce<Record<string, NotificationItem[]>>((groups, notification) => {
+    const key = new Date(notification.createdAt).toDateString()
+    ;(groups[key] ||= []).push(notification)
+    return groups
+  }, {})
 
   const getTypeBadgeColor = (type: string) => {
     if (type.includes('INTERNSHIP')) return { bg: 'rgba(59, 130, 246, 0.2)', text: '#60a5fa' }
@@ -291,7 +305,7 @@ export const NotificationsView: React.FC = () => {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div
               style={{
                 background: 'rgba(17, 24, 39, 0.8)',
@@ -327,6 +341,7 @@ export const NotificationsView: React.FC = () => {
               </div>
             </div>
 
+            <button onClick={() => setShowArchived((value) => !value)} style={{ background: 'transparent', color: '#c4b5fd', border: '1px solid rgba(196,181,253,.35)', borderRadius: '10px', padding: '10px 14px', cursor: 'pointer' }}>{showArchived ? 'Inbox' : 'History'}</button>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
@@ -415,6 +430,7 @@ export const NotificationsView: React.FC = () => {
         </div>
       )}
 
+      {lastSyncedAt && <div style={{ maxWidth: '850px', margin: '0 auto 12px', color: '#64748b', fontSize: '12px' }}>Realtime sync active · last updated {new Date(lastSyncedAt).toLocaleTimeString()}</div>}
       {/* Notifications Inbox Stream */}
       {activeTab !== 'preferences' && (
         <div style={{ maxWidth: '850px', margin: '0 auto' }}>
@@ -438,7 +454,7 @@ export const NotificationsView: React.FC = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {filteredNotifications.map((notif) => {
+              {Object.entries(groupedNotifications).map(([date, group]) => (<div key={date}><div style={{ color: '#94a3b8', fontSize: '12px', fontWeight: 700, margin: '8px 0' }}>{date}</div>{group.map((notif) => {
                 const badgeStyle = getTypeBadgeColor(notif.type)
                 return (
                   <div
@@ -504,6 +520,7 @@ export const NotificationsView: React.FC = () => {
                         </span>
                       </div>
 
+                      {notif.link && <button onClick={() => { if (!notif.read) void handleMarkAsRead(notif.id); window.location.assign(notif.link!) }} style={{ background: 'transparent', border: 'none', padding: 0, color: '#818cf8', cursor: 'pointer', fontWeight: 600, marginBottom: '8px' }}>Open related activity →</button>}
                       <p
                         style={{
                           margin: '0 0 12px 0',
@@ -562,7 +579,7 @@ export const NotificationsView: React.FC = () => {
                     </div>
                   </div>
                 )
-              })}
+              })}</div>))}
             </div>
           )}
         </div>
