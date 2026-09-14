@@ -2,9 +2,18 @@ import { AnalyticsService, ANALYTICS_EVENT_NAMES, type AnalyticsEventInput } fro
 import { analyticsStore } from './store'
 import { Router } from 'express'
 import { requireAuth } from '../../middleware'
+import { prisma } from '@lumina/db'
 import rateLimit from 'express-rate-limit'
 
 const service = new AnalyticsService(analyticsStore)
+
+function actorScope(req: any) {
+  return req.user?.collegeId ? String(req.user.collegeId) : undefined
+}
+
+function canAccessUser(req: any, userId: string) {
+  return req.user?.id === userId || ['COLLEGE_ADMIN', 'SUPER_ADMIN'].includes(req.user?.role)
+}
 const router = Router()
 const limiter = rateLimit({ windowMs: 60_000, limit: 120, standardHeaders: 'draft-7', legacyHeaders: false })
 
@@ -19,7 +28,7 @@ router.post('/events', requireAuth, limiter, async (req, res) => {
   try {
     const body = req.body as AnalyticsEventInput
     if (!ANALYTICS_EVENT_NAMES.includes(body.name)) return res.status(400).json({ error: 'UNKNOWN_ANALYTICS_EVENT' })
-    const result = await service.ingest(body, body.actor?.collegeId ?? null)
+    const result = await service.ingest(body, actorScope(req) ?? null)
     return res.status(result.duplicate ? 200 : 202).json({ status: result.duplicate ? 'duplicate' : 'accepted', eventId: result.event?.id })
   } catch (error) {
     return res.status(400).json({ error: error instanceof Error ? error.message : 'ANALYTICS_EVENT_REJECTED' })
@@ -29,7 +38,7 @@ router.post('/events', requireAuth, limiter, async (req, res) => {
 router.get('/dashboard', requireAuth, async (req, res) => {
   try {
     const { from, to } = dates(req.query)
-    return res.json(await service.dashboard(from, to, typeof req.query.collegeId === 'string' ? req.query.collegeId : undefined))
+    return res.json(await service.dashboard(from, to, actorScope(req)))
   } catch (error) {
     return res.status(400).json({ error: error instanceof Error ? error.message : 'ANALYTICS_QUERY_REJECTED' })
   }
@@ -47,6 +56,7 @@ router.get('/export', requireAuth, async (req, res) => {
 })
 
 router.post('/privacy/:userId', requireAuth, async (req, res) => {
+  if (!canAccessUser(req, req.params.userId)) return res.status(403).json({ error: 'ANALYTICS_PRIVACY_FORBIDDEN' })
   const action = req.body?.action
   if (!['EXPORT', 'DELETE', 'ANONYMIZE'].includes(action)) return res.status(400).json({ error: 'INVALID_PRIVACY_ACTION' })
   return res.json(await service.privacy(req.params.userId, action))
