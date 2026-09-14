@@ -69,6 +69,7 @@ describe('AnalyticsService', () => {
       },
       'c1'
     )
-    expect(repo.events[0].properties).toEqual({ screen: 'home' })
+    expect(repo.events[0]).toBeDefined()
+    expect(repo.events[0]!.properties).toEqual({ screen: 'home' })
   })
 })
