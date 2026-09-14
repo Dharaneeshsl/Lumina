@@ -1,10 +1,10 @@
+import type { AnalyticsEventInput } from './types'
+
 export * from './types'
 export * from './aggregates'
 export * from './funnels'
 export * from './retention'
 export * from './service'
-
-import type { AnalyticsEventInput } from './types'
 
 export interface AnalyticsTransport {
   send(events: AnalyticsEventInput[]): Promise<void>
