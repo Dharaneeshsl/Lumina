@@ -64,7 +64,23 @@ export class AdminApi {
   }
 
   metrics() {
-    return this.request('/admin/dashboard')
+    return this.request('/admin/metrics')
+  }
+
+  analytics(query = '') {
+    return this.request('/analytics/dashboard' + (query ? `?${query}` : ''))
+  }
+
+  analyticsExport(query = '') {
+    return this.request('/analytics/export' + (query ? `?${query}` : ''))
+  }
+
+  trackAnalytics(body: unknown) {
+    return this.request('/analytics/events', { method: 'POST', body: JSON.stringify(body) })
+  }
+
+  analyticsPrivacy(userId: string, action: 'EXPORT' | 'DELETE' | 'ANONYMIZE') {
+    return this.request(`/analytics/privacy/${userId}`, { method: 'POST', body: JSON.stringify({ action }) })
   }
 
   users(query = '') {
