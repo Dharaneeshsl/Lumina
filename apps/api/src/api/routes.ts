@@ -13,6 +13,7 @@ import analyticsRouter from '../analytics/router'
 import * as controller from './controller'
 import { MSG_PROFILE_ROUTER_WORKS } from '@lumina/constants'
 import { Router } from 'express'
+import { subscribe } from '@lumina/realtime'
 import rateLimit from 'express-rate-limit'
 
 import type { AuthenticatedRequest } from '@lumina/contracts'
@@ -384,6 +385,13 @@ apiRouter.use('/alumni', alumniRouter)
 
 // Section 21: Notifications mounted on /api/v1/notifications and /api/notifications
 const notificationRouter = Router()
+notificationRouter.get('/stream', requireAuth, (req, res) => {
+  const userId = (req as AuthenticatedRequest).user.id
+  res.status(200).set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' })
+  res.flushHeaders?.()
+  const unsubscribe = subscribe(userId, res)
+  req.on('close', unsubscribe)
+})
 notificationRouter.get('/', requireAuth, controller.listNotifications)
 notificationRouter.get('/unread-count', requireAuth, controller.getNotificationUnreadCount)
 notificationRouter.post('/read', requireAuth, controller.markNotificationsAsRead)
