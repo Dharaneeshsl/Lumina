@@ -1,5 +1,6 @@
-import type { AnalyticsRepository, StoredAnalyticsEvent } from '@lumina/analytics'
 import { prisma } from '@lumina/db'
+
+import type { AnalyticsRepository, StoredAnalyticsEvent } from '@lumina/analytics'
 
 function toStored(event: any): StoredAnalyticsEvent {
   return {
@@ -21,7 +22,9 @@ function toStored(event: any): StoredAnalyticsEvent {
 
 export class PrismaAnalyticsRepository implements AnalyticsRepository {
   async findByIdempotencyKey(key: string) {
-    const event = await prisma.analyticsEvent.findUnique({ where: { idempotencyKey: key } })
+    const event = await prisma.analyticsEvent.findUnique({
+      where: { idempotencyKey: key },
+    })
     return event ? toStored(event) : null
   }
 

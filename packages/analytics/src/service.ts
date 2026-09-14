@@ -1,4 +1,5 @@
 import { activeUsers, engagementRate, eventCounts } from './aggregates'
+
 import type { AnalyticsConsent, AnalyticsEventInput, AnalyticsEventName } from './types'
 
 export interface StoredAnalyticsEvent extends AnalyticsEventInput {
@@ -23,7 +24,9 @@ export interface AnalyticsRepository {
 const SENSITIVE = /password|token|secret|authorization|message|content|email|phone/i
 
 export function sanitizeProperties(properties: AnalyticsEventInput['properties'] = {}) {
-  return Object.fromEntries(Object.entries(properties).filter(([key]) => !SENSITIVE.test(key)))
+  return Object.fromEntries(
+    Object.entries(properties).filter(([key]) => !SENSITIVE.test(key)),
+  )
 }
 
 export function validateEvent(input: AnalyticsEventInput): AnalyticsEventInput {
@@ -106,7 +109,9 @@ export class AnalyticsService {
       const events = await this.repository.list({ from, to })
       return events.filter((event) => event.actor?.userId === userId)
     }
-    if (action === 'DELETE') return { affected: await this.repository.deleteUser(userId) }
+    if (action === 'DELETE') {
+      return { affected: await this.repository.deleteUser(userId) }
+    }
     return { affected: await this.repository.anonymizeUser(userId) }
   }
 }

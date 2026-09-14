@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import { AnalyticsClient } from './index'
+
 import { activeUsers, engagementRate, eventCounts, retention } from './aggregates'
+import { AnalyticsClient } from './index'
 
 const event = {
   name: 'user_logged_in' as const,
@@ -11,21 +12,29 @@ const event = {
 describe('analytics client', () => {
   test('sends accepted events', async () => {
     const sent: unknown[] = []
-    const client = new AnalyticsClient({ send: async (events) => sent.push(...events) })
+    const client = new AnalyticsClient({
+      send: async (events) => {
+        sent.push(...events)
+      },
+    })
     await client.track(event)
     expect(sent).toHaveLength(1)
   })
 
   test('drops denied consent', async () => {
     const sent: unknown[] = []
-    const client = new AnalyticsClient({ send: async (events) => sent.push(...events) })
+    const client = new AnalyticsClient({
+      send: async (events) => {
+        sent.push(...events)
+      },
+    })
     await client.track({ ...event, consent: 'DENIED' })
     expect(sent).toHaveLength(0)
   })
 
   test('requires idempotency keys', async () => {
     const client = new AnalyticsClient({ send: async () => undefined })
-    expect(client.track({ ...event, idempotencyKey: '' })).rejects.toThrow(
+    await expect(client.track({ ...event, idempotencyKey: '' })).rejects.toThrow(
       'ANALYTICS_IDEMPOTENCY_KEY_REQUIRED',
     )
   })
@@ -33,7 +42,10 @@ describe('analytics client', () => {
 
 describe('analytics aggregates', () => {
   test('calculates active users and event counts', () => {
-    const events = [event, { ...event, idempotencyKey: 'event-2', name: 'post_created' as const }]
+    const events = [
+      event,
+      { ...event, idempotencyKey: 'event-2', name: 'post_created' as const },
+    ]
     expect(activeUsers(events)).toBe(1)
     expect(eventCounts(events)).toEqual({ user_logged_in: 1, post_created: 1 })
   })

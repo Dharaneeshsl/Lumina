@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test'
+
 import { createApp } from '../../../app'
 
 describe('analytics routes', () => {
