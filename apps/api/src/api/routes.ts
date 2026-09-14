@@ -12,12 +12,17 @@ import {
 import * as controller from './controller'
 import { MSG_PROFILE_ROUTER_WORKS } from '@lumina/constants'
 import { Router } from 'express'
+import analyticsRouter from '../analytics/router'
 import rateLimit from 'express-rate-limit'
 
 import type { AuthenticatedRequest } from '@lumina/contracts'
 import type { NextFunction, Request, Response } from 'express'
 
 const apiRouter = Router()
+
+// Section 28: Product analytics ingestion, dashboards, exports and privacy operations.
+apiRouter.use('/v1/analytics', analyticsRouter)
+apiRouter.use('/analytics', analyticsRouter)
 
 // Feature-specific rate limits (same windows/limits as before).
 const videoTokenLimiter = rateLimit({
