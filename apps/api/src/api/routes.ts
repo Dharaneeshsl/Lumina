@@ -2,13 +2,6 @@
  * Single API router mounted at `/api`.
  * Path prefixes match the previous per-module mounts so clients do not change.
  */
-import { MSG_PROFILE_ROUTER_WORKS } from '@lumina/constants'
-import { Router } from 'express'
-import rateLimit from 'express-rate-limit'
-
-import type { AuthenticatedRequest } from '@lumina/contracts'
-import type { NextFunction, Request, Response } from 'express'
-
 import {
   boundConcurrentUploads,
   optionalAuth,
@@ -18,6 +11,12 @@ import {
 } from '../../middleware'
 import analyticsRouter from '../analytics/router'
 import * as controller from './controller'
+import { MSG_PROFILE_ROUTER_WORKS } from '@lumina/constants'
+import { Router } from 'express'
+import rateLimit from 'express-rate-limit'
+
+import type { AuthenticatedRequest } from '@lumina/contracts'
+import type { NextFunction, Request, Response } from 'express'
 
 const apiRouter = Router()
 

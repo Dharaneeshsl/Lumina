@@ -1,6 +1,7 @@
+import { AnalyticsService } from './service'
 import { describe, expect, test } from 'bun:test'
 
-import { AnalyticsService, type AnalyticsRepository, type StoredAnalyticsEvent } from './service'
+import type { AnalyticsRepository, StoredAnalyticsEvent } from './service'
 
 class Repo implements AnalyticsRepository {
   events: StoredAnalyticsEvent[] = []
@@ -15,7 +16,7 @@ class Repo implements AnalyticsRepository {
 
   async list(input: { from: Date; to: Date; collegeId?: string }) {
     return this.events.filter(
-      (event) => !input.collegeId || event.actor?.collegeId === input.collegeId,
+      (event) => !input.collegeId || event.actor?.collegeId === input.collegeId
     )
   }
 
@@ -66,7 +67,7 @@ describe('AnalyticsService', () => {
         idempotencyKey: 'key-2',
         properties: { password: 'x', screen: 'home' },
       },
-      'c1',
+      'c1'
     )
     expect(repo.events[0].properties).toEqual({ screen: 'home' })
   })

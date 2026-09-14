@@ -1,6 +1,5 @@
-import { describe, expect, test } from 'bun:test'
-
 import { createApp } from '../../../app'
+import { describe, expect, test } from 'bun:test'
 
 describe('analytics routes', () => {
   test('analytics route is mounted', async () => {

@@ -7,7 +7,7 @@ export interface CohortPoint {
 
 export function cohortRetention(
   cohorts: Record<string, string[]>,
-  returning: Record<string, string[]>,
+  returning: Record<string, string[]>
 ): CohortPoint[] {
   return Object.entries(cohorts).map(([cohort, users]) => {
     const set = new Set(returning[cohort] ?? [])

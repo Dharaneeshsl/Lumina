@@ -24,9 +24,7 @@ export interface AnalyticsRepository {
 const SENSITIVE = /password|token|secret|authorization|message|content|email|phone/i
 
 export function sanitizeProperties(properties: AnalyticsEventInput['properties'] = {}) {
-  return Object.fromEntries(
-    Object.entries(properties).filter(([key]) => !SENSITIVE.test(key)),
-  )
+  return Object.fromEntries(Object.entries(properties).filter(([key]) => !SENSITIVE.test(key)))
 }
 
 export function validateEvent(input: AnalyticsEventInput): AnalyticsEventInput {
@@ -42,7 +40,7 @@ export class AnalyticsService {
 
   async ingest(
     input: AnalyticsEventInput,
-    tenantId: string | null,
+    tenantId: string | null
   ): Promise<{ duplicate: boolean; event?: StoredAnalyticsEvent }> {
     const event = validateEvent(input)
     if ((event.consent as AnalyticsConsent | undefined) === 'DENIED') {
@@ -103,7 +101,7 @@ export class AnalyticsService {
     userId: string,
     action: 'EXPORT' | 'DELETE' | 'ANONYMIZE',
     from = new Date(0),
-    to = new Date(),
+    to = new Date()
   ) {
     if (action === 'EXPORT') {
       const events = await this.repository.list({ from, to })
