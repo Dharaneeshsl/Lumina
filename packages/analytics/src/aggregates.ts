@@ -6,7 +6,7 @@ export interface TimedAnalyticsEvent extends AnalyticsEventInput {
 
 export function activeUsers(events: TimedAnalyticsEvent[]): number {
   return new Set(
-    events.map((event) => event.actor?.userId).filter((id): id is string => Boolean(id)),
+    events.map((event) => event.actor?.userId).filter((id): id is string => Boolean(id))
   ).size
 }
 

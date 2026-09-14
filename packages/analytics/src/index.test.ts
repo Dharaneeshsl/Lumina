@@ -1,7 +1,6 @@
-import { describe, expect, test } from 'bun:test'
-
 import { activeUsers, engagementRate, eventCounts, retention } from './aggregates'
 import { AnalyticsClient } from './index'
+import { describe, expect, test } from 'bun:test'
 
 const event = {
   name: 'user_logged_in' as const,
@@ -35,17 +34,14 @@ describe('analytics client', () => {
   test('requires idempotency keys', async () => {
     const client = new AnalyticsClient({ send: async () => undefined })
     await expect(client.track({ ...event, idempotencyKey: '' })).rejects.toThrow(
-      'ANALYTICS_IDEMPOTENCY_KEY_REQUIRED',
+      'ANALYTICS_IDEMPOTENCY_KEY_REQUIRED'
     )
   })
 })
 
 describe('analytics aggregates', () => {
   test('calculates active users and event counts', () => {
-    const events = [
-      event,
-      { ...event, idempotencyKey: 'event-2', name: 'post_created' as const },
-    ]
+    const events = [event, { ...event, idempotencyKey: 'event-2', name: 'post_created' as const }]
     expect(activeUsers(events)).toBe(1)
     expect(eventCounts(events)).toEqual({ user_logged_in: 1, post_created: 1 })
   })
