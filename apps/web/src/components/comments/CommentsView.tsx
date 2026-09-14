@@ -152,7 +152,7 @@ export default function CommentsView({ onBackToHome }: { onBackToHome: () => voi
   }
 
   const renderComment = (comment: Comment, nested = false): React.ReactNode => {
-    const author = comment.user || comment.author || {}
+    const author: User = comment.user || comment.author || {}
     return <div key={comment.id} style={{ marginLeft: nested ? 24 : 0, borderLeft: nested ? '2px solid rgba(129,140,248,.25)' : undefined, paddingLeft: nested ? 14 : 0, marginTop: 14 }}>
       <article style={{ background: '#111827', border: comment.isPinned ? '1px solid #818cf8' : '1px solid rgba(255,255,255,.09)', borderRadius: 14, padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
