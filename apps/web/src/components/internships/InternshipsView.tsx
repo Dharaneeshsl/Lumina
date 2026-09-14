@@ -63,6 +63,8 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [managedApplications, setManagedApplications] = useState<any[]>([])
+  const [managingInternship, setManagingInternship] = useState<InternshipData | null>(null)
 
   const api = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
   const unwrap = (value: any) => value?.data ?? value
@@ -136,6 +138,33 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   const handleWithdraw = async (applicationId: string) => {
     const application = myApplications.find((item) => item.id === applicationId); if (!application) return
     setSubmitting(true); try { await request('/internships/' + application.internshipId + '/withdraw', { method: 'POST' }); await loadPortal() } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
+  }
+
+  const handleDeleteInternship = async (internship: InternshipData) => {
+    if (!window.confirm('Delete "' + internship.title + '"? This cannot be undone.')) return
+    setSubmitting(true); try { await request('/internships/' + internship.id, { method: 'DELETE' }); await loadPortal() } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
+  }
+  const handleEditInternship = async (internship: InternshipData) => {
+    const title = window.prompt('Internship title', internship.title); if (title === null || !title.trim()) return
+    const location = window.prompt('Location', internship.location || '')
+    const description = window.prompt('Description', internship.description || '')
+    try { await request('/internships/' + internship.id, { method: 'PATCH', body: JSON.stringify({ title: title.trim(), location: location ?? internship.location, description: description ?? internship.description }) }); await loadPortal() } catch (e: any) { setError(e.message) }
+  }
+  const handleManageApplicants = async (internship: InternshipData) => {
+    setManagingInternship(internship); setManagedApplications([]); setLoading(true)
+    try { const data = await request('/internships/' + internship.id + '/applications'); setManagedApplications(asList(data, 'applications')) } catch (e: any) { setError(e.message) } finally { setLoading(false) }
+  }
+  const handleApplicationStatus = async (applicationId: string, status: string) => {
+    try { await request('/internships/applications/' + applicationId + '/status', { method: 'PATCH', body: JSON.stringify({ status }) }); if (managingInternship) await handleManageApplicants(managingInternship); await loadPortal() } catch (e: any) { setError(e.message) }
+  }
+  const handleCreateCompany = async () => {
+    const name = window.prompt('Company name'); if (!name?.trim()) return
+    const website = window.prompt('Website (optional)')
+    try { await request('/internships/companies', { method: 'POST', body: JSON.stringify({ name: name.trim(), website: website || undefined }) }); await loadPortal() } catch (e: any) { setError(e.message) }
+  }
+  const handleEditCompany = async (company: CompanyData) => {
+    const name = window.prompt('Company name', company.name); if (!name?.trim()) return
+    try { await request('/internships/companies/' + company.id, { method: 'PATCH', body: JSON.stringify({ name: name.trim() }) }); await loadPortal() } catch (e: any) { setError(e.message) }
   }
 
   // Recruiter Create Internship Action
@@ -713,7 +742,7 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 </p>
               </div>
 
-              <button
+              <div style={{ display: 'flex', gap: '10px' }}><button onClick={handleCreateCompany} style={{ backgroundColor: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.35)', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer' }}>+ Company</button><button
                 onClick={() => setIsNewInternshipModalOpen(true)}
                 style={{
                   backgroundColor: '#8b5cf6',
@@ -726,7 +755,7 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 }}
               >
                 + Post New Internship
-              </button>
+              </button></div>
             </div>
 
             {/* List of Managed Postings */}
@@ -765,7 +794,10 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                     >
                       {item.status}
                     </span>
+                    <button onClick={() => handleEditInternship(item)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => handleDeleteInternship(item)} style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>Delete</button>
                     <button
+                      onClick={() => handleManageApplicants(item)}
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.05)',
                         color: '#fff',
@@ -786,6 +818,14 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
         )}
       </main>
 
+      {managingInternship && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 120, overflow: 'auto', padding: '32px' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', background: '#0f172a', padding: '24px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}><h3>Applicants — {managingInternship.title}</h3><button onClick={() => setManagingInternship(null)}>Close</button></div>
+            {managedApplications.length === 0 ? <p style={{ color: '#94a3b8' }}>No applications yet.</p> : managedApplications.map((app) => <div key={app.id} style={{ padding: '14px', borderBottom: '1px solid rgba(255,255,255,.1)' }}><strong>{app.user?.name || app.user?.email || 'Student'}</strong><div style={{ color: '#94a3b8', fontSize: '13px' }}>{app.user?.email}</div><div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>{['APPLIED','REVIEWING','SHORTLISTED','INTERVIEW','OFFERED','SELECTED','REJECTED'].map((status) => <button key={status} onClick={() => handleApplicationStatus(app.id, status)} disabled={app.status === status}>{status}</button>)}</div></div>)}
+          </div>
+        </div>
+      )}
       {/* MODAL: APPLY TO INTERNSHIP */}
       {isApplyModalOpen && selectedInternship && (
         <div
