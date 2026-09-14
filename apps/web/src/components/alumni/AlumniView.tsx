@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export interface AlumniProfileData {
   id: string
@@ -77,7 +77,7 @@ export interface AlumniEventData {
   organizer: { id: string; name: string; email: string; image: string | null }
 }
 
-const SAMPLE_ALUMNI: AlumniProfileData[] = [
+const LEGACY_LEGACY_SAMPLE_ALUMNI: AlumniProfileData[] = [
   {
     id: 'alum-1',
     userId: 'user-alum-1',
@@ -224,61 +224,35 @@ export const AlumniView: React.FC = () => {
   const [verificationSuccess, setVerificationSuccess] = useState(false)
 
   // Local state for connections & requests
-  const [connections, setConnections] = useState<AlumniConnectionData[]>([
-    {
-      id: 'conn-1',
-      studentId: 'current-user',
-      alumniId: 'user-alum-1',
-      status: 'ACCEPTED',
-      message: 'Hi Sarah, would love to connect!',
-      createdAt: new Date().toISOString(),
-      student: {
-        id: 'current-user',
-        name: 'Alex Student',
-        email: 'alex@student.lumina.edu',
-        image: null,
-      },
-      alumni: {
-        id: 'user-alum-1',
-        name: 'Dr. Sarah Lin',
-        email: 'sarah.lin@alumni.lumina.edu',
-        image: null,
-      },
-    },
-  ])
+  const [connections, setConnections] = useState<AlumniConnectionData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const [mentorshipSessions, setMentorshipSessions] = useState<MentorshipSessionData[]>([
-    {
-      id: 'sess-1',
-      studentId: 'current-user',
-      alumniId: 'user-alum-1',
-      topic: 'AI Research Guidance & GPU Systems Preparation',
-      notes: 'Focus on distributed PyTorch training architecture and grad school applications.',
-      status: 'SCHEDULED',
-      scheduledAt: '2026-09-20T17:00:00.000Z',
-      durationMinutes: 45,
-      meetingUrl: 'https://meet.lumina.edu/mentorship-sess-1',
-      createdAt: new Date().toISOString(),
-      student: {
-        id: 'current-user',
-        name: 'Alex Student',
-        email: 'alex@student.lumina.edu',
-        image: null,
-      },
-      alumni: {
-        id: 'user-alum-1',
-        name: 'Dr. Sarah Lin',
-        email: 'sarah.lin@alumni.lumina.edu',
-        image: null,
-      },
-    },
-  ])
+  const [mentorshipSessions, setMentorshipSessions] = useState<MentorshipSessionData[]>([])
 
-  const [referrals] = useState<AlumniReferralData[]>(SAMPLE_REFERRALS)
-  const [events] = useState<AlumniEventData[]>(SAMPLE_EVENTS)
+  const [referrals, setReferrals] = useState<AlumniReferralData[]>([])
+  const [events, setEvents] = useState<AlumniEventData[]>([])
+  const [alumni, setAlumni] = useState<AlumniProfileData[]>([])
+
+  const api = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
+  const unwrap = (value: any) => value?.data ?? value
+  const list = (value: any, key: string) => Array.isArray(value) ? value : unwrap(value)?.[key] || unwrap(value)?.items || []
+  const request = async (path: string, options: RequestInit = {}) => {
+    const response = await fetch(api + path, { credentials: 'include', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options })
+    const payload = response.status === 204 ? null : await response.json().catch(() => null)
+    if (!response.ok) throw new Error(payload?.message || payload?.error || 'Request failed')
+    return unwrap(payload)
+  }
+  const loadNetwork = async () => { setLoading(true); setError(null); try {
+    const [directory, connectionData, sessionData, referralData, eventData] = await Promise.all([
+      request('/alumni/directory'), request('/alumni/connections').catch(() => []), request('/alumni/mentorship/sessions').catch(() => []), request('/alumni/referrals'), request('/alumni/events')
+    ])
+    setAlumni(list(directory, 'alumni')); setConnections(list(connectionData, 'connections')); setMentorshipSessions(list(sessionData, 'sessions')); setReferrals(list(referralData, 'referrals')); setEvents(list(eventData, 'events'))
+  } catch (e: any) { setError(e.message) } finally { setLoading(false) } }
+  useEffect(() => { void loadNetwork() }, [])
 
   // Filtering
-  const filteredAlumni = SAMPLE_ALUMNI.filter((alum) => {
+  const filteredAlumni = alumni.filter((alum) => {
     const matchesSearch =
       alum.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (alum.company && alum.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -291,75 +265,17 @@ export const AlumniView: React.FC = () => {
     return matchesSearch && matchesIndustry && matchesMentorship
   })
 
-  const handleSendConnection = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedAlumnus) return
-
-    const newConnection: AlumniConnectionData = {
-      id: `conn-${Date.now()}`,
-      studentId: 'current-user',
-      alumniId: selectedAlumnus.userId,
-      status: 'PENDING',
-      message: connectionMessage,
-      createdAt: new Date().toISOString(),
-      student: {
-        id: 'current-user',
-        name: 'Alex Student',
-        email: 'alex@student.lumina.edu',
-        image: null,
-      },
-      alumni: {
-        id: selectedAlumnus.userId,
-        name: selectedAlumnus.user.name,
-        email: selectedAlumnus.user.email,
-        image: selectedAlumnus.user.image,
-      },
-    }
-
-    setConnections([newConnection, ...connections])
-    setShowConnectModal(false)
-    setConnectionMessage('')
+  const handleSendConnection = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!selectedAlumnus) return
+    try { await request('/alumni/connections', { method: 'POST', body: JSON.stringify({ alumniId: selectedAlumnus.userId, message: connectionMessage || undefined }) }); await loadNetwork(); setShowConnectModal(false); setConnectionMessage('') } catch (e: any) { setError(e.message) }
   }
 
-  const handleRequestMentorship = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedAlumnus) return
-
-    const newSession: MentorshipSessionData = {
-      id: `sess-${Date.now()}`,
-      studentId: 'current-user',
-      alumniId: selectedAlumnus.userId,
-      topic: mentorshipTopic,
-      notes: mentorshipNotes,
-      status: 'REQUESTED',
-      scheduledAt: null,
-      durationMinutes: 30,
-      meetingUrl: null,
-      createdAt: new Date().toISOString(),
-      student: {
-        id: 'current-user',
-        name: 'Alex Student',
-        email: 'alex@student.lumina.edu',
-        image: null,
-      },
-      alumni: {
-        id: selectedAlumnus.userId,
-        name: selectedAlumnus.user.name,
-        email: selectedAlumnus.user.email,
-        image: selectedAlumnus.user.image,
-      },
-    }
-
-    setMentorshipSessions([newSession, ...mentorshipSessions])
-    setShowMentorshipModal(false)
-    setMentorshipTopic('')
-    setMentorshipNotes('')
+  const handleRequestMentorship = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!selectedAlumnus) return
+    try { await request('/alumni/mentorship/sessions', { method: 'POST', body: JSON.stringify({ alumniId: selectedAlumnus.userId, topic: mentorshipTopic, notes: mentorshipNotes || undefined, durationMinutes: 30 }) }); await loadNetwork(); setShowMentorshipModal(false); setMentorshipTopic(''); setMentorshipNotes('') } catch (e: any) { setError(e.message) }
   }
 
-  const handleVerificationSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setVerificationSuccess(true)
-  }
+  const handleVerificationSubmit = async (e: React.FormEvent) => { e.preventDefault(); try { await request('/alumni/profile', { method: 'POST', body: JSON.stringify({ graduationYear: Number(verificationYear), departmentName: verificationDept, bio: verificationProofUrl ? 'Verification proof: ' + verificationProofUrl : undefined }) }); setVerificationSuccess(true); await loadNetwork() } catch (e: any) { setError(e.message) } }
 
   return (
     <div
@@ -371,6 +287,8 @@ export const AlumniView: React.FC = () => {
         padding: '24px',
       }}
     >
+      {error && <div style={{ background: '#451a1a', color: '#fecaca', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>{error}</div>}
+      {loading && <div style={{ color: '#a5b4fc', marginBottom: '12px' }}>Loading alumni network…</div>}
       {/* Header Banner */}
       <div
         style={{
