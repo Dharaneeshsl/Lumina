@@ -9,7 +9,9 @@
     "dev": "prisma generate --watch",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
-    "migrate:status": "prisma migrate status"
+    "migrate:status": "prisma migrate status",
+    "check-types": "tsc --noEmit",
+    "test": "bun test"
   },
   "exports": {
     ".": "./src/index.ts"

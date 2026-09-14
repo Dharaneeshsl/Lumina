@@ -1368,3 +1368,24 @@ model Announcement {
 
   @@index([isActive])
 }
+
+
+model AnalyticsEvent {
+  id             String   @id @default(cuid())
+  name           String
+  idempotencyKey String   @unique
+  userId         String?
+  anonymousId    String?
+  collegeId      String?
+  tenantId       String?
+  consent        String?
+  properties     Json?
+  occurredAt     DateTime?
+  receivedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@index([collegeId, receivedAt])
+  @@index([userId, receivedAt])
+  @@index([name, receivedAt])
+  @@index([tenantId, receivedAt])
+}
