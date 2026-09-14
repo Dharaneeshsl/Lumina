@@ -40,7 +40,8 @@
     "multer": "^2.2.0",
     "@stream-io/node-sdk": "^0.7.63",
     "stream-chat": "^9.50.2",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@lumina/analytics": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^5"
