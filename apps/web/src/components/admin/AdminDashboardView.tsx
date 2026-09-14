@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 export interface AdminMetricsData {
   totalUsers: number
@@ -70,136 +70,35 @@ export interface AnnouncementItem {
   createdBy: { id: string; name: string; email: string }
 }
 
-const SAMPLE_METRICS: AdminMetricsData = {
-  totalUsers: 1420,
-  totalColleges: 18,
-  totalClubs: 86,
-  totalInternships: 142,
-  pendingVerifications: 12,
-  openReports: 4,
-  timestamp: new Date().toISOString(),
-}
-
-const SAMPLE_USERS: AdminUserData[] = [
-  {
-    id: 'usr-1',
-    name: 'Dr. Sarah Lin',
-    email: 'sarah.lin@alumni.lumina.edu',
-    username: 'sarah_lin',
-    role: 'ALUMNI',
-    status: 'ACTIVE',
-    collegeId: 'col-1',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
-    verification: { alumniVerified: true, status: 'VERIFIED' },
-  },
-  {
-    id: 'usr-2',
-    name: 'Alex Student',
-    email: 'alex@student.lumina.edu',
-    username: 'alex_s',
-    role: 'STUDENT',
-    status: 'ACTIVE',
-    collegeId: 'col-1',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
-  },
-  {
-    id: 'usr-3',
-    name: 'Dean Robert Vance',
-    email: 'robert.vance@admin.lumina.edu',
-    username: 'dean_vance',
-    role: 'COLLEGE_ADMIN',
-    status: 'ACTIVE',
-    collegeId: 'col-1',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 120).toISOString(),
-  },
-  {
-    id: 'usr-4',
-    name: 'Suspended Account User',
-    email: 'spammer@temp.test',
-    username: 'bad_actor',
-    role: 'STUDENT',
-    status: 'SUSPENDED',
-    collegeId: 'col-1',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-  },
-]
-
-const SAMPLE_VERIFICATIONS: AdminVerificationItem[] = [
-  {
-    id: 'ver-1',
-    userId: 'usr-5',
-    status: 'PENDING',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    user: {
-      id: 'usr-5',
-      name: 'Elena Rostova',
-      email: 'elena.r@alumni.lumina.edu',
-      role: 'STUDENT',
-      collegeId: 'col-1',
-    },
-  },
-]
-
-const SAMPLE_REPORTS: AdminReportItem[] = [
-  {
-    id: 'rep-1',
-    commentId: 'comm-101',
-    reporterId: 'usr-2',
-    reason: 'Inappropriate language and spam link in discussion thread.',
-    status: 'OPEN',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString(),
-    reporter: { id: 'usr-2', name: 'Alex Student', email: 'alex@student.lumina.edu' },
-    comment: {
-      id: 'comm-101',
-      body: 'Buy cheap tokens at spam.example.com',
-      userId: 'usr-4',
-      postId: 'post-99',
-    },
-  },
-]
-
-const SAMPLE_AUDIT_LOGS: AdminAuditLogItem[] = [
-  {
-    id: 'audit-1',
-    adminId: 'usr-3',
-    action: 'UPDATE_USER_ROLE_STATUS',
-    targetId: 'usr-4',
-    targetType: 'USER',
-    details: { role: 'STUDENT', status: 'SUSPENDED', reason: 'Spamming discussion channels' },
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    admin: {
-      id: 'usr-3',
-      name: 'Dean Robert Vance',
-      email: 'robert.vance@admin.lumina.edu',
-      role: 'COLLEGE_ADMIN',
-    },
-  },
-]
-
-const SAMPLE_ANNOUNCEMENTS: AnnouncementItem[] = [
-  {
-    id: 'ann-1',
-    title: 'Platform Maintenance Notice - Fall 2026',
-    content:
-      'Lumina services will undergo scheduled database optimizations on Sunday at 02:00 UTC.',
-    type: 'MAINTENANCE',
-    targetRole: 'ALL',
-    isActive: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    createdBy: { id: 'usr-3', name: 'Dean Robert Vance', email: 'robert.vance@admin.lumina.edu' },
-  },
-]
-
 export const AdminDashboardView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'overview' | 'users' | 'verification' | 'reports' | 'audit' | 'settings'
   >('overview')
-  const [metrics] = useState<AdminMetricsData>(SAMPLE_METRICS)
-  const [users, setUsers] = useState<AdminUserData[]>(SAMPLE_USERS)
-  const [verifications, setVerifications] = useState<AdminVerificationItem[]>(SAMPLE_VERIFICATIONS)
-  const [reports, setReports] = useState<AdminReportItem[]>(SAMPLE_REPORTS)
-  const [auditLogs, setAuditLogs] = useState<AdminAuditLogItem[]>(SAMPLE_AUDIT_LOGS)
-  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(SAMPLE_ANNOUNCEMENTS)
+  const [metrics, setMetrics] = useState<AdminMetricsData | null>(null)
+  const [users, setUsers] = useState<AdminUserData[]>([])
+  const [verifications, setVerifications] = useState<AdminVerificationItem[]>([])
+  const [reports, setReports] = useState<AdminReportItem[]>([])
+  const [auditLogs, setAuditLogs] = useState<AdminAuditLogItem[]>([])
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const api = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
+  const unwrap = (value: any) => value?.data ?? value
+  const asList = (value: any, key: string) => Array.isArray(value) ? value : unwrap(value)?.[key] || unwrap(value)?.items || []
+  const request = useCallback(async (path: string, options: RequestInit = {}) => {
+    const response = await fetch(api + path, { credentials: 'include', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options })
+    const payload = response.status === 204 ? null : await response.json().catch(() => null)
+    if (!response.ok) throw new Error(payload?.message || payload?.error || 'Admin request failed')
+    return unwrap(payload)
+  }, [api])
+  const loadAdmin = useCallback(async () => { setLoading(true); setError(null); try {
+    const [m,u,v,r,a,s,ann] = await Promise.all([request('/admin/metrics'), request('/admin/users'), request('/admin/verification/queue'), request('/admin/reports/queue'), request('/admin/audit-logs'), request('/admin/settings'), request('/admin/announcements')])
+    setMetrics(m); setUsers(asList(u,'users')); setVerifications(asList(v,'verifications')); setReports(asList(r,'reports')); setAuditLogs(asList(a,'logs')); setAnnouncements(asList(ann,'announcements'))
+    const settings = asList(s,'settings'); const getBool = (key: string, fallback: boolean) => { const item = settings.find((x:any) => x.key === key); return item ? String(item.value) === 'true' : fallback }
+    setMaintenanceMode(getBool('maintenance_mode', false)); setRegistrationAllowed(getBool('registration_allowed', true))
+  } catch (e:any) { setError(e.message) } finally { setLoading(false) } }, [request])
+  useEffect(() => { void loadAdmin() }, [loadAdmin])
 
   // Filters & search
   const [userSearchQuery, setUserSearchQuery] = useState('')
@@ -215,93 +114,14 @@ export const AdminDashboardView: React.FC = () => {
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [registrationAllowed, setRegistrationAllowed] = useState(true)
 
-  const handleUpdateUserStatus = (userId: string, newStatus: 'ACTIVE' | 'SUSPENDED' | 'BANNED') => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, status: newStatus } : u)))
+  const handleUpdateUserStatus = async (userId: string, newStatus: 'ACTIVE' | 'SUSPENDED' | 'BANNED') => { try { await request('/admin/users/' + userId, { method: 'PATCH', body: JSON.stringify({ status: newStatus }) }); await loadAdmin() } catch (e:any) { setError(e.message) } }
 
-    const newLog: AdminAuditLogItem = {
-      id: `audit-${Date.now()}`,
-      adminId: 'usr-3',
-      action: 'UPDATE_USER_ROLE_STATUS',
-      targetId: userId,
-      targetType: 'USER',
-      details: { status: newStatus },
-      createdAt: new Date().toISOString(),
-      admin: {
-        id: 'usr-3',
-        name: 'Dean Robert Vance',
-        email: 'robert.vance@admin.lumina.edu',
-        role: 'COLLEGE_ADMIN',
-      },
-    }
-    setAuditLogs([newLog, ...auditLogs])
-  }
+  const handleApproveVerification = async (verId: string, approve: boolean) => { try { await request('/admin/moderation/action', { method: 'POST', body: JSON.stringify({ targetType: 'VERIFICATION', targetId: verId, action: approve ? 'APPROVE' : 'REJECT', reason: 'Reviewed by administrator' }) }); await loadAdmin() } catch (e:any) { setError(e.message) } }
 
-  const handleApproveVerification = (verId: string, approve: boolean) => {
-    const ver = verifications.find((v) => v.id === verId)
-    setVerifications((prev) => prev.filter((v) => v.id !== verId))
+  const handleResolveReport = async (reportId: string, action: string) => { try { await request('/admin/moderation/action', { method: 'POST', body: JSON.stringify({ targetType: 'REPORT', targetId: reportId, action, reason: 'Reviewed by administrator' }) }); await loadAdmin() } catch (e:any) { setError(e.message) } }
 
-    if (ver && approve) {
-      setUsers((prev) => prev.map((u) => (u.id === ver.userId ? { ...u, role: 'ALUMNI' } : u)))
-    }
-
-    const newLog: AdminAuditLogItem = {
-      id: `audit-${Date.now()}`,
-      adminId: 'usr-3',
-      action: approve ? 'APPROVE_VERIFICATION' : 'REJECT_VERIFICATION',
-      targetId: verId,
-      targetType: 'VERIFICATION',
-      details: { approve },
-      createdAt: new Date().toISOString(),
-      admin: {
-        id: 'usr-3',
-        name: 'Dean Robert Vance',
-        email: 'robert.vance@admin.lumina.edu',
-        role: 'COLLEGE_ADMIN',
-      },
-    }
-    setAuditLogs([newLog, ...auditLogs])
-  }
-
-  const handleResolveReport = (reportId: string, action: string) => {
-    setReports((prev) => prev.filter((r) => r.id !== reportId))
-
-    const newLog: AdminAuditLogItem = {
-      id: `audit-${Date.now()}`,
-      adminId: 'usr-3',
-      action: `MODERATION_${action}`,
-      targetId: reportId,
-      targetType: 'REPORT',
-      details: { action },
-      createdAt: new Date().toISOString(),
-      admin: {
-        id: 'usr-3',
-        name: 'Dean Robert Vance',
-        email: 'robert.vance@admin.lumina.edu',
-        role: 'COLLEGE_ADMIN',
-      },
-    }
-    setAuditLogs([newLog, ...auditLogs])
-  }
-
-  const handleCreateAnnouncement = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!annTitle || !annContent) return
-
-    const newAnn: AnnouncementItem = {
-      id: `ann-${Date.now()}`,
-      title: annTitle,
-      content: annContent,
-      type: annType,
-      targetRole: 'ALL',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      createdBy: { id: 'usr-3', name: 'Dean Robert Vance', email: 'robert.vance@admin.lumina.edu' },
-    }
-
-    setAnnouncements([newAnn, ...announcements])
-    setAnnTitle('')
-    setAnnContent('')
-  }
+  const handleCreateAnnouncement = async (e: React.FormEvent) => { e.preventDefault(); if (!annTitle || !annContent) return; try { await request('/admin/announcements', { method: 'POST', body: JSON.stringify({ title: annTitle, content: annContent, targetRole: 'ALL', priority: annType }) }); setAnnTitle(''); setAnnContent(''); await loadAdmin() } catch (e:any) { setError(e.message) } }
+  const handleSetting = async (key: string, value: boolean, description: string) => { try { await request('/admin/settings', { method: 'PATCH', body: JSON.stringify({ key, value: String(value), description }) }); if (key === 'maintenance_mode') setMaintenanceMode(value); else setRegistrationAllowed(value) } catch (e:any) { setError(e.message) } }
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -323,6 +143,8 @@ export const AdminDashboardView: React.FC = () => {
         padding: '24px',
       }}
     >
+      {error && <div style={{ background: '#451a1a', color: '#fecaca', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>{error}</div>}
+      {loading && <div style={{ color: '#a5b4fc', marginBottom: '12px' }}>Loading administrator data…</div>}
       {/* Header Banner */}
       <div
         style={{
@@ -456,20 +278,20 @@ export const AdminDashboardView: React.FC = () => {
             {[
               {
                 label: 'Total Platform Users',
-                value: metrics.totalUsers,
+                value: metrics?.totalUsers ?? '—',
                 color: '#6366f1',
                 icon: '👥',
               },
               {
                 label: 'Colleges Onboarded',
-                value: metrics.totalColleges,
+                value: metrics?.totalColleges ?? '—',
                 color: '#38bdf8',
                 icon: '🏛️',
               },
-              { label: 'Active Clubs', value: metrics.totalClubs, color: '#ec4899', icon: '🛡️' },
+              { label: 'Active Clubs', value: metrics?.totalClubs ?? '—', color: '#ec4899', icon: '🛡️' },
               {
                 label: 'Internships Posted',
-                value: metrics.totalInternships,
+                value: metrics?.totalInternships ?? '—',
                 color: '#a855f7',
                 icon: '💼',
               },
@@ -1255,7 +1077,7 @@ export const AdminDashboardView: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={maintenanceMode}
-                  onChange={(e) => setMaintenanceMode(e.target.checked)}
+                  onChange={(e) => void handleSetting('maintenance_mode', e.target.checked, 'Global maintenance flag')}
                   style={{
                     width: '18px',
                     height: '18px',
@@ -1286,7 +1108,7 @@ export const AdminDashboardView: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={registrationAllowed}
-                  onChange={(e) => setRegistrationAllowed(e.target.checked)}
+                  onChange={(e) => void handleSetting('registration_allowed', e.target.checked, 'Allow new registrations')}
                   style={{
                     width: '18px',
                     height: '18px',
