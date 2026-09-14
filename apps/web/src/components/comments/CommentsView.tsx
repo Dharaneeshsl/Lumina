@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-type User = { id: string; name?: string; username?: string | null; image?: string | null }
+type User = { id?: string; name?: string; username?: string | null; image?: string | null }
 type Reaction = { emoji: string; count?: number; userIds?: string[] }
 type Comment = {
   id: string
