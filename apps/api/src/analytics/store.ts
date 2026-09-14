@@ -1,5 +1,5 @@
-import { prisma } from '@lumina/db'
 import type { AnalyticsRepository, StoredAnalyticsEvent } from '@lumina/analytics'
+import { prisma } from '@lumina/db'
 
 function toStored(event: any): StoredAnalyticsEvent {
   return {
@@ -8,7 +8,11 @@ function toStored(event: any): StoredAnalyticsEvent {
     idempotencyKey: event.idempotencyKey,
     occurredAt: event.occurredAt?.toISOString(),
     properties: event.properties as Record<string, string | number | boolean | null> | undefined,
-    actor: { userId: event.userId ?? undefined, anonymousId: event.anonymousId ?? undefined, collegeId: event.collegeId ?? undefined },
+    actor: {
+      userId: event.userId ?? undefined,
+      anonymousId: event.anonymousId ?? undefined,
+      collegeId: event.collegeId ?? undefined,
+    },
     consent: event.consent as any,
     tenantId: event.tenantId,
     receivedAt: event.receivedAt,
