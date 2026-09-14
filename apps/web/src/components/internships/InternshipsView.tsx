@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export interface CompanyData {
   id: string
@@ -50,7 +50,7 @@ export interface ApplicationData {
   internship: InternshipData
 }
 
-const SAMPLE_COMPANIES: CompanyData[] = [
+const LEGACY_LEGACY_SAMPLE_COMPANIES: CompanyData[] = [
   {
     id: 'comp-1',
     name: 'Aether AI Labs',
@@ -80,7 +80,7 @@ const SAMPLE_COMPANIES: CompanyData[] = [
   },
 ]
 
-const SAMPLE_INTERNSHIPS: InternshipData[] = [
+const LEGACY_LEGACY_SAMPLE_INTERNSHIPS: InternshipData[] = [
   {
     id: 'int-1',
     companyId: 'comp-1',
@@ -100,7 +100,7 @@ const SAMPLE_INTERNSHIPS: InternshipData[] = [
     skills: ['Python', 'TypeScript', 'LangChain', 'PyTorch'],
     deadline: '2026-10-15',
     contactEmail: 'careers@aetherai.example.com',
-    company: SAMPLE_COMPANIES[0],
+    company: LEGACY_SAMPLE_COMPANIES[0],
     _count: { applications: 18 },
   },
   {
@@ -121,7 +121,7 @@ const SAMPLE_INTERNSHIPS: InternshipData[] = [
     skills: ['Go', 'Rust', 'PostgreSQL', 'Redis', 'Docker'],
     deadline: '2026-10-01',
     contactEmail: 'internships@quantumscale.example.com',
-    company: SAMPLE_COMPANIES[1],
+    company: LEGACY_SAMPLE_COMPANIES[1],
     _count: { applications: 24 },
   },
   {
@@ -142,7 +142,7 @@ const SAMPLE_INTERNSHIPS: InternshipData[] = [
     skills: ['Ethical Hacking', 'Network Security', 'Python', 'Linux'],
     deadline: '2026-11-01',
     contactEmail: 'talent@veritassec.example.com',
-    company: SAMPLE_COMPANIES[2],
+    company: LEGACY_SAMPLE_COMPANIES[2],
     _count: { applications: 12 },
   },
 ]
@@ -153,22 +153,35 @@ interface InternshipsViewProps {
 
 export default function InternshipsView({ onBackToHome }: InternshipsViewProps) {
   const [activeTab, setActiveTab] = useState<'explore' | 'my-applications' | 'recruiter'>('explore')
-  const [internships, setInternships] = useState<InternshipData[]>(SAMPLE_INTERNSHIPS)
-  const [companies] = useState<CompanyData[]>(SAMPLE_COMPANIES)
-  const [myApplications, setMyApplications] = useState<ApplicationData[]>([
-    {
-      id: 'app-101',
-      internshipId: 'int-1',
-      userId: 'usr-student-1',
-      resumeUrl: 'https://example.com/resumes/my_cv_2026.pdf',
-      coverLetter:
-        'Passionate about building state-of-the-art LLM orchestration systems and agentic tools.',
-      status: 'SHORTLISTED',
-      notes: 'Invited for technical interview round on Oct 2nd.',
-      createdAt: new Date().toISOString(),
-      internship: SAMPLE_INTERNSHIPS[0],
-    },
-  ])
+  const [internships, setInternships] = useState<InternshipData[]>([])
+  const [companies, setCompanies] = useState<CompanyData[]>([])
+  const [myApplications, setMyApplications] = useState<ApplicationData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  const api = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
+  const unwrap = (value: any) => value?.data ?? value
+  const request = async (path: string, options: RequestInit = {}) => {
+    const response = await fetch(api + path, { credentials: 'include', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options })
+    const payload = response.status === 204 ? null : await response.json().catch(() => null)
+    if (!response.ok) throw new Error(payload?.message || payload?.error || 'Request failed')
+    return unwrap(payload)
+  }
+  const asList = (value: any, key: string) => Array.isArray(value) ? value : value?.[key] || value?.items || []
+  const loadPortal = async () => {
+    setLoading(true); setError(null)
+    try {
+      const [internshipData, companyData, applicationData] = await Promise.all([
+        request('/internships'), request('/internships/companies'), request('/internships/my-applications').catch(() => [])
+      ])
+      setInternships(asList(internshipData, 'internships'))
+      const loadedCompanies = asList(companyData, 'companies'); setCompanies(loadedCompanies)
+      setMyApplications(asList(applicationData, 'applications'))
+      if (!newCompanyId && loadedCompanies[0]) setNewCompanyId(loadedCompanies[0].id)
+    } catch (e: any) { setError(e.message) } finally { setLoading(false) }
+  }
+  useEffect(() => { void loadPortal() }, [])
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
@@ -185,7 +198,7 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   // Recruiter Posting State
   const [isNewInternshipModalOpen, setIsNewInternshipModalOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
-  const [newCompanyId, setNewCompanyId] = useState(SAMPLE_COMPANIES[0].id)
+  const [newCompanyId, setNewCompanyId] = useState('')
   const [newDescription, setNewDescription] = useState('')
   const [newLocation, setNewLocation] = useState('')
   const [newStipend, setNewStipend] = useState('4000')
@@ -205,71 +218,29 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   })
 
   // Apply Action
-  const handleApply = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedInternship) return
-
-    const existing = myApplications.find((app) => app.internshipId === selectedInternship.id)
-    if (existing) {
-      setApplicationSuccessMsg('You have already applied to this internship!')
-      return
-    }
-
-    const newApp: ApplicationData = {
-      id: `app-${Date.now()}`,
-      internshipId: selectedInternship.id,
-      userId: 'usr-student-1',
-      resumeUrl: resumeUrlInput,
-      coverLetter: coverLetterInput,
-      status: 'APPLIED',
-      notes: null,
-      createdAt: new Date().toISOString(),
-      internship: selectedInternship,
-    }
-
-    setMyApplications([newApp, ...myApplications])
-    setApplicationSuccessMsg('Application submitted successfully!')
-    setTimeout(() => {
-      setIsApplyModalOpen(false)
-      setSelectedInternship(null)
-      setApplicationSuccessMsg(null)
-      setCoverLetterInput('')
-    }, 1200)
+  const handleApply = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!selectedInternship) return
+    setSubmitting(true); setApplicationSuccessMsg(null)
+    try {
+      await request('/internships/' + selectedInternship.id + '/apply', { method: 'POST', body: JSON.stringify({ resumeUrl: resumeUrlInput || undefined, coverLetter: coverLetterInput || undefined }) })
+      await loadPortal(); setApplicationSuccessMsg('Application submitted successfully!')
+      setTimeout(() => { setIsApplyModalOpen(false); setSelectedInternship(null); setApplicationSuccessMsg(null); setCoverLetterInput('') }, 900)
+    } catch (e: any) { setApplicationSuccessMsg(e.message) } finally { setSubmitting(false) }
   }
 
   // Withdraw Action
-  const handleWithdraw = (applicationId: string) => {
-    setMyApplications((prev) =>
-      prev.map((app) => (app.id === applicationId ? { ...app, status: 'WITHDRAWN' } : app))
-    )
+  const handleWithdraw = async (applicationId: string) => {
+    const application = myApplications.find((item) => item.id === applicationId); if (!application) return
+    setSubmitting(true); try { await request('/internships/' + application.internshipId + '/withdraw', { method: 'POST' }); await loadPortal() } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
   }
 
   // Recruiter Create Internship Action
-  const handleCreateInternship = (e: React.FormEvent) => {
-    e.preventDefault()
-    const targetComp = companies.find((c) => c.id === newCompanyId) || companies[0]
-    const created: InternshipData = {
-      id: `int-${Date.now()}`,
-      companyId: targetComp.id,
-      title: newTitle,
-      description: newDescription,
-      location: newLocation,
-      stipend: parseFloat(newStipend) || 0,
-      type: newType,
-      mode: newMode,
-      status: 'PUBLISHED',
-      requirements: ['Bachelor degree or active student enrollment', 'Strong technical baseline'],
-      skills: newSkills.split(',').map((s) => s.trim()),
-      deadline: '2026-11-30',
-      contactEmail: `recruiter@${targetComp.name.toLowerCase().replace(/\s+/g, '')}.com`,
-      company: targetComp,
-      _count: { applications: 0 },
-    }
-
-    setInternships([created, ...internships])
-    setIsNewInternshipModalOpen(false)
-    setNewTitle('')
-    setNewDescription('')
+  const handleCreateInternship = async (e: React.FormEvent) => {
+    e.preventDefault(); setSubmitting(true)
+    try {
+      await request('/internships', { method: 'POST', body: JSON.stringify({ companyId: newCompanyId, title: newTitle, description: newDescription || undefined, location: newLocation || undefined, stipend: Number(newStipend) || undefined, mode: newMode, type: newType, skills: newSkills.split(',').map((item) => item.trim()).filter(Boolean) }) })
+      await loadPortal(); setIsNewInternshipModalOpen(false); setNewTitle(''); setNewDescription('')
+    } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
   }
 
   return (
@@ -281,6 +252,8 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
     >
+      {error && <div style={{ backgroundColor: '#451a1a', color: '#fecaca', padding: '12px 24px' }}>{error}</div>}
+      {loading && <div style={{ padding: '12px 24px', color: '#93c5fd' }}>Loading internship portal…</div>}
       {/* Top Bar Navigation */}
       <header
         style={{
