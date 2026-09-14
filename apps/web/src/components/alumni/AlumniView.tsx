@@ -77,129 +77,6 @@ export interface AlumniEventData {
   organizer: { id: string; name: string; email: string; image: string | null }
 }
 
-const LEGACY_LEGACY_SAMPLE_ALUMNI: AlumniProfileData[] = [
-  {
-    id: 'alum-1',
-    userId: 'user-alum-1',
-    graduationYear: 2021,
-    departmentName: 'Computer Science & Engineering',
-    company: 'Google DeepMind',
-    jobTitle: 'Senior Research Engineer',
-    industry: 'Artificial Intelligence',
-    location: 'San Francisco, CA',
-    bio: 'Building agentic AI reasoning models and distributed GPU training systems. Glad to mentor students in AI/ML & Systems engineering.',
-    isAvailableForMentorship: true,
-    directoryVisible: true,
-    linkedIn: 'https://linkedin.com',
-    github: 'https://github.com',
-    skills: ['PyTorch', 'Distributed Systems', 'CUDA', 'Python', 'LLMs'],
-    user: {
-      id: 'user-alum-1',
-      name: 'Dr. Sarah Lin',
-      email: 'sarah.lin@alumni.lumina.edu',
-      image:
-        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80',
-      verification: { alumniVerified: true },
-    },
-  },
-  {
-    id: 'alum-2',
-    userId: 'user-alum-2',
-    graduationYear: 2019,
-    departmentName: 'Electrical & Computer Engineering',
-    company: 'Stripe',
-    jobTitle: 'Staff Backend Architect',
-    industry: 'Fintech & Cloud Systems',
-    location: 'New York, NY',
-    bio: 'Focused on global payments infrastructure, API reliability, and developer platforms.',
-    isAvailableForMentorship: true,
-    directoryVisible: true,
-    linkedIn: 'https://linkedin.com',
-    github: 'https://github.com',
-    skills: ['Go', 'Distributed Databases', 'PostgreSQL', 'System Design'],
-    user: {
-      id: 'user-alum-2',
-      name: 'Marcus Vance',
-      email: 'marcus.v@alumni.lumina.edu',
-      image:
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      verification: { alumniVerified: true },
-    },
-  },
-  {
-    id: 'alum-3',
-    userId: 'user-alum-3',
-    graduationYear: 2022,
-    departmentName: 'Data Science & Analytics',
-    company: 'Snowflake',
-    jobTitle: 'Product Manager - Data Cloud',
-    industry: 'Enterprise Software',
-    location: 'Seattle, WA',
-    bio: 'Transitioned from Data Engineering to Technical Product Management. Reach out for resume reviews and PM interview prep!',
-    isAvailableForMentorship: true,
-    directoryVisible: true,
-    linkedIn: 'https://linkedin.com',
-    github: null,
-    skills: ['Product Strategy', 'SQL', 'Data Analytics', 'Roadmapping'],
-    user: {
-      id: 'user-alum-3',
-      name: 'Aria Patel',
-      email: 'aria.patel@alumni.lumina.edu',
-      image:
-        'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80',
-      verification: { alumniVerified: true },
-    },
-  },
-]
-
-const SAMPLE_REFERRALS: AlumniReferralData[] = [
-  {
-    id: 'ref-1',
-    alumniId: 'user-alum-1',
-    title: 'Research Fellow & SWE Intern - Summer 2027',
-    company: 'Google DeepMind',
-    location: 'San Francisco, CA / Remote',
-    description:
-      'Looking for top CS/Math students interested in AI reasoning. Referral slots open!',
-    link: 'https://deepmind.google/careers',
-    status: 'OPEN',
-    createdAt: new Date().toISOString(),
-    alumni: { id: 'user-alum-1', name: 'Dr. Sarah Lin', email: 'sarah@example.com', image: null },
-  },
-  {
-    id: 'ref-2',
-    alumniId: 'user-alum-2',
-    title: 'Infrastructure Engineer (New Grad 2026)',
-    company: 'Stripe',
-    location: 'New York, NY',
-    description: 'Direct referral for backend engineers proficient in Go, Rust, or C++.',
-    link: 'https://stripe.com/jobs',
-    status: 'OPEN',
-    createdAt: new Date().toISOString(),
-    alumni: { id: 'user-alum-2', name: 'Marcus Vance', email: 'marcus@example.com', image: null },
-  },
-]
-
-const SAMPLE_EVENTS: AlumniEventData[] = [
-  {
-    id: 'evt-1',
-    organizerId: 'user-alum-1',
-    title: 'Annual Alumni & Student Tech Summit 2026',
-    description:
-      'Keynotes, speed networking, 1:1 portfolio reviews, and career Q&A with top industry leaders.',
-    eventDate: '2026-10-15T18:00:00.000Z',
-    location: 'Main Auditorium & Virtual Stream',
-    virtualLink: 'https://meet.lumina.edu/alumni-summit',
-    createdAt: new Date().toISOString(),
-    organizer: {
-      id: 'user-alum-1',
-      name: 'Dr. Sarah Lin',
-      email: 'sarah@example.com',
-      image: null,
-    },
-  },
-]
-
 export const AlumniView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     'directory' | 'mentorship' | 'connections' | 'referrals' | 'verification'
@@ -216,6 +93,12 @@ export const AlumniView: React.FC = () => {
   const [connectionMessage, setConnectionMessage] = useState('')
   const [mentorshipTopic, setMentorshipTopic] = useState('')
   const [mentorshipNotes, setMentorshipNotes] = useState('')
+  const [referralTitle, setReferralTitle] = useState('')
+  const [referralCompany, setReferralCompany] = useState('')
+  const [referralLocation, setReferralLocation] = useState('')
+  const [referralDescription, setReferralDescription] = useState('')
+  const [referralLink, setReferralLink] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   // Verification request form state
   const [verificationYear, setVerificationYear] = useState('2023')
@@ -273,6 +156,14 @@ export const AlumniView: React.FC = () => {
   const handleRequestMentorship = async (e: React.FormEvent) => {
     e.preventDefault(); if (!selectedAlumnus) return
     try { await request('/alumni/mentorship/sessions', { method: 'POST', body: JSON.stringify({ alumniId: selectedAlumnus.userId, topic: mentorshipTopic, notes: mentorshipNotes || undefined, durationMinutes: 30 }) }); await loadNetwork(); setShowMentorshipModal(false); setMentorshipTopic(''); setMentorshipNotes('') } catch (e: any) { setError(e.message) }
+  }
+
+  const handleCreateReferral = async (e: React.FormEvent) => {
+    e.preventDefault(); setSubmitting(true)
+    try {
+      await request('/alumni/referrals', { method: 'POST', body: JSON.stringify({ title: referralTitle, company: referralCompany, location: referralLocation || undefined, description: referralDescription || undefined, link: referralLink || undefined }) })
+      setShowReferralModal(false); setReferralTitle(''); setReferralCompany(''); setReferralLocation(''); setReferralDescription(''); setReferralLink(''); await loadNetwork()
+    } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
   }
 
   const handleVerificationSubmit = async (e: React.FormEvent) => { e.preventDefault(); try { await request('/alumni/profile', { method: 'POST', body: JSON.stringify({ graduationYear: Number(verificationYear), departmentName: verificationDept, bio: verificationProofUrl ? 'Verification proof: ' + verificationProofUrl : undefined }) }); setVerificationSuccess(true); await loadNetwork() } catch (e: any) { setError(e.message) } }
@@ -1335,14 +1226,16 @@ export const AlumniView: React.FC = () => {
               Post Referral Opportunity
             </h3>
             <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                setShowReferralModal(false)
-              }}
+              onSubmit={handleCreateReferral}
             >
               <p style={{ fontSize: '13px', color: '#9ca3af' }}>
-                Share referral slots or job opportunities with current students.
+                Share a real referral slot or opportunity with current students.
               </p>
+              <input required placeholder="Opportunity title" value={referralTitle} onChange={(e) => setReferralTitle(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '10px', borderRadius: '8px' }} />
+              <input required placeholder="Company" value={referralCompany} onChange={(e) => setReferralCompany(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '10px', borderRadius: '8px' }} />
+              <input placeholder="Location" value={referralLocation} onChange={(e) => setReferralLocation(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '10px', borderRadius: '8px' }} />
+              <textarea placeholder="Description" value={referralDescription} onChange={(e) => setReferralDescription(e.target.value)} rows={3} style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '10px', borderRadius: '8px' }} />
+              <input type="url" placeholder="Opportunity URL (optional)" value={referralLink} onChange={(e) => setReferralLink(e.target.value)} style={{ width: '100%', boxSizing: 'border-box', marginBottom: '10px', padding: '10px', borderRadius: '8px' }} />
               <div
                 style={{
                   display: 'flex',
@@ -1351,6 +1244,9 @@ export const AlumniView: React.FC = () => {
                   marginTop: '20px',
                 }}
               >
+                <button type="submit" disabled={submitting} style={{ background: '#6366f1', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>
+                  {submitting ? 'Posting…' : 'Post Referral'}
+                </button>
                 <button
                   type="button"
                   onClick={() => setShowReferralModal(false)}
