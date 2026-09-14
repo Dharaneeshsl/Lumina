@@ -50,35 +50,6 @@ export interface ApplicationData {
   internship: InternshipData
 }
 
-const LEGACY_LEGACY_SAMPLE_COMPANIES: CompanyData[] = [
-  {
-    id: 'comp-1',
-    name: 'Aether AI Labs',
-    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80',
-    website: 'https://aetherai.example.com',
-    description: 'Frontier research in large language models and autonomous agentic systems.',
-    industry: 'Artificial Intelligence',
-    location: 'San Francisco, CA / Remote',
-  },
-  {
-    id: 'comp-2',
-    name: 'QuantumScale Technologies',
-    logo: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=120&q=80',
-    website: 'https://quantumscale.example.com',
-    description: 'Next-gen distributed databases and high-frequency cloud infrastructure.',
-    industry: 'Cloud Infrastructure',
-    location: 'Bengaluru, KA / Hybrid',
-  },
-  {
-    id: 'comp-3',
-    name: 'Veritas Cybersec',
-    logo: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=120&q=80',
-    website: 'https://veritassec.example.com',
-    description: 'Zero-trust network architecture and automated threat detection platforms.',
-    industry: 'Cybersecurity',
-    location: 'Austin, TX / Onsite',
-  },
-]
 
 const LEGACY_LEGACY_SAMPLE_INTERNSHIPS: InternshipData[] = [
   {
