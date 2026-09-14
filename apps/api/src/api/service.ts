@@ -31,6 +31,9 @@ import {
   uploadFile,
 } from '@lumina/storage'
 import {
+  adminAuditQuerySchema,
+  adminModerationActionSchema,
+  adminUserQuerySchema,
   alumniConnectionRequestSchema,
   alumniProfileSchema,
   alumniSearchQuerySchema,
@@ -39,6 +42,7 @@ import {
   clubQuerySchema,
   createAlumniEventSchema,
   createAlumniReferralSchema,
+  createAnnouncementSchema,
   createClubEventSchema,
   createClubPostSchema,
   createClubSchema,
@@ -63,6 +67,7 @@ import {
   studyGroupReplySchema,
   studyGroupSearchQuerySchema,
   studyGroupTimetableSchema,
+  systemSettingSchema,
   updateAlumniProfileSchema,
   updateApplicationStatusSchema,
   updateClubMemberRoleSchema,
@@ -75,6 +80,7 @@ import {
   updateStudyGroupMemberSchema,
   updateStudyGroupNoteSchema,
   updateStudyGroupSchema,
+  updateUserRoleStatusSchema,
 } from '@lumina/validators'
 import { Prisma } from '@prisma/client'
 import ffmpeg from 'fluent-ffmpeg'
@@ -6802,3 +6808,343 @@ export const updateNotificationPreferences = NotificationService.updatePreferenc
 export const registerDeviceToken = NotificationService.registerDeviceToken
 export const listDeviceTokens = NotificationService.listDeviceTokens
 export const revokeDeviceToken = NotificationService.revokeDeviceToken
+
+export namespace AdminRepo {
+  export async function getAdminUser(userId: string) {
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        role: true,
+        collegeId: true,
+      },
+    })
+  }
+
+  export async function logAdminAction(data: {
+    adminId: string
+    action: string
+    targetId?: string | null
+    targetType?: string | null
+    details?: any
+  }) {
+    return prisma.adminAuditLog.create({
+      data: {
+        adminId: data.adminId,
+        action: data.action,
+        targetId: data.targetId ?? null,
+        targetType: data.targetType ?? null,
+        details: data.details ?? null,
+      },
+    })
+  }
+
+  export async function getDashboardSummaryMetrics(collegeId?: string | null) {
+    const userWhere: any = collegeId ? { collegeId } : {}
+    const clubWhere: any = collegeId ? { collegeId } : {}
+    const internshipWhere: any = collegeId ? { collegeId } : {}
+
+    const [
+      totalUsers,
+      totalColleges,
+      totalClubs,
+      totalInternships,
+      pendingVerifications,
+      openReports,
+    ] = await Promise.all([
+      prisma.user.count({ where: userWhere }),
+      prisma.college.count(),
+      prisma.club.count({ where: clubWhere }),
+      prisma.internship.count({ where: internshipWhere }),
+      prisma.verification.count({ where: { status: 'PENDING' } }),
+      prisma.commentReport.count(),
+    ])
+
+    return {
+      totalUsers,
+      totalColleges,
+      totalClubs,
+      totalInternships,
+      pendingVerifications,
+      openReports,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  export async function listUsers(params: {
+    q?: string
+    role?: string
+    status?: string
+    collegeId?: string
+    limit?: number
+  }) {
+    const where: any = {}
+    if (params.collegeId) where.collegeId = params.collegeId
+    if (params.role) where.role = params.role
+    if (params.status) where.status = params.status
+    if (params.q) {
+      where.OR = [
+        { name: { contains: params.q, mode: 'insensitive' } },
+        { email: { contains: params.q, mode: 'insensitive' } },
+        { username: { contains: params.q, mode: 'insensitive' } },
+      ]
+    }
+
+    return prisma.user.findMany({
+      where,
+      take: params.limit || 50,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        role: true,
+        status: true,
+        collegeId: true,
+        createdAt: true,
+        verification: { select: { alumniVerified: true, status: true } },
+      },
+    })
+  }
+
+  export async function updateUserRoleStatus(userId: string, data: { role?: any; status?: any }) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(data.role && { role: data.role }),
+        ...(data.status && { status: data.status }),
+      },
+    })
+  }
+
+  export async function listVerificationQueue() {
+    return prisma.verification.findMany({
+      where: { status: 'PENDING' },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { id: true, name: true, email: true, role: true, collegeId: true } },
+      },
+    })
+  }
+
+  export async function listReportsQueue() {
+    return prisma.commentReport.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        reporter: { select: { id: true, name: true, email: true } },
+        comment: { select: { id: true, content: true, userId: true, postId: true } },
+      },
+    })
+  }
+
+  export async function listAuditLogs(params: {
+    adminId?: string
+    action?: string
+    targetType?: string
+    limit?: number
+  }) {
+    const where: any = {}
+    if (params.adminId) where.adminId = params.adminId
+    if (params.action) where.action = params.action
+    if (params.targetType) where.targetType = params.targetType
+
+    return prisma.adminAuditLog.findMany({
+      where,
+      take: params.limit || 50,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        admin: { select: { id: true, name: true, email: true, role: true } },
+      },
+    })
+  }
+
+  export async function getSystemSettings() {
+    return prisma.systemSetting.findMany({
+      orderBy: { key: 'asc' },
+    })
+  }
+
+  export async function upsertSystemSetting(
+    key: string,
+    value: string,
+    description?: string | null,
+    updatedById?: string
+  ) {
+    return prisma.systemSetting.upsert({
+      where: { key },
+      create: { key, value, description: description ?? null, updatedById },
+      update: { value, description: description ?? null, updatedById },
+    })
+  }
+
+  export async function createAnnouncement(createdById: string, data: any) {
+    return prisma.announcement.create({
+      data: {
+        createdById,
+        title: data.title,
+        content: data.content,
+        type: data.type ?? 'INFO',
+        targetRole: data.targetRole ?? 'ALL',
+        isActive: true,
+      },
+    })
+  }
+
+  export async function listAnnouncements() {
+    return prisma.announcement.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        createdBy: { select: { id: true, name: true, email: true } },
+      },
+    })
+  }
+}
+
+export namespace AdminService {
+  export async function ensureAdmin(adminId: string) {
+    const admin = await AdminRepo.getAdminUser(adminId)
+    if (
+      !admin ||
+      (admin.role !== 'COLLEGE_ADMIN' && admin.role !== 'ADMIN' && admin.role !== 'SUPER_ADMIN')
+    ) {
+      throw forbidden('ONLY_ADMINISTRATORS_CAN_ACCESS_THIS_RESOURCE')
+    }
+    return admin
+  }
+
+  export async function getDashboardMetrics(adminId: string) {
+    const admin = await ensureAdmin(adminId)
+    const scopeCollegeId = admin.role === 'SUPER_ADMIN' ? null : admin.collegeId
+    return AdminRepo.getDashboardSummaryMetrics(scopeCollegeId)
+  }
+
+  export async function listUsers(adminId: string, input: unknown) {
+    const admin = await ensureAdmin(adminId)
+    const parsed = adminUserQuerySchema.parse(input)
+    const scopeCollegeId = admin.role === 'SUPER_ADMIN' ? parsed.collegeId : admin.collegeId
+
+    return AdminRepo.listUsers({
+      q: parsed.q,
+      role: parsed.role,
+      status: parsed.status,
+      collegeId: scopeCollegeId ?? undefined,
+      limit: parsed.limit ? Number(parsed.limit) : 50,
+    })
+  }
+
+  export async function updateUserRoleStatus(
+    adminId: string,
+    targetUserId: string,
+    input: unknown
+  ) {
+    await ensureAdmin(adminId)
+    const parsed = updateUserRoleStatusSchema.parse(input)
+    const updated = await AdminRepo.updateUserRoleStatus(targetUserId, parsed)
+
+    await AdminRepo.logAdminAction({
+      adminId,
+      action: 'UPDATE_USER_ROLE_STATUS',
+      targetId: targetUserId,
+      targetType: 'USER',
+      details: { role: parsed.role, status: parsed.status, reason: parsed.reason },
+    })
+
+    return updated
+  }
+
+  export async function listVerificationQueue(adminId: string) {
+    await ensureAdmin(adminId)
+    return AdminRepo.listVerificationQueue()
+  }
+
+  export async function listReportsQueue(adminId: string) {
+    await ensureAdmin(adminId)
+    return AdminRepo.listReportsQueue()
+  }
+
+  export async function applyModerationAction(adminId: string, input: unknown) {
+    await ensureAdmin(adminId)
+    const parsed = adminModerationActionSchema.parse(input)
+
+    await AdminRepo.logAdminAction({
+      adminId,
+      action: `MODERATION_${parsed.action}`,
+      targetId: parsed.targetId,
+      targetType: parsed.targetType,
+      details: { reason: parsed.reason },
+    })
+
+    return { success: true, action: parsed.action, targetId: parsed.targetId }
+  }
+
+  export async function listAuditLogs(adminId: string, input: unknown) {
+    await ensureAdmin(adminId)
+    const parsed = adminAuditQuerySchema.parse(input)
+    return AdminRepo.listAuditLogs({
+      adminId: parsed.adminId,
+      action: parsed.action,
+      targetType: parsed.targetType,
+      limit: parsed.limit ? Number(parsed.limit) : 50,
+    })
+  }
+
+  export async function getSystemSettings(adminId: string) {
+    await ensureAdmin(adminId)
+    return AdminRepo.getSystemSettings()
+  }
+
+  export async function updateSystemSetting(adminId: string, input: unknown) {
+    await ensureAdmin(adminId)
+    const parsed = systemSettingSchema.parse(input)
+    const updated = await AdminRepo.upsertSystemSetting(
+      parsed.key,
+      parsed.value,
+      parsed.description,
+      adminId
+    )
+
+    await AdminRepo.logAdminAction({
+      adminId,
+      action: 'UPDATE_SYSTEM_SETTING',
+      targetId: updated.id,
+      targetType: 'SYSTEM_SETTING',
+      details: { key: parsed.key, value: parsed.value },
+    })
+
+    return updated
+  }
+
+  export async function createAnnouncement(adminId: string, input: unknown) {
+    await ensureAdmin(adminId)
+    const parsed = createAnnouncementSchema.parse(input)
+    const announcement = await AdminRepo.createAnnouncement(adminId, parsed)
+
+    await AdminRepo.logAdminAction({
+      adminId,
+      action: 'CREATE_ANNOUNCEMENT',
+      targetId: announcement.id,
+      targetType: 'ANNOUNCEMENT',
+      details: { title: parsed.title, type: parsed.type },
+    })
+
+    return announcement
+  }
+
+  export async function listAnnouncements(adminId: string) {
+    await ensureAdmin(adminId)
+    return AdminRepo.listAnnouncements()
+  }
+}
+
+export const getAdminDashboardMetrics = AdminService.getDashboardMetrics
+export const listAdminUsers = AdminService.listUsers
+export const updateAdminUserRoleStatus = AdminService.updateUserRoleStatus
+export const listAdminVerificationQueue = AdminService.listVerificationQueue
+export const listAdminReportsQueue = AdminService.listReportsQueue
+export const applyAdminModerationAction = AdminService.applyModerationAction
+export const listAdminAuditLogs = AdminService.listAuditLogs
+export const getAdminSystemSettings = AdminService.getSystemSettings
+export const updateAdminSystemSetting = AdminService.updateSystemSetting
+export const createAdminAnnouncement = AdminService.createAnnouncement
+export const listAdminAnnouncements = AdminService.listAnnouncements

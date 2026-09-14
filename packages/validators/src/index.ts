@@ -477,3 +477,65 @@ export const registerDeviceTokenSchema = z
     platform: z.enum(['WEB', 'IOS', 'ANDROID']).optional(),
   })
   .strict()
+
+export const adminUserQuerySchema = z.object({
+  q: z.string().trim().max(200).optional(),
+  role: z.string().optional(),
+  status: z.string().optional(),
+  collegeId: z.string().max(64).optional(),
+  limit: z.union([z.string(), z.number()]).optional(),
+  cursor: z.string().optional(),
+})
+
+export const updateUserRoleStatusSchema = z
+  .object({
+    role: z
+      .enum([
+        'STUDENT',
+        'FACULTY',
+        'ALUMNI',
+        'CLUB_ADMIN',
+        'COMMUNITY_MODERATOR',
+        'COLLEGE_ADMIN',
+        'SUPER_ADMIN',
+      ])
+      .optional(),
+    status: z.enum(['PENDING', 'ACTIVE', 'SUSPENDED', 'BANNED', 'DELETED']).optional(),
+    reason: z.string().trim().max(1000).optional(),
+  })
+  .strict()
+
+export const adminModerationActionSchema = z
+  .object({
+    targetId: z.string().min(1).max(64),
+    targetType: z.enum(['COMMENT', 'POST', 'USER', 'CLUB', 'COMMUNITY', 'INTERNSHIP']),
+    action: z.enum(['WARN', 'HIDE', 'SUSPEND', 'BAN', 'RESTORE', 'RESOLVE', 'DISMISS', 'REMOVE']),
+    reason: z.string().trim().max(1000).optional(),
+  })
+  .strict()
+
+export const systemSettingSchema = z
+  .object({
+    key: z.string().trim().min(1).max(100),
+    value: z.union([z.string(), z.record(z.unknown()), z.boolean(), z.number()]),
+    description: z.string().trim().max(1000).optional(),
+  })
+  .strict()
+
+export const createAnnouncementSchema = z
+  .object({
+    title: z.string().trim().min(1).max(200),
+    content: z.string().trim().min(1).max(5000),
+    type: z.enum(['INFO', 'WARNING', 'CRITICAL', 'MAINTENANCE']).optional(),
+    priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
+    targetRole: z.enum(['ALL', 'STUDENT', 'ALUMNI', 'FACULTY']).optional(),
+  })
+  .strict()
+
+export const adminAuditQuerySchema = z.object({
+  adminId: z.string().optional(),
+  action: z.string().optional(),
+  targetType: z.string().optional(),
+  limit: z.union([z.string(), z.number()]).optional(),
+  cursor: z.string().optional(),
+})
