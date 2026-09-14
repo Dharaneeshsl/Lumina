@@ -1,6 +1,9 @@
-import { AnalyticsService, ANALYTICS_EVENT_NAMES, type AnalyticsEventInput } from '@lumina/analytics'
+import { ANALYTICS_EVENT_NAMES, AnalyticsService } from '@lumina/analytics'
 import { Router } from 'express'
 import rateLimit from 'express-rate-limit'
+
+import type { AnalyticsEventInput } from '@lumina/analytics'
+
 import { requireAuth } from '../../middleware'
 import { analyticsStore } from './store'
 
@@ -18,12 +21,16 @@ function actorScope(req: any) {
 }
 
 function canAccessUser(req: any, userId: string) {
-  return req.user?.id === userId || ['COLLEGE_ADMIN', 'SUPER_ADMIN'].includes(req.user?.role)
+  return (
+    req.user?.id === userId || ['COLLEGE_ADMIN', 'SUPER_ADMIN'].includes(req.user?.role)
+  )
 }
 
 function dates(query: Record<string, unknown>) {
   const to = query.to ? new Date(String(query.to)) : new Date()
-  const from = query.from ? new Date(String(query.from)) : new Date(to.getTime() - 30 * 86400000)
+  const from = query.from
+    ? new Date(String(query.from))
+    : new Date(to.getTime() - 30 * 86400000)
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || from > to) {
     throw new Error('INVALID_DATE_RANGE')
   }
@@ -37,7 +44,10 @@ router.post('/events', requireAuth, limiter, async (req, res) => {
       return res.status(400).json({ error: 'UNKNOWN_ANALYTICS_EVENT' })
     }
     const result = await service.ingest(
-      { ...body, actor: { ...body.actor, userId: req.user?.id, collegeId: actorScope(req) } },
+      {
+        ...body,
+        actor: { ...body.actor, userId: req.user?.id, collegeId: actorScope(req) },
+      },
       actorScope(req) ?? null,
     )
     return res.status(result.duplicate ? 200 : 202).json({
