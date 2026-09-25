@@ -1,0 +1,28 @@
+meta {
+  name: Register push notification device
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/notifications/devices
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "token": "fcm-device-token-sample-12345",
+    "platform": "WEB"
+  }
+}
+
+assert {
+  res.status: eq 201
+}

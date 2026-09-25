@@ -41,7 +41,9 @@
     "@stream-io/node-sdk": "^0.7.63",
     "stream-chat": "^9.50.2",
     "zod": "^4.4.3",
-    "@lumina/analytics": "workspace:*"
+    "@lumina/analytics": "workspace:*",
+    "@lumina/realtime": "workspace:*",
+    "@lumina/transactional": "workspace:*"
   },
   "peerDependencies": {
     "typescript": "^5"

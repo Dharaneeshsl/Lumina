@@ -1,0 +1,28 @@
+meta {
+  name: Apply for internship
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/internships/{{internshipId}}/apply
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "resumeUrl": "https://storage.lumina.internal/resumes/my-resume.pdf",
+    "coverLetter": "I am passionate about building robust systems and excited for this opportunity."
+  }
+}
+
+assert {
+  res.status: eq 201
+}

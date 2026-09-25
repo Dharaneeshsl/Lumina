@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export interface CompanyData {
   id: string
@@ -50,102 +50,6 @@ export interface ApplicationData {
   internship: InternshipData
 }
 
-const SAMPLE_COMPANIES: CompanyData[] = [
-  {
-    id: 'comp-1',
-    name: 'Aether AI Labs',
-    logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=120&q=80',
-    website: 'https://aetherai.example.com',
-    description: 'Frontier research in large language models and autonomous agentic systems.',
-    industry: 'Artificial Intelligence',
-    location: 'San Francisco, CA / Remote',
-  },
-  {
-    id: 'comp-2',
-    name: 'QuantumScale Technologies',
-    logo: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=120&q=80',
-    website: 'https://quantumscale.example.com',
-    description: 'Next-gen distributed databases and high-frequency cloud infrastructure.',
-    industry: 'Cloud Infrastructure',
-    location: 'Bengaluru, KA / Hybrid',
-  },
-  {
-    id: 'comp-3',
-    name: 'Veritas Cybersec',
-    logo: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=120&q=80',
-    website: 'https://veritassec.example.com',
-    description: 'Zero-trust network architecture and automated threat detection platforms.',
-    industry: 'Cybersecurity',
-    location: 'Austin, TX / Onsite',
-  },
-]
-
-const SAMPLE_INTERNSHIPS: InternshipData[] = [
-  {
-    id: 'int-1',
-    companyId: 'comp-1',
-    title: 'AI Systems & Agentic Workflows Intern',
-    description:
-      'Work with core engineering team to build scalable agent execution pipelines, LLM fine-tuning loops, and real-time streaming tools.',
-    location: 'Remote / Hybrid',
-    stipend: 4500,
-    type: 'FULL_TIME',
-    mode: 'REMOTE',
-    status: 'PUBLISHED',
-    requirements: [
-      'Proficiency in Python/TypeScript',
-      'Understanding of Vector DBs & RAG architecture',
-      'Strong analytical mindset',
-    ],
-    skills: ['Python', 'TypeScript', 'LangChain', 'PyTorch'],
-    deadline: '2026-10-15',
-    contactEmail: 'careers@aetherai.example.com',
-    company: SAMPLE_COMPANIES[0],
-    _count: { applications: 18 },
-  },
-  {
-    id: 'int-2',
-    companyId: 'comp-2',
-    title: 'Distributed Systems & Database Intern',
-    description:
-      'Optimize high-throughput storage engines, Redis cluster caching, and consensus algorithms for high-scale microservice deployments.',
-    location: 'Bengaluru, India',
-    stipend: 3800,
-    type: 'FULL_TIME',
-    mode: 'HYBRID',
-    status: 'PUBLISHED',
-    requirements: [
-      'Solid understanding of C++/Go/Rust or Node.js',
-      'Familiarity with PostgreSQL & distributed transactions',
-    ],
-    skills: ['Go', 'Rust', 'PostgreSQL', 'Redis', 'Docker'],
-    deadline: '2026-10-01',
-    contactEmail: 'internships@quantumscale.example.com',
-    company: SAMPLE_COMPANIES[1],
-    _count: { applications: 24 },
-  },
-  {
-    id: 'int-3',
-    companyId: 'comp-3',
-    title: 'Security Research & Pen-Testing Intern',
-    description:
-      'Perform web application vulnerability assessments, audit API authentication endpoints, and automate static security scanners.',
-    location: 'Austin, TX',
-    stipend: 4200,
-    type: 'PART_TIME',
-    mode: 'ONSITE',
-    status: 'PUBLISHED',
-    requirements: [
-      'Knowledge of OWASP Top 10 vulnerabilities',
-      'Experience with Burp Suite or Wireshark',
-    ],
-    skills: ['Ethical Hacking', 'Network Security', 'Python', 'Linux'],
-    deadline: '2026-11-01',
-    contactEmail: 'talent@veritassec.example.com',
-    company: SAMPLE_COMPANIES[2],
-    _count: { applications: 12 },
-  },
-]
 
 interface InternshipsViewProps {
   onBackToHome: () => void
@@ -153,22 +57,37 @@ interface InternshipsViewProps {
 
 export default function InternshipsView({ onBackToHome }: InternshipsViewProps) {
   const [activeTab, setActiveTab] = useState<'explore' | 'my-applications' | 'recruiter'>('explore')
-  const [internships, setInternships] = useState<InternshipData[]>(SAMPLE_INTERNSHIPS)
-  const [companies] = useState<CompanyData[]>(SAMPLE_COMPANIES)
-  const [myApplications, setMyApplications] = useState<ApplicationData[]>([
-    {
-      id: 'app-101',
-      internshipId: 'int-1',
-      userId: 'usr-student-1',
-      resumeUrl: 'https://example.com/resumes/my_cv_2026.pdf',
-      coverLetter:
-        'Passionate about building state-of-the-art LLM orchestration systems and agentic tools.',
-      status: 'SHORTLISTED',
-      notes: 'Invited for technical interview round on Oct 2nd.',
-      createdAt: new Date().toISOString(),
-      internship: SAMPLE_INTERNSHIPS[0],
-    },
-  ])
+  const [internships, setInternships] = useState<InternshipData[]>([])
+  const [companies, setCompanies] = useState<CompanyData[]>([])
+  const [myApplications, setMyApplications] = useState<ApplicationData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [managedApplications, setManagedApplications] = useState<any[]>([])
+  const [managingInternship, setManagingInternship] = useState<InternshipData | null>(null)
+
+  const api = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
+  const unwrap = (value: any) => value?.data ?? value
+  const request = async (path: string, options: RequestInit = {}) => {
+    const response = await fetch(api + path, { credentials: 'include', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options })
+    const payload = response.status === 204 ? null : await response.json().catch(() => null)
+    if (!response.ok) throw new Error(payload?.message || payload?.error || 'Request failed')
+    return unwrap(payload)
+  }
+  const asList = (value: any, key: string) => Array.isArray(value) ? value : value?.[key] || value?.items || []
+  const loadPortal = async () => {
+    setLoading(true); setError(null)
+    try {
+      const [internshipData, companyData, applicationData] = await Promise.all([
+        request('/internships'), request('/internships/companies'), request('/internships/my-applications').catch(() => [])
+      ])
+      setInternships(asList(internshipData, 'internships'))
+      const loadedCompanies = asList(companyData, 'companies'); setCompanies(loadedCompanies)
+      setMyApplications(asList(applicationData, 'applications'))
+      if (!newCompanyId && loadedCompanies[0]) setNewCompanyId(loadedCompanies[0].id)
+    } catch (e: any) { setError(e.message) } finally { setLoading(false) }
+  }
+  useEffect(() => { void loadPortal() }, [])
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')
@@ -180,12 +99,38 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [coverLetterInput, setCoverLetterInput] = useState('')
   const [resumeUrlInput, setResumeUrlInput] = useState('https://example.com/resumes/my_resume.pdf')
+  const [uploadingResume, setUploadingResume] = useState(false)
+  const [uploadedResumeName, setUploadedResumeName] = useState<string | null>(null)
   const [applicationSuccessMsg, setApplicationSuccessMsg] = useState<string | null>(null)
+
+  const handleResumeFileUpload = async (file: File) => {
+    setUploadingResume(true)
+    setError(null)
+    try {
+      const formData = new FormData()
+      formData.append('resume', file)
+      const res = await fetch(api + '/internships/resume', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.message || 'Resume upload failed')
+      if (data?.resumeUrl) {
+        setResumeUrlInput(data.resumeUrl)
+        setUploadedResumeName(file.name)
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to upload resume file')
+    } finally {
+      setUploadingResume(false)
+    }
+  }
 
   // Recruiter Posting State
   const [isNewInternshipModalOpen, setIsNewInternshipModalOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
-  const [newCompanyId, setNewCompanyId] = useState(SAMPLE_COMPANIES[0].id)
+  const [newCompanyId, setNewCompanyId] = useState('')
   const [newDescription, setNewDescription] = useState('')
   const [newLocation, setNewLocation] = useState('')
   const [newStipend, setNewStipend] = useState('4000')
@@ -205,71 +150,56 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   })
 
   // Apply Action
-  const handleApply = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedInternship) return
-
-    const existing = myApplications.find((app) => app.internshipId === selectedInternship.id)
-    if (existing) {
-      setApplicationSuccessMsg('You have already applied to this internship!')
-      return
-    }
-
-    const newApp: ApplicationData = {
-      id: `app-${Date.now()}`,
-      internshipId: selectedInternship.id,
-      userId: 'usr-student-1',
-      resumeUrl: resumeUrlInput,
-      coverLetter: coverLetterInput,
-      status: 'APPLIED',
-      notes: null,
-      createdAt: new Date().toISOString(),
-      internship: selectedInternship,
-    }
-
-    setMyApplications([newApp, ...myApplications])
-    setApplicationSuccessMsg('Application submitted successfully!')
-    setTimeout(() => {
-      setIsApplyModalOpen(false)
-      setSelectedInternship(null)
-      setApplicationSuccessMsg(null)
-      setCoverLetterInput('')
-    }, 1200)
+  const handleApply = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!selectedInternship) return
+    setSubmitting(true); setApplicationSuccessMsg(null)
+    try {
+      await request('/internships/' + selectedInternship.id + '/apply', { method: 'POST', body: JSON.stringify({ resumeUrl: resumeUrlInput || undefined, coverLetter: coverLetterInput || undefined }) })
+      await loadPortal(); setApplicationSuccessMsg('Application submitted successfully!')
+      setTimeout(() => { setIsApplyModalOpen(false); setSelectedInternship(null); setApplicationSuccessMsg(null); setCoverLetterInput('') }, 900)
+    } catch (e: any) { setApplicationSuccessMsg(e.message) } finally { setSubmitting(false) }
   }
 
   // Withdraw Action
-  const handleWithdraw = (applicationId: string) => {
-    setMyApplications((prev) =>
-      prev.map((app) => (app.id === applicationId ? { ...app, status: 'WITHDRAWN' } : app))
-    )
+  const handleWithdraw = async (applicationId: string) => {
+    const application = myApplications.find((item) => item.id === applicationId); if (!application) return
+    setSubmitting(true); try { await request('/internships/' + application.internshipId + '/withdraw', { method: 'POST' }); await loadPortal() } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
+  }
+
+  const handleDeleteInternship = async (internship: InternshipData) => {
+    if (!window.confirm('Delete "' + internship.title + '"? This cannot be undone.')) return
+    setSubmitting(true); try { await request('/internships/' + internship.id, { method: 'DELETE' }); await loadPortal() } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
+  }
+  const handleEditInternship = async (internship: InternshipData) => {
+    const title = window.prompt('Internship title', internship.title); if (title === null || !title.trim()) return
+    const location = window.prompt('Location', internship.location || '')
+    const description = window.prompt('Description', internship.description || '')
+    try { await request('/internships/' + internship.id, { method: 'PATCH', body: JSON.stringify({ title: title.trim(), location: location ?? internship.location, description: description ?? internship.description }) }); await loadPortal() } catch (e: any) { setError(e.message) }
+  }
+  const handleManageApplicants = async (internship: InternshipData) => {
+    setManagingInternship(internship); setManagedApplications([]); setLoading(true)
+    try { const data = await request('/internships/' + internship.id + '/applications'); setManagedApplications(asList(data, 'applications')) } catch (e: any) { setError(e.message) } finally { setLoading(false) }
+  }
+  const handleApplicationStatus = async (applicationId: string, status: string) => {
+    try { await request('/internships/applications/' + applicationId + '/status', { method: 'PATCH', body: JSON.stringify({ status }) }); if (managingInternship) await handleManageApplicants(managingInternship); await loadPortal() } catch (e: any) { setError(e.message) }
+  }
+  const handleCreateCompany = async () => {
+    const name = window.prompt('Company name'); if (!name?.trim()) return
+    const website = window.prompt('Website (optional)')
+    try { await request('/internships/companies', { method: 'POST', body: JSON.stringify({ name: name.trim(), website: website || undefined }) }); await loadPortal() } catch (e: any) { setError(e.message) }
+  }
+  const handleEditCompany = async (company: CompanyData) => {
+    const name = window.prompt('Company name', company.name); if (!name?.trim()) return
+    try { await request('/internships/companies/' + company.id, { method: 'PATCH', body: JSON.stringify({ name: name.trim() }) }); await loadPortal() } catch (e: any) { setError(e.message) }
   }
 
   // Recruiter Create Internship Action
-  const handleCreateInternship = (e: React.FormEvent) => {
-    e.preventDefault()
-    const targetComp = companies.find((c) => c.id === newCompanyId) || companies[0]
-    const created: InternshipData = {
-      id: `int-${Date.now()}`,
-      companyId: targetComp.id,
-      title: newTitle,
-      description: newDescription,
-      location: newLocation,
-      stipend: parseFloat(newStipend) || 0,
-      type: newType,
-      mode: newMode,
-      status: 'PUBLISHED',
-      requirements: ['Bachelor degree or active student enrollment', 'Strong technical baseline'],
-      skills: newSkills.split(',').map((s) => s.trim()),
-      deadline: '2026-11-30',
-      contactEmail: `recruiter@${targetComp.name.toLowerCase().replace(/\s+/g, '')}.com`,
-      company: targetComp,
-      _count: { applications: 0 },
-    }
-
-    setInternships([created, ...internships])
-    setIsNewInternshipModalOpen(false)
-    setNewTitle('')
-    setNewDescription('')
+  const handleCreateInternship = async (e: React.FormEvent) => {
+    e.preventDefault(); setSubmitting(true)
+    try {
+      await request('/internships', { method: 'POST', body: JSON.stringify({ companyId: newCompanyId, title: newTitle, description: newDescription || undefined, location: newLocation || undefined, stipend: Number(newStipend) || undefined, mode: newMode, type: newType, skills: newSkills.split(',').map((item) => item.trim()).filter(Boolean) }) })
+      await loadPortal(); setIsNewInternshipModalOpen(false); setNewTitle(''); setNewDescription('')
+    } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
   }
 
   return (
@@ -281,6 +211,8 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
         fontFamily: 'Inter, system-ui, sans-serif',
       }}
     >
+      {error && <div style={{ backgroundColor: '#451a1a', color: '#fecaca', padding: '12px 24px' }}>{error}</div>}
+      {loading && <div style={{ padding: '12px 24px', color: '#93c5fd' }}>Loading internship portal…</div>}
       {/* Top Bar Navigation */}
       <header
         style={{
@@ -836,7 +768,20 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 </p>
               </div>
 
-              <button
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={handleCreateCompany} style={{ backgroundColor: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.35)', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer' }}>+ Company</button>
+                {companies.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const company = companies[0]
+                      if (company) void handleEditCompany(company)
+                    }}
+                    style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer' }}
+                  >
+                    Edit Company
+                  </button>
+                )}
+                <button
                 onClick={() => setIsNewInternshipModalOpen(true)}
                 style={{
                   backgroundColor: '#8b5cf6',
@@ -849,7 +794,7 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 }}
               >
                 + Post New Internship
-              </button>
+              </button></div>
             </div>
 
             {/* List of Managed Postings */}
@@ -888,7 +833,10 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                     >
                       {item.status}
                     </span>
+                    <button onClick={() => handleEditInternship(item)} style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => handleDeleteInternship(item)} style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>Delete</button>
                     <button
+                      onClick={() => handleManageApplicants(item)}
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.05)',
                         color: '#fff',
@@ -909,6 +857,14 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
         )}
       </main>
 
+      {managingInternship && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', zIndex: 120, overflow: 'auto', padding: '32px' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto', background: '#0f172a', padding: '24px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}><h3>Applicants — {managingInternship.title}</h3><button onClick={() => setManagingInternship(null)}>Close</button></div>
+            {managedApplications.length === 0 ? <p style={{ color: '#94a3b8' }}>No applications yet.</p> : managedApplications.map((app) => <div key={app.id} style={{ padding: '14px', borderBottom: '1px solid rgba(255,255,255,.1)' }}><strong>{app.user?.name || app.user?.email || 'Student'}</strong><div style={{ color: '#94a3b8', fontSize: '13px' }}>{app.user?.email}</div><div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>{['APPLIED','REVIEWING','SHORTLISTED','INTERVIEW','OFFERED','SELECTED','REJECTED'].map((status) => <button key={status} onClick={() => handleApplicationStatus(app.id, status)} disabled={app.status === status}>{status}</button>)}</div></div>)}
+          </div>
+        </div>
+      )}
       {/* MODAL: APPLY TO INTERNSHIP */}
       {isApplyModalOpen && selectedInternship && (
         <div
@@ -979,22 +935,53 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
               >
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#cbd5e1',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    Resume URL / Drive File Link
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#cbd5e1',
+                      }}
+                    >
+                      Resume Document / URL
+                    </label>
+                    <label
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        color: '#60a5fa',
+                        border: '1px solid rgba(59, 130, 246, 0.4)',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: uploadingResume ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {uploadingResume ? 'Uploading...' : '📁 Upload PDF/DOCX'}
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        disabled={uploadingResume}
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) void handleResumeFileUpload(file)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {uploadedResumeName && (
+                    <div style={{ fontSize: '12px', color: '#34d399', marginBottom: '6px' }}>
+                      ✓ Uploaded: {uploadedResumeName}
+                    </div>
+                  )}
                   <input
                     type="url"
                     required
                     value={resumeUrlInput}
                     onChange={(e) => setResumeUrlInput(e.target.value)}
+                    placeholder="https://... or upload file above"
                     style={{
                       width: '100%',
                       padding: '10px 14px',
@@ -1298,6 +1285,7 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 </button>
                 <button
                   type="submit"
+                  disabled={submitting}
                   style={{
                     backgroundColor: '#8b5cf6',
                     color: '#fff',
@@ -1305,10 +1293,11 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                     padding: '10px 22px',
                     borderRadius: '8px',
                     fontWeight: 600,
-                    cursor: 'pointer',
+                    cursor: submitting ? 'not-allowed' : 'pointer',
+                    opacity: submitting ? 0.7 : 1,
                   }}
                 >
-                  Publish Posting
+                  {submitting ? 'Publishing...' : 'Publish Posting'}
                 </button>
               </div>
             </form>

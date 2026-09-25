@@ -1,0 +1,30 @@
+meta {
+  name: Apply moderation action
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/moderation/action
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "targetType": "POST",
+    "targetId": "{{targetId}}",
+    "action": "HIDE",
+    "reason": "Violates community guidelines."
+  }
+}
+
+assert {
+  res.status: eq 200
+}

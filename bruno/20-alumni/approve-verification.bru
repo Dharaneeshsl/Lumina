@@ -1,0 +1,28 @@
+meta {
+  name: Approve alumni verification
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/alumni/verification/approve
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "userId": "{{alumniUserId}}",
+    "approve": true
+  }
+}
+
+assert {
+  res.status: eq 200
+}

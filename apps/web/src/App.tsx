@@ -8,11 +8,16 @@ import AdminDashboardView from './components/admin/AdminDashboardView'
 import LoginPage from './LoginPage'
 import InternshipsPage from './pages/InternshipsPage'
 import SignupPage from './SignupPage'
+import CommentsView from './components/comments/CommentsView'
 
 export default function App() {
   const [currentView, setCurrentView] = useState<
-    'landing' | 'signup' | 'login' | 'clubs' | 'internships' | 'alumni' | 'notifications' | 'admin'
+    'landing' | 'signup' | 'login' | 'clubs' | 'internships' | 'alumni' | 'notifications' | 'admin' | 'comments'
   >('landing')
+
+  if (currentView === 'comments') {
+    return <CommentsView onBackToHome={() => setCurrentView('landing')} />
+  }
 
   if (currentView === 'clubs') {
     return <ClubsView onBackToHome={() => setCurrentView('landing')} />
@@ -156,6 +161,11 @@ export default function App() {
                     className="nav-link"
                   >
                     Colleges
+                  </a>
+                </li>
+                <li>
+                  <a href="#comments" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentView('comments') }}>
+                    Comments 💬
                   </a>
                 </li>
                 <li>

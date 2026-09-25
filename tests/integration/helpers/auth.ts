@@ -4,6 +4,8 @@ import request from 'supertest'
 import type { Express } from 'express'
 import type { Response } from 'supertest'
 
+export { clearDatabase } from './database'
+
 const resendRequests: Array<{ url: string; body: unknown }> = []
 const originalFetch = globalThis.fetch
 

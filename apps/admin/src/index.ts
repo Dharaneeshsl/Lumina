@@ -5,6 +5,8 @@
  */
 export type AdminRole = 'SUPER_ADMIN' | 'COLLEGE_ADMIN'
 
+export type AdminManagedResource = 'COMMUNITY' | 'CLUB' | 'EVENT' | 'INTERNSHIP' | 'NOTIFICATION'
+
 export type AdminSection =
   | 'overview'
   | 'users'
@@ -64,7 +66,7 @@ export class AdminApi {
   }
 
   metrics() {
-    return this.request('/admin/metrics')
+    return this.request('/admin/summary')
   }
 
   analytics(query = '') {
@@ -95,15 +97,15 @@ export class AdminApi {
   }
 
   verificationQueue() {
-    return this.request('/admin/verifications')
+    return this.request('/admin/verification/queue')
   }
 
   reportsQueue() {
-    return this.request('/admin/reports')
+    return this.request('/admin/reports/queue')
   }
 
   moderate(body: unknown) {
-    return this.request('/admin/moderation', {
+    return this.request('/admin/moderation/action', {
       method: 'POST',
       body: JSON.stringify(body),
     })
@@ -133,6 +135,14 @@ export class AdminApi {
       method: 'POST',
       body: JSON.stringify(body),
     })
+  }
+
+  /** Generic admin management adapter for existing domain APIs. */
+  listResource(resource: AdminManagedResource, query = '') {
+    const paths: Record<AdminManagedResource, string> = {
+      COMMUNITY: '/communities', CLUB: '/clubs', EVENT: '/events', INTERNSHIP: '/internships', NOTIFICATION: '/notifications',
+    }
+    return this.request(paths[resource] + (query ? `?${query}` : ''))
   }
 }
 

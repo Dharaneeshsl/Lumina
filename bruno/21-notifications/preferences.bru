@@ -1,0 +1,21 @@
+meta {
+  name: Get and update notification preferences
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notifications/preferences
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+assert {
+  res.status: eq 200
+}

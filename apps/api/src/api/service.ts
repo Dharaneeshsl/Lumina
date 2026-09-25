@@ -6108,6 +6108,32 @@ export namespace InternshipService {
 
     return updated
   }
+
+  export async function uploadResume(userId: string, file: Express.Multer.File) {
+    if (!file || !file.buffer) {
+      throw badRequest('FILE_REQUIRED', 'Resume file is required.')
+    }
+    const allowed = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
+    if (!allowed.includes(file.mimetype)) {
+      throw badRequest('INVALID_FILE', 'Only PDF, DOC, and DOCX files are allowed for resumes.')
+    }
+
+    const uploaded = await uploadFile({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      folder: `users/${userId}/resumes`,
+    })
+
+    return {
+      resumeUrl: uploaded.url,
+      key: uploaded.key,
+      fileName: file.originalname,
+    }
+  }
 }
 
 export const createCompany = InternshipService.createCompany
@@ -6126,6 +6152,7 @@ export const withdrawApplication = InternshipService.withdrawApplication
 export const getMyApplications = InternshipService.getMyApplications
 export const listInternshipApplications = InternshipService.listInternshipApplications
 export const updateApplicationStatus = InternshipService.updateApplicationStatus
+export const uploadResume = InternshipService.uploadResume
 
 export namespace AlumniRepo {
   export async function getAuthenticatedUser(userId: string) {
@@ -6372,7 +6399,8 @@ export namespace AlumniRepo {
     sessionId: string,
     status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
     meetingUrl?: string | null,
-    notes?: string | null
+    notes?: string | null,
+    scheduledAt?: Date | null
   ) {
     return prisma.mentorshipSession.update({
       where: { id: sessionId },
@@ -6380,6 +6408,7 @@ export namespace AlumniRepo {
         status,
         ...(meetingUrl !== undefined && { meetingUrl }),
         ...(notes !== undefined && { notes }),
+        ...(scheduledAt !== undefined && { scheduledAt }),
       },
     })
   }
@@ -6500,6 +6529,16 @@ export namespace AlumniService {
       },
     })
 
+    await prisma.adminAuditLog.create({
+      data: {
+        adminId: reviewerId,
+        action: parsed.approve ? 'APPROVE_ALUMNI_VERIFICATION' : 'REJECT_ALUMNI_VERIFICATION',
+        targetId: parsed.userId,
+        targetType: 'USER',
+        details: { approved: parsed.approve },
+      },
+    }).catch(() => null)
+
     return verification
   }
 
@@ -6507,6 +6546,23 @@ export namespace AlumniService {
     const parsed = alumniConnectionRequestSchema.parse(input)
     if (studentId === parsed.alumniId) {
       throw badRequest('CANNOT_CONNECT_WITH_SELF')
+    }
+
+    const existing = await prisma.alumniConnection.findFirst({
+      where: {
+        OR: [
+          { studentId, alumniId: parsed.alumniId },
+          { studentId: parsed.alumniId, alumniId: studentId },
+        ],
+      },
+    })
+    if (existing) {
+      if (existing.status === 'PENDING') {
+        throw conflict('CONNECTION_REQUEST_ALREADY_PENDING')
+      }
+      if (existing.status === 'ACCEPTED') {
+        throw conflict('ALREADY_CONNECTED')
+      }
     }
 
     const connection = await AlumniRepo.createConnection(studentId, parsed.alumniId, parsed.message)
@@ -6593,7 +6649,8 @@ export namespace AlumniService {
       sessionId,
       parsed.status,
       parsed.meetingUrl,
-      parsed.notes
+      parsed.notes,
+      parsed.scheduledAt ? new Date(parsed.scheduledAt) : undefined
     )
 
     const recipientId = userId === session.studentId ? session.alumniId : session.studentId
@@ -6685,6 +6742,12 @@ export namespace NotificationRepo {
     })
   }
 
+  export async function getNotificationById(userId: string, notificationId: string) {
+    return prisma.notification.findFirst({
+      where: { id: notificationId, userId },
+    })
+  }
+
   export async function archiveNotification(userId: string, notificationId: string) {
     return prisma.notification.updateMany({
       where: { id: notificationId, userId },
@@ -6763,6 +6826,14 @@ export namespace NotificationService {
     return { success: true }
   }
 
+  export async function getNotificationById(userId: string, notificationId: string) {
+    const item = await NotificationRepo.getNotificationById(userId, notificationId)
+    if (!item) {
+      throw notFound('NOTIFICATION_NOT_FOUND', 'Notification not found')
+    }
+    return item
+  }
+
   export async function archiveNotification(userId: string, notificationId: string) {
     await NotificationRepo.archiveNotification(userId, notificationId)
     return { success: true }
@@ -6798,6 +6869,7 @@ export namespace NotificationService {
 }
 
 export const listNotifications = NotificationService.listNotifications
+export const getNotificationById = NotificationService.getNotificationById
 export const getNotificationUnreadCount = NotificationService.getUnreadCount
 export const markNotificationsAsRead = NotificationService.markAsRead
 export const markAllNotificationsAsRead = NotificationService.markAllAsRead
@@ -7135,16 +7207,115 @@ export namespace AdminService {
     await ensureAdmin(adminId)
     return AdminRepo.listAnnouncements()
   }
+
+  export async function approveVerificationById(
+    adminId: string,
+    verificationId: string,
+    approve: boolean,
+    notes?: string
+  ) {
+    await ensureAdmin(adminId)
+    const verification = await prisma.verification.findUnique({
+      where: { id: verificationId },
+      include: { user: true },
+    })
+    if (!verification) {
+      throw notFound('VERIFICATION_NOT_FOUND', 'Verification item not found')
+    }
+
+    const updated = await prisma.verification.update({
+      where: { id: verificationId },
+      data: {
+        status: approve ? 'APPROVED' : 'REJECTED',
+        alumniVerified: approve,
+        reviewerNotes: notes,
+      },
+    })
+
+    if (approve && verification.user) {
+      await prisma.user.update({
+        where: { id: verification.userId },
+        data: { role: 'ALUMNI' },
+      })
+    }
+
+    await prisma.notification.create({
+      data: {
+        userId: verification.userId,
+        title: approve ? 'Verification Approved' : 'Verification Rejected',
+        body: approve
+          ? 'Your profile verification has been approved by the administration.'
+          : notes || 'Your profile verification request was not approved.',
+        type: 'ALUMNI_VERIFICATION',
+      },
+    })
+
+    await AdminRepo.logAdminAction({
+      adminId,
+      action: approve ? 'APPROVE_VERIFICATION' : 'REJECT_VERIFICATION',
+      targetId: verificationId,
+      targetType: 'VERIFICATION',
+      details: { approved: approve, userId: verification.userId, notes },
+    })
+
+    return updated
+  }
+
+  export async function exportAuditLogs(adminId: string, input: unknown) {
+    await ensureAdmin(adminId)
+    const parsed = adminAuditQuerySchema.parse(input)
+    const logs = await AdminRepo.listAuditLogs({
+      adminId: parsed.adminId,
+      action: parsed.action,
+      targetType: parsed.targetType,
+      limit: 1000,
+    })
+    return {
+      exportedAt: new Date().toISOString(),
+      count: logs.length,
+      logs,
+    }
+  }
+}
+
+export namespace GeneralResourceService {
+  export async function listCommunities() {
+    return prisma.studyGroup.findMany({
+      include: {
+        owner: { select: { id: true, name: true, username: true } },
+        _count: { select: { members: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    })
+  }
+
+  export async function listEvents() {
+    return prisma.event.findMany({
+      include: {
+        club: { select: { id: true, name: true, logo: true } },
+        organizer: { select: { id: true, name: true, username: true } },
+        _count: { select: { attendees: true } },
+      },
+      orderBy: { startTime: 'asc' },
+      take: 100,
+    })
+  }
 }
 
 export const getAdminDashboardMetrics = AdminService.getDashboardMetrics
 export const listAdminUsers = AdminService.listUsers
 export const updateAdminUserRoleStatus = AdminService.updateUserRoleStatus
 export const listAdminVerificationQueue = AdminService.listVerificationQueue
+export const approveAdminVerificationById = AdminService.approveVerificationById
 export const listAdminReportsQueue = AdminService.listReportsQueue
 export const applyAdminModerationAction = AdminService.applyModerationAction
 export const listAdminAuditLogs = AdminService.listAuditLogs
-export const getAdminSystemSettings = AdminService.getSystemSettings
+export const exportAdminAuditLogs = AdminService.exportAuditLogs
+export const getAdminSystemSettings = AdminService.getAdminSystemSettings ?? AdminService.getSystemSettings
 export const updateAdminSystemSetting = AdminService.updateSystemSetting
 export const createAdminAnnouncement = AdminService.createAnnouncement
 export const listAdminAnnouncements = AdminService.listAnnouncements
+
+export const listCommunities = GeneralResourceService.listCommunities
+export const listEvents = GeneralResourceService.listEvents

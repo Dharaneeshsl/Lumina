@@ -128,3 +128,30 @@ export const uploadPostMedia = multer({
   },
   fileFilter: postMediaFileFilter,
 })
+
+const resumeMimeTypes = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]
+
+const resumeFileFilter: multer.Options['fileFilter'] = (_req, file, cb) => {
+  if (resumeMimeTypes.includes(file.mimetype)) {
+    cb(null, true)
+    return
+  }
+  cb(new Error('Only PDF, DOC, and DOCX files are allowed for resumes.'))
+}
+
+const MAX_RESUME_SIZE = 10 * 1024 * 1024
+
+export const uploadResume = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: MAX_RESUME_SIZE,
+    files: 1,
+    fields: 10,
+  },
+  fileFilter: resumeFileFilter,
+})
+
