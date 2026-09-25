@@ -107,7 +107,7 @@ export const NotificationsView: React.FC = () => {
 
   useEffect(() => {
     void load()
-    const stream = new EventSource(`${api}/notifications/stream`, { withCredentials: true })
+    const stream = new EventSource(`${API_BASE}/notifications/stream`, { withCredentials: true })
     stream.addEventListener('notification', () => void load())
     const interval = window.setInterval(() => void load(), 30000)
     const onFocus = () => void load()

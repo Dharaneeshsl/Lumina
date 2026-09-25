@@ -1,0 +1,31 @@
+meta {
+  name: Create alumni networking event
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{baseUrl}}/api/v1/alumni/events
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "title": "Global Alumni Summit 2026: AI & Systems Frontiers",
+    "description": "Annual gathering of Lumina alumni sharing career journeys, research breakthroughs, and startup opportunities.",
+    "eventDate": "2026-11-20T17:00:00.000Z",
+    "location": "Main Campus Grand Auditorium",
+    "virtualLink": "https://stream.lumina.internal/alumni-summit-2026"
+  }
+}
+
+assert {
+  res.status: eq 201
+}

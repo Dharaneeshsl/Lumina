@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 export interface AlumniProfileData {
   id: string
@@ -79,7 +79,7 @@ export interface AlumniEventData {
 
 export const AlumniView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
-    'directory' | 'mentorship' | 'connections' | 'referrals' | 'verification'
+    'directory' | 'mentorship' | 'connections' | 'referrals' | 'verification' | 'profile'
   >('directory')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedIndustry, setSelectedIndustry] = useState('ALL')
@@ -90,14 +90,47 @@ export const AlumniView: React.FC = () => {
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [showMentorshipModal, setShowMentorshipModal] = useState(false)
   const [showReferralModal, setShowReferralModal] = useState(false)
+  const [showEventModal, setShowEventModal] = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [selectedSession, setSelectedSession] = useState<MentorshipSessionData | null>(null)
+
   const [connectionMessage, setConnectionMessage] = useState('')
   const [mentorshipTopic, setMentorshipTopic] = useState('')
   const [mentorshipNotes, setMentorshipNotes] = useState('')
+
+  // Referral state
   const [referralTitle, setReferralTitle] = useState('')
   const [referralCompany, setReferralCompany] = useState('')
   const [referralLocation, setReferralLocation] = useState('')
   const [referralDescription, setReferralDescription] = useState('')
   const [referralLink, setReferralLink] = useState('')
+
+  // Event state
+  const [eventTitle, setEventTitle] = useState('')
+  const [eventDescription, setEventDescription] = useState('')
+  const [eventDate, setEventDate] = useState('')
+  const [eventLocation, setEventLocation] = useState('')
+  const [eventVirtualLink, setEventVirtualLink] = useState('')
+
+  // Schedule modal state
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleMeetingUrl, setScheduleMeetingUrl] = useState('')
+
+  // Profile edit state
+  const [profileGradYear, setProfileGradYear] = useState('2024')
+  const [profileDept, setProfileDept] = useState('')
+  const [profileCompany, setProfileCompany] = useState('')
+  const [profileJobTitle, setProfileJobTitle] = useState('')
+  const [profileIndustry, setProfileIndustry] = useState('')
+  const [profileLocation, setProfileLocation] = useState('')
+  const [profileBio, setProfileBio] = useState('')
+  const [profileSkills, setProfileSkills] = useState('')
+  const [profileLinkedIn, setProfileLinkedIn] = useState('')
+  const [profileGithub, setProfileGithub] = useState('')
+  const [profileMentorshipAvail, setProfileMentorshipAvail] = useState(true)
+  const [profileDirectoryVisible, setProfileDirectoryVisible] = useState(true)
+  const [profileSaved, setProfileSaved] = useState(false)
+
   const [submitting, setSubmitting] = useState(false)
 
   // Verification request form state
@@ -119,20 +152,65 @@ export const AlumniView: React.FC = () => {
 
   const api = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1'
   const unwrap = (value: any) => value?.data ?? value
-  const list = (value: any, key: string) => Array.isArray(value) ? value : unwrap(value)?.[key] || unwrap(value)?.items || []
-  const request = async (path: string, options: RequestInit = {}) => {
-    const response = await fetch(api + path, { credentials: 'include', headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options })
-    const payload = response.status === 204 ? null : await response.json().catch(() => null)
-    if (!response.ok) throw new Error(payload?.message || payload?.error || 'Request failed')
-    return unwrap(payload)
-  }
-  const loadNetwork = async () => { setLoading(true); setError(null); try {
-    const [directory, connectionData, sessionData, referralData, eventData] = await Promise.all([
-      request('/alumni/directory'), request('/alumni/connections').catch(() => []), request('/alumni/mentorship/sessions').catch(() => []), request('/alumni/referrals'), request('/alumni/events')
-    ])
-    setAlumni(list(directory, 'alumni')); setConnections(list(connectionData, 'connections')); setMentorshipSessions(list(sessionData, 'sessions')); setReferrals(list(referralData, 'referrals')); setEvents(list(eventData, 'events'))
-  } catch (e: any) { setError(e.message) } finally { setLoading(false) } }
-  useEffect(() => { void loadNetwork() }, [])
+  const list = (value: any, key: string) =>
+    Array.isArray(value) ? value : unwrap(value)?.[key] || unwrap(value)?.items || []
+
+  const request = useCallback(
+    async (path: string, options: RequestInit = {}) => {
+      const response = await fetch(api + path, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+        ...options,
+      })
+      const payload = response.status === 204 ? null : await response.json().catch(() => null)
+      if (!response.ok) throw new Error(payload?.message || payload?.error || 'Request failed')
+      return unwrap(payload)
+    },
+    [api]
+  )
+
+  const loadNetwork = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [directory, connectionData, sessionData, referralData, eventData, myProfileData] =
+        await Promise.all([
+          request('/alumni/directory'),
+          request('/alumni/connections').catch(() => []),
+          request('/alumni/mentorship/sessions').catch(() => []),
+          request('/alumni/referrals'),
+          request('/alumni/events'),
+          request('/alumni/profile/me').catch(() => null),
+        ])
+      setAlumni(list(directory, 'alumni'))
+      setConnections(list(connectionData, 'connections'))
+      setMentorshipSessions(list(sessionData, 'sessions'))
+      setReferrals(list(referralData, 'referrals'))
+      setEvents(list(eventData, 'events'))
+      if (myProfileData) {
+        setProfileGradYear(String(myProfileData.graduationYear || '2024'))
+        setProfileDept(myProfileData.departmentName || '')
+        setProfileCompany(myProfileData.company || '')
+        setProfileJobTitle(myProfileData.jobTitle || '')
+        setProfileIndustry(myProfileData.industry || '')
+        setProfileLocation(myProfileData.location || '')
+        setProfileBio(myProfileData.bio || '')
+        setProfileSkills(Array.isArray(myProfileData.skills) ? myProfileData.skills.join(', ') : '')
+        setProfileLinkedIn(myProfileData.linkedIn || '')
+        setProfileGithub(myProfileData.github || '')
+        setProfileMentorshipAvail(myProfileData.isAvailableForMentorship ?? true)
+        setProfileDirectoryVisible(myProfileData.directoryVisible ?? true)
+      }
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [request])
+
+  useEffect(() => {
+    void loadNetwork()
+  }, [loadNetwork])
 
   // Filtering
   const filteredAlumni = alumni.filter((alum) => {
@@ -149,24 +227,188 @@ export const AlumniView: React.FC = () => {
   })
 
   const handleSendConnection = async (e: React.FormEvent) => {
-    e.preventDefault(); if (!selectedAlumnus) return
-    try { await request('/alumni/connections', { method: 'POST', body: JSON.stringify({ alumniId: selectedAlumnus.userId, message: connectionMessage || undefined }) }); await loadNetwork(); setShowConnectModal(false); setConnectionMessage('') } catch (e: any) { setError(e.message) }
+    e.preventDefault()
+    if (!selectedAlumnus) return
+    try {
+      await request('/alumni/connections', {
+        method: 'POST',
+        body: JSON.stringify({
+          alumniId: selectedAlumnus.userId,
+          message: connectionMessage || undefined,
+        }),
+      })
+      await loadNetwork()
+      setShowConnectModal(false)
+      setConnectionMessage('')
+    } catch (e: any) {
+      setError(e.message)
+    }
+  }
+
+  const handleUpdateConnection = async (
+    connectionId: string,
+    status: 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN'
+  ) => {
+    try {
+      await request(`/alumni/connections/${connectionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+      await loadNetwork()
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
 
   const handleRequestMentorship = async (e: React.FormEvent) => {
-    e.preventDefault(); if (!selectedAlumnus) return
-    try { await request('/alumni/mentorship/sessions', { method: 'POST', body: JSON.stringify({ alumniId: selectedAlumnus.userId, topic: mentorshipTopic, notes: mentorshipNotes || undefined, durationMinutes: 30 }) }); await loadNetwork(); setShowMentorshipModal(false); setMentorshipTopic(''); setMentorshipNotes('') } catch (e: any) { setError(e.message) }
+    e.preventDefault()
+    if (!selectedAlumnus) return
+    try {
+      await request('/alumni/mentorship/sessions', {
+        method: 'POST',
+        body: JSON.stringify({
+          alumniId: selectedAlumnus.userId,
+          topic: mentorshipTopic,
+          notes: mentorshipNotes || undefined,
+          durationMinutes: 30,
+        }),
+      })
+      await loadNetwork()
+      setShowMentorshipModal(false)
+      setMentorshipTopic('')
+      setMentorshipNotes('')
+    } catch (e: any) {
+      setError(e.message)
+    }
+  }
+
+  const handleUpdateSession = async (
+    sessionId: string,
+    status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED',
+    meetingUrl?: string,
+    scheduledAt?: string
+  ) => {
+    try {
+      await request(`/alumni/mentorship/sessions/${sessionId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          status,
+          meetingUrl: meetingUrl || undefined,
+          scheduledAt: scheduledAt || undefined,
+        }),
+      })
+      setShowScheduleModal(false)
+      setSelectedSession(null)
+      await loadNetwork()
+    } catch (e: any) {
+      setError(e.message)
+    }
   }
 
   const handleCreateReferral = async (e: React.FormEvent) => {
-    e.preventDefault(); setSubmitting(true)
+    e.preventDefault()
+    setSubmitting(true)
     try {
-      await request('/alumni/referrals', { method: 'POST', body: JSON.stringify({ title: referralTitle, company: referralCompany, location: referralLocation || undefined, description: referralDescription || undefined, link: referralLink || undefined }) })
-      setShowReferralModal(false); setReferralTitle(''); setReferralCompany(''); setReferralLocation(''); setReferralDescription(''); setReferralLink(''); await loadNetwork()
-    } catch (e: any) { setError(e.message) } finally { setSubmitting(false) }
+      await request('/alumni/referrals', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: referralTitle,
+          company: referralCompany,
+          location: referralLocation || undefined,
+          description: referralDescription || undefined,
+          link: referralLink || undefined,
+        }),
+      })
+      setShowReferralModal(false)
+      setReferralTitle('')
+      setReferralCompany('')
+      setReferralLocation('')
+      setReferralDescription('')
+      setReferralLink('')
+      await loadNetwork()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const handleVerificationSubmit = async (e: React.FormEvent) => { e.preventDefault(); try { await request('/alumni/profile', { method: 'POST', body: JSON.stringify({ graduationYear: Number(verificationYear), departmentName: verificationDept, bio: verificationProofUrl ? 'Verification proof: ' + verificationProofUrl : undefined }) }); setVerificationSuccess(true); await loadNetwork() } catch (e: any) { setError(e.message) } }
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+    try {
+      await request('/alumni/events', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: eventTitle,
+          description: eventDescription || undefined,
+          eventDate: eventDate ? new Date(eventDate).toISOString() : new Date().toISOString(),
+          location: eventLocation || undefined,
+          virtualLink: eventVirtualLink || undefined,
+        }),
+      })
+      setShowEventModal(false)
+      setEventTitle('')
+      setEventDescription('')
+      setEventDate('')
+      setEventLocation('')
+      setEventVirtualLink('')
+      await loadNetwork()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleUpdateMyProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+    setProfileSaved(false)
+    try {
+      await request('/alumni/profile', {
+        method: 'POST',
+        body: JSON.stringify({
+          graduationYear: Number(profileGradYear),
+          departmentName: profileDept || undefined,
+          company: profileCompany || undefined,
+          jobTitle: profileJobTitle || undefined,
+          industry: profileIndustry || undefined,
+          location: profileLocation || undefined,
+          bio: profileBio || undefined,
+          isAvailableForMentorship: profileMentorshipAvail,
+          directoryVisible: profileDirectoryVisible,
+          linkedIn: profileLinkedIn || undefined,
+          github: profileGithub || undefined,
+          skills: profileSkills ? profileSkills.split(',').map((s) => s.trim()).filter(Boolean) : [],
+        }),
+      })
+      setProfileSaved(true)
+      await loadNetwork()
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleVerificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await request('/alumni/profile', {
+        method: 'POST',
+        body: JSON.stringify({
+          graduationYear: Number(verificationYear),
+          departmentName: verificationDept,
+          bio: verificationProofUrl ? 'Verification proof: ' + verificationProofUrl : undefined,
+        }),
+      })
+      setVerificationSuccess(true)
+      await loadNetwork()
+    } catch (e: any) {
+      setError(e.message)
+    }
+  }
 
   return (
     <div
@@ -274,6 +516,7 @@ export const AlumniView: React.FC = () => {
             { id: 'connections', label: '🌐 Network Connections' },
             { id: 'referrals', label: '💼 Referrals & Events' },
             { id: 'verification', label: '🎓 Alumni Verification' },
+            { id: 'profile', label: '👤 My Alumni Profile' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -612,24 +855,95 @@ export const AlumniView: React.FC = () => {
                   )}
                 </div>
 
-                {sess.meetingUrl && (
-                  <a
-                    href={sess.meetingUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      background: '#22c55e',
-                      color: '#ffffff',
-                      textDecoration: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    🎥 Join Video Call
-                  </a>
-                )}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {sess.meetingUrl && (
+                    <a
+                      href={sess.meetingUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        background: '#22c55e',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      🎥 Join Video Call
+                    </a>
+                  )}
+                  {sess.status === 'REQUESTED' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setSelectedSession(sess)
+                          setShowScheduleModal(true)
+                        }}
+                        style={{
+                          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        📅 Schedule
+                      </button>
+                      <button
+                        onClick={() => void handleUpdateSession(sess.id, 'CANCELLED')}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: '1px solid #ef4444',
+                          color: '#f87171',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                  {sess.status === 'SCHEDULED' && (
+                    <>
+                      <button
+                        onClick={() => void handleUpdateSession(sess.id, 'COMPLETED')}
+                        style={{
+                          background: 'rgba(34, 197, 94, 0.2)',
+                          border: '1px solid #22c55e',
+                          color: '#4ade80',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ✓ Mark Completed
+                      </button>
+                      <button
+                        onClick={() => void handleUpdateSession(sess.id, 'CANCELLED')}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: '1px solid #ef4444',
+                          color: '#f87171',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -671,21 +985,68 @@ export const AlumniView: React.FC = () => {
                     {conn.message || 'No message provided.'}
                   </p>
                 </div>
-                <span
-                  style={{
-                    padding: '4px 10px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    background:
-                      conn.status === 'ACCEPTED'
-                        ? 'rgba(34, 197, 94, 0.2)'
-                        : 'rgba(234, 179, 8, 0.2)',
-                    color: conn.status === 'ACCEPTED' ? '#4ade80' : '#fde047',
-                  }}
-                >
-                  {conn.status}
-                </span>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      background:
+                        conn.status === 'ACCEPTED'
+                          ? 'rgba(34, 197, 94, 0.2)'
+                          : conn.status === 'REJECTED'
+                            ? 'rgba(239, 68, 68, 0.2)'
+                            : conn.status === 'WITHDRAWN'
+                              ? 'rgba(107, 114, 128, 0.2)'
+                              : 'rgba(234, 179, 8, 0.2)',
+                      color:
+                        conn.status === 'ACCEPTED'
+                          ? '#4ade80'
+                          : conn.status === 'REJECTED'
+                            ? '#f87171'
+                            : conn.status === 'WITHDRAWN'
+                              ? '#9ca3af'
+                              : '#fde047',
+                    }}
+                  >
+                    {conn.status}
+                  </span>
+                  {conn.status === 'PENDING' && (
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        onClick={() => void handleUpdateConnection(conn.id, 'ACCEPTED')}
+                        style={{
+                          background: 'rgba(34, 197, 94, 0.25)',
+                          border: '1px solid #22c55e',
+                          color: '#4ade80',
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ✓ Accept
+                      </button>
+                      <button
+                        onClick={() => void handleUpdateConnection(conn.id, 'REJECTED')}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.25)',
+                          border: '1px solid #ef4444',
+                          color: '#f87171',
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ✕ Reject
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -706,21 +1067,38 @@ export const AlumniView: React.FC = () => {
             <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#ffffff' }}>
               Alumni Referrals & Opportunities
             </h2>
-            <button
-              onClick={() => setShowReferralModal(true)}
-              style={{
-                background: 'rgba(99, 102, 241, 0.2)',
-                color: '#818cf8',
-                border: '1px solid rgba(99, 102, 241, 0.4)',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              + Post Referral
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setShowReferralModal(true)}
+                style={{
+                  background: 'rgba(99, 102, 241, 0.2)',
+                  color: '#818cf8',
+                  border: '1px solid rgba(99, 102, 241, 0.4)',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                + Post Referral
+              </button>
+              <button
+                onClick={() => setShowEventModal(true)}
+                style={{
+                  background: 'rgba(168, 85, 247, 0.2)',
+                  color: '#c084fc',
+                  border: '1px solid rgba(168, 85, 247, 0.4)',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                + Post Event
+              </button>
+            </div>
           </div>
 
           <div
@@ -992,6 +1370,197 @@ export const AlumniView: React.FC = () => {
         </div>
       )}
 
+      {/* My Profile Tab */}
+      {activeTab === 'profile' && (
+        <div
+          style={{
+            maxWidth: '680px',
+            margin: '0 auto',
+            background: 'rgba(17, 24, 39, 0.7)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '32px',
+          }}
+        >
+          <h2 style={{ fontSize: '22px', fontWeight: 700, marginTop: 0, color: '#ffffff' }}>
+            My Alumni Profile & Privacy Settings
+          </h2>
+          <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '24px' }}>
+            Keep your graduation records, current career position, and mentorship availability updated.
+          </p>
+
+          {profileSaved && (
+            <div
+              style={{
+                background: 'rgba(34, 197, 94, 0.15)',
+                border: '1px solid rgba(34, 197, 94, 0.4)',
+                color: '#4ade80',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+              }}
+            >
+              ✓ Profile saved successfully!
+            </div>
+          )}
+
+          <form onSubmit={handleUpdateMyProfile} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Graduation Year</label>
+                <input
+                  type="number"
+                  value={profileGradYear}
+                  onChange={(e) => setProfileGradYear(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                  required
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Department / Major</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Electrical Engineering"
+                  value={profileDept}
+                  onChange={(e) => setProfileDept(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Current Company</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Google, Microsoft, Startup"
+                  value={profileCompany}
+                  onChange={(e) => setProfileCompany(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Job Title / Role</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Senior Software Engineer"
+                  value={profileJobTitle}
+                  onChange={(e) => setProfileJobTitle(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Industry</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Artificial Intelligence"
+                  value={profileIndustry}
+                  onChange={(e) => setProfileIndustry(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Location</label>
+                <input
+                  type="text"
+                  placeholder="e.g. San Francisco, CA or Remote"
+                  value={profileLocation}
+                  onChange={(e) => setProfileLocation(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Skills & Expertise (comma separated)</label>
+              <input
+                type="text"
+                placeholder="TypeScript, Distributed Systems, Python, Product Strategy"
+                value={profileSkills}
+                onChange={(e) => setProfileSkills(e.target.value)}
+                style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>LinkedIn Profile URL</label>
+                <input
+                  type="url"
+                  placeholder="https://linkedin.com/in/username"
+                  value={profileLinkedIn}
+                  onChange={(e) => setProfileLinkedIn(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>GitHub Profile URL</label>
+                <input
+                  type="url"
+                  placeholder="https://github.com/username"
+                  value={profileGithub}
+                  onChange={(e) => setProfileGithub(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>Bio / Introduction</label>
+              <textarea
+                placeholder="A brief introduction for students who wish to connect or seek mentorship..."
+                value={profileBio}
+                onChange={(e) => setProfileBio(e.target.value)}
+                rows={3}
+                style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(31, 41, 55, 0.8)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px', color: '#fff' }}
+              />
+            </div>
+
+            <div style={{ background: 'rgba(31,41,55,0.4)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#e2e8f0', cursor: 'pointer', fontSize: '13px' }}>
+                <input
+                  type="checkbox"
+                  checked={profileMentorshipAvail}
+                  onChange={(e) => setProfileMentorshipAvail(e.target.checked)}
+                  style={{ accentColor: '#6366f1' }}
+                />
+                <strong>Available for Mentorship:</strong> Students can request 1:1 sessions with you.
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#e2e8f0', cursor: 'pointer', fontSize: '13px' }}>
+                <input
+                  type="checkbox"
+                  checked={profileDirectoryVisible}
+                  onChange={(e) => setProfileDirectoryVisible(e.target.checked)}
+                  style={{ accentColor: '#6366f1' }}
+                />
+                <strong>Directory Visibility:</strong> Make profile visible to students in public alumni directory.
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{
+                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginTop: '10px',
+              }}
+            >
+              {submitting ? 'Saving Profile…' : 'Save Alumni Profile'}
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* Connect Modal */}
       {showConnectModal && selectedAlumnus && (
         <div
@@ -1260,6 +1829,270 @@ export const AlumniView: React.FC = () => {
                   }}
                 >
                   Close
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Mentorship Schedule Modal */}
+      {showScheduleModal && selectedSession && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px',
+          }}
+        >
+          <div
+            style={{
+              background: '#111827',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '16px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '480px',
+            }}
+          >
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', color: '#ffffff' }}>
+              Confirm & Schedule Session
+            </h3>
+            <p style={{ fontSize: '13px', color: '#9ca3af' }}>
+              Topic: <strong>{selectedSession.topic}</strong>
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                void handleUpdateSession(
+                  selectedSession.id,
+                  'SCHEDULED',
+                  scheduleMeetingUrl,
+                  scheduleDate ? new Date(scheduleDate).toISOString() : undefined
+                )
+              }}
+            >
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>
+                  Scheduled Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(31,41,55,0.8)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '8px',
+                    padding: '10px',
+                    color: '#ffffff',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#d1d5db', marginBottom: '4px' }}>
+                  Meeting / Video URL (e.g. Google Meet, Zoom)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://meet.google.com/xyz-abcd-efg"
+                  value={scheduleMeetingUrl}
+                  onChange={(e) => setScheduleMeetingUrl(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(31,41,55,0.8)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: '8px',
+                    padding: '10px',
+                    color: '#ffffff',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  required
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  style={{
+                    background: 'transparent',
+                    color: '#9ca3af',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    background: '#22c55e',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Confirm Schedule
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Event Modal */}
+      {showEventModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px',
+          }}
+        >
+          <div
+            style={{
+              background: '#111827',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '16px',
+              padding: '24px',
+              width: '100%',
+              maxWidth: '480px',
+            }}
+          >
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', color: '#ffffff' }}>
+              Host Alumni Event
+            </h3>
+            <form onSubmit={handleCreateEvent}>
+              <input
+                required
+                placeholder="Event title"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: 'rgba(31,41,55,0.8)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
+              />
+              <textarea
+                placeholder="Event description and agenda"
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+                rows={3}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: 'rgba(31,41,55,0.8)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
+              />
+              <input
+                required
+                type="datetime-local"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: 'rgba(31,41,55,0.8)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
+              />
+              <input
+                placeholder="Location / Campus Venue (e.g. Auditorium Hall)"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: 'rgba(31,41,55,0.8)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
+              />
+              <input
+                type="url"
+                placeholder="Virtual Stream / Meeting Link"
+                value={eventVirtualLink}
+                onChange={(e) => setEventVirtualLink(e.target.value)}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  background: 'rgba(31,41,55,0.8)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff',
+                }}
+              />
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowEventModal(false)}
+                  style={{
+                    background: 'transparent',
+                    color: '#9ca3af',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  style={{
+                    background: '#a855f7',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {submitting ? 'Creating…' : 'Create Event'}
                 </button>
               </div>
             </form>

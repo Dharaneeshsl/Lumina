@@ -1382,6 +1382,22 @@ paths:
       responses:
         '200': { description: Application status updated }
 
+  /api/v1/internships/resume:
+    post:
+      summary: Upload student resume file (PDF/DOCX)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                resume:
+                  type: string
+                  format: binary
+      responses:
+        '200': { description: Resume uploaded successfully }
+
   /api/v1/alumni/profile:
     post:
       summary: Create or update alumni profile
@@ -1554,6 +1570,15 @@ paths:
         '200': { description: Notification archived }
 
   /api/v1/notifications/{notificationId}:
+    get:
+      summary: Get notification details by ID
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Notification details returned }
     delete:
       summary: Delete a notification
       parameters:
@@ -1563,6 +1588,17 @@ paths:
           schema: { type: string }
       responses:
         '200': { description: Notification deleted }
+
+  /api/v1/notifications/stream:
+    get:
+      summary: Server-Sent Events stream for real-time notifications
+      responses:
+        '200':
+          description: Event stream established
+          content:
+            text/event-stream:
+              schema:
+                type: string
 
   /api/v1/notifications/preferences:
     get:
@@ -1639,6 +1675,46 @@ paths:
       responses:
         '200': { description: Verification queue returned }
 
+  /api/v1/admin/verification/approve:
+    post:
+      summary: Legacy approve verification request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Verification approved }
+
+  /api/v1/admin/verification/{verificationId}/approve:
+    post:
+      summary: Approve verification request by ID
+      parameters:
+        - name: verificationId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Verification approved }
+
+  /api/v1/admin/verification/{verificationId}/reject:
+    post:
+      summary: Reject verification request by ID
+      parameters:
+        - name: verificationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rejectionReason: { type: string }
+      responses:
+        '200': { description: Verification rejected }
+
   /api/v1/admin/reports/queue:
     get:
       summary: List content reports queue
@@ -1661,6 +1737,12 @@ paths:
       summary: List admin audit log history
       responses:
         '200': { description: Audit logs returned }
+
+  /api/v1/admin/audit-logs/export:
+    get:
+      summary: Export admin audit logs as JSON/CSV
+      responses:
+        '200': { description: Audit logs export returned }
 
   /api/v1/admin/settings:
     get:
@@ -1691,6 +1773,52 @@ paths:
       summary: List announcements
       responses:
         '200': { description: Announcements list returned }
+
+  /api/v1/communities:
+    get:
+      summary: List managed communities and study groups for admin
+      responses:
+        '200': { description: Communities list returned }
+
+  /api/v1/events:
+    get:
+      summary: List all campus events for admin
+      responses:
+        '200': { description: Events list returned }
+
+  /api/v1/analytics/events:
+    post:
+      summary: Ingest analytics telemetry events (rate-limited)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200': { description: Event recorded }
+
+  /api/v1/analytics/dashboard:
+    get:
+      summary: Get system product analytics summary and metrics
+      responses:
+        '200': { description: Analytics dashboard metrics returned }
+
+  /api/v1/analytics/export:
+    get:
+      summary: Export product analytics data
+      responses:
+        '200': { description: Analytics data exported }
+
+  /api/v1/analytics/privacy/{userId}:
+    post:
+      summary: Anonymize or purge user analytics data
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: User data anonymized }
 
 components:
   securitySchemes:

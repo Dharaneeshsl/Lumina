@@ -1,0 +1,30 @@
+meta {
+  name: Schedule or update mentorship session
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/alumni/mentorship/sessions/{{sessionId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "status": "SCHEDULED",
+    "meetingUrl": "https://meet.google.com/xyz-alumni-mentorship",
+    "scheduledAt": "2026-11-10T14:00:00.000Z",
+    "notes": "Session confirmed. Please have your resume and code samples ready."
+  }
+}
+
+assert {
+  res.status: eq 200
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Send alumni connection request
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/alumni/connections
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "alumniId": "{{alumniUserId}}",
+    "message": "Hi! I am a final-year CS student interested in learning more about your engineering journey."
+  }
+}
+
+assert {
+  res.status: eq 201
+}

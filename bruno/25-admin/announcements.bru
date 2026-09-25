@@ -1,0 +1,29 @@
+meta {
+  name: Broadcast announcement
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/admin/announcements
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "title": "Scheduled Campus Maintenance",
+    "content": "All systems will undergo brief maintenance on Sunday at 02:00 AM UTC.",
+    "targetAudience": "ALL"
+  }
+}
+
+assert {
+  res.status: eq 201
+}

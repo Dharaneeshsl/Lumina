@@ -6,4 +6,4 @@ import { Resend } from 'resend'
  * Resend accepts an API key at construction time. Keep startup resilient in
  * local and CI environments where email delivery is not exercised.
  */
-export const resend = new Resend(process.env.RESEND_API_KEY ?? '')
+export const resend = new Resend(process.env.RESEND_API_KEY || 're_stub_placeholder')

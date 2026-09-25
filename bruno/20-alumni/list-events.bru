@@ -1,0 +1,20 @@
+meta {
+  name: List upcoming alumni events
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/v1/alumni/events
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+}

@@ -410,6 +410,7 @@ export const updateMentorshipStatusSchema = z
   .object({
     status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED']),
     meetingUrl: z.string().url().max(500).nullable().optional(),
+    scheduledAt: z.string().datetime().or(z.string().date()).nullable().optional(),
     notes: z.string().trim().max(2000).nullable().optional(),
   })
   .strict()

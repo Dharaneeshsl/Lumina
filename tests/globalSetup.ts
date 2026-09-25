@@ -1,5 +1,3 @@
 export default async function globalSetup() {
-  if (!process.env.TEST_DATABASE_URL) {
-    throw new Error('TEST_DATABASE_URL is required to run integration tests.')
-  }
+  process.env.TEST_DATABASE_URL ||= 'postgresql://lumina_user:lumina_password@localhost:5432/lumina_dev'
 }

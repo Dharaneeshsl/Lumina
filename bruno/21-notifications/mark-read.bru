@@ -1,0 +1,27 @@
+meta {
+  name: Mark notifications as read
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/notifications/read
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "notificationIds": ["{{notificationId}}"]
+  }
+}
+
+assert {
+  res.status: eq 200
+}

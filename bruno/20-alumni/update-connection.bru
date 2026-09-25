@@ -1,0 +1,27 @@
+meta {
+  name: Respond to alumni connection request
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/alumni/connections/{{connectionId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "status": "ACCEPTED"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

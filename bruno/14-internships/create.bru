@@ -1,0 +1,37 @@
+meta {
+  name: Create internship
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/internships
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "companyId": "{{companyId}}",
+    "title": "Software Engineering Intern - Full Stack",
+    "description": "Looking for talented students proficient in TypeScript, React, and Node.js.",
+    "role": "SOFTWARE_ENGINEER",
+    "locationType": "HYBRID",
+    "location": "Bengaluru, India",
+    "stipendAmount": 45000,
+    "stipendCurrency": "INR",
+    "stipendPeriod": "MONTHLY",
+    "skills": ["TypeScript", "React", "PostgreSQL"],
+    "applicationDeadline": "2026-12-31T23:59:59.000Z"
+  }
+}
+
+assert {
+  res.status: eq 201
+}

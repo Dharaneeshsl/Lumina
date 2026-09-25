@@ -1,0 +1,28 @@
+meta {
+  name: Update applicant status
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/internships/applications/{{applicationId}}/status
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "status": "SHORTLISTED",
+    "note": "Candidate selected for technical interview."
+  }
+}
+
+assert {
+  res.status: eq 200
+}

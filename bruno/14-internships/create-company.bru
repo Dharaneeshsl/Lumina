@@ -1,0 +1,29 @@
+meta {
+  name: Create company
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/internships/companies
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "name": "Acme Innovations Labs",
+    "website": "https://acme-labs.example.com",
+    "description": "Leading cloud and AI infrastructure provider."
+  }
+}
+
+assert {
+  res.status: eq 201
+}

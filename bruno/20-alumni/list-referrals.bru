@@ -1,0 +1,20 @@
+meta {
+  name: List active alumni referrals
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/v1/alumni/referrals
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+}

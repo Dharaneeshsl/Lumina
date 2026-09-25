@@ -1,0 +1,21 @@
+meta {
+  name: Content reports queue
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/v1/admin/reports/queue
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+assert {
+  res.status: eq 200
+}

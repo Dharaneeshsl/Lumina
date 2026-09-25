@@ -1,0 +1,31 @@
+meta {
+  name: Create alumni referral
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/v1/alumni/referrals
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "title": "Software Engineer II - Cloud Infrastructure",
+    "company": "Google Cloud",
+    "location": "Sunnyvale, CA / Hybrid",
+    "description": "Offering internal referrals for Lumina students and graduates with Go/C++ distributed systems experience.",
+    "link": "https://careers.google.com/jobs/results/123456"
+  }
+}
+
+assert {
+  res.status: eq 201
+}

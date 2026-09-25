@@ -1,0 +1,21 @@
+meta {
+  name: Join club
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/clubs/{{clubId}}/join
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+assert {
+  res.status: eq 200
+}

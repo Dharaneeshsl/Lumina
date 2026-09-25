@@ -1,0 +1,21 @@
+meta {
+  name: User analytics privacy request
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/analytics/privacy/{{userId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+assert {
+  res.status: eq 200
+}

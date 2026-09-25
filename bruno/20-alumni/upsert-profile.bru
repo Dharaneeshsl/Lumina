@@ -1,0 +1,38 @@
+meta {
+  name: Upsert alumni profile
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/alumni/profile
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "graduationYear": 2023,
+    "departmentName": "Computer Science & Engineering",
+    "company": "DeepMind",
+    "jobTitle": "Research Engineer",
+    "industry": "Artificial Intelligence",
+    "location": "London, UK",
+    "bio": "Working on agentic reasoning and distributed reinforcement learning.",
+    "skills": ["Python", "PyTorch", "TypeScript", "Systems Design"],
+    "linkedIn": "https://linkedin.com/in/alumnus-sample",
+    "github": "https://github.com/alumnus-sample",
+    "isAvailableForMentorship": true,
+    "directoryVisible": true
+  }
+}
+
+assert {
+  res.status: eq 200
+}

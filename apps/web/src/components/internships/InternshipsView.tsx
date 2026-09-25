@@ -99,7 +99,33 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false)
   const [coverLetterInput, setCoverLetterInput] = useState('')
   const [resumeUrlInput, setResumeUrlInput] = useState('https://example.com/resumes/my_resume.pdf')
+  const [uploadingResume, setUploadingResume] = useState(false)
+  const [uploadedResumeName, setUploadedResumeName] = useState<string | null>(null)
   const [applicationSuccessMsg, setApplicationSuccessMsg] = useState<string | null>(null)
+
+  const handleResumeFileUpload = async (file: File) => {
+    setUploadingResume(true)
+    setError(null)
+    try {
+      const formData = new FormData()
+      formData.append('resume', file)
+      const res = await fetch(api + '/internships/resume', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.message || 'Resume upload failed')
+      if (data?.resumeUrl) {
+        setResumeUrlInput(data.resumeUrl)
+        setUploadedResumeName(file.name)
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to upload resume file')
+    } finally {
+      setUploadingResume(false)
+    }
+  }
 
   // Recruiter Posting State
   const [isNewInternshipModalOpen, setIsNewInternshipModalOpen] = useState(false)
@@ -742,7 +768,20 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}><button onClick={handleCreateCompany} style={{ backgroundColor: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.35)', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer' }}>+ Company</button><button
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={handleCreateCompany} style={{ backgroundColor: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.35)', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer' }}>+ Company</button>
+                {companies.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const company = companies[0]
+                      if (company) void handleEditCompany(company)
+                    }}
+                    style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.15)', padding: '10px 14px', borderRadius: '10px', cursor: 'pointer' }}
+                  >
+                    Edit Company
+                  </button>
+                )}
+                <button
                 onClick={() => setIsNewInternshipModalOpen(true)}
                 style={{
                   backgroundColor: '#8b5cf6',
@@ -896,22 +935,53 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
               >
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#cbd5e1',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    Resume URL / Drive File Link
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        color: '#cbd5e1',
+                      }}
+                    >
+                      Resume Document / URL
+                    </label>
+                    <label
+                      style={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        color: '#60a5fa',
+                        border: '1px solid rgba(59, 130, 246, 0.4)',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: uploadingResume ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {uploadingResume ? 'Uploading...' : '📁 Upload PDF/DOCX'}
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        disabled={uploadingResume}
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) void handleResumeFileUpload(file)
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {uploadedResumeName && (
+                    <div style={{ fontSize: '12px', color: '#34d399', marginBottom: '6px' }}>
+                      ✓ Uploaded: {uploadedResumeName}
+                    </div>
+                  )}
                   <input
                     type="url"
                     required
                     value={resumeUrlInput}
                     onChange={(e) => setResumeUrlInput(e.target.value)}
+                    placeholder="https://... or upload file above"
                     style={{
                       width: '100%',
                       padding: '10px 14px',
@@ -1215,6 +1285,7 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                 </button>
                 <button
                   type="submit"
+                  disabled={submitting}
                   style={{
                     backgroundColor: '#8b5cf6',
                     color: '#fff',
@@ -1222,10 +1293,11 @@ export default function InternshipsView({ onBackToHome }: InternshipsViewProps) 
                     padding: '10px 22px',
                     borderRadius: '8px',
                     fontWeight: 600,
-                    cursor: 'pointer',
+                    cursor: submitting ? 'not-allowed' : 'pointer',
+                    opacity: submitting ? 0.7 : 1,
                   }}
                 >
-                  Publish Posting
+                  {submitting ? 'Publishing...' : 'Publish Posting'}
                 </button>
               </div>
             </form>

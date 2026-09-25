@@ -1,0 +1,20 @@
+meta {
+  name: Get alumni profile by user ID
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/alumni/profile/{{userId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+}
+
+assert {
+  res.status: eq 200
+}

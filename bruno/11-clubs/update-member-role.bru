@@ -1,0 +1,27 @@
+meta {
+  name: Update club member role
+  type: http
+  seq: 9
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/clubs/{{clubId}}/members/{{memberUserId}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: application/json
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+body:json {
+  {
+    "role": "LEAD"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

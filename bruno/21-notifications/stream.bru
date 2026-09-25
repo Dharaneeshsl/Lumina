@@ -1,0 +1,21 @@
+meta {
+  name: Notifications SSE stream
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/notifications/stream
+  body: none
+  auth: inherit
+}
+
+headers {
+  Origin: {{origin}}
+  Accept: text/event-stream
+  Cookie: better-auth.session_token={{sessionToken}}
+}
+
+assert {
+  res.status: eq 200
+}

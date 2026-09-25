@@ -8,6 +8,7 @@ import {
   requireAuth,
   upload,
   uploadPostMedia,
+  uploadResume,
 } from '../../middleware'
 import analyticsRouter from '../analytics/router'
 import * as controller from './controller'
@@ -351,6 +352,20 @@ internshipRouter.patch(
   requireAuth,
   controller.updateApplicationStatus
 )
+internshipRouter.post(
+  '/resume',
+  requireAuth,
+  boundConcurrentUploads,
+  uploadResume.single('resume'),
+  controller.uploadResume
+)
+internshipRouter.post(
+  '/upload-resume',
+  requireAuth,
+  boundConcurrentUploads,
+  uploadResume.single('resume'),
+  controller.uploadResume
+)
 
 apiRouter.use('/v1/internships', internshipRouter)
 apiRouter.use('/internships', internshipRouter)
@@ -394,6 +409,7 @@ notificationRouter.get('/stream', requireAuth, (req, res) => {
 })
 notificationRouter.get('/', requireAuth, controller.listNotifications)
 notificationRouter.get('/unread-count', requireAuth, controller.getNotificationUnreadCount)
+notificationRouter.get('/:notificationId', requireAuth, controller.getNotificationById)
 notificationRouter.post('/read', requireAuth, controller.markNotificationsAsRead)
 notificationRouter.post('/read-all', requireAuth, controller.markAllNotificationsAsRead)
 notificationRouter.patch('/:notificationId/archive', requireAuth, controller.archiveNotification)
@@ -420,11 +436,15 @@ adminRouter.patch(
 )
 adminRouter.get('/verification/queue', requireAuth, controller.listAdminVerificationQueue)
 adminRouter.get('/verification-queue', requireAuth, controller.listAdminVerificationQueue)
+adminRouter.post('/verification/approve', requireAuth, controller.approveAlumniVerification)
+adminRouter.post('/verification/:verificationId/approve', requireAuth, controller.approveAdminVerificationById)
+adminRouter.post('/verification/:verificationId/reject', requireAuth, controller.rejectAdminVerificationById)
 adminRouter.get('/reports/queue', requireAuth, controller.listAdminReportsQueue)
 adminRouter.get('/reports', requireAuth, controller.listAdminReportsQueue)
 adminRouter.post('/moderation/action', requireAuth, controller.applyAdminModerationAction)
 adminRouter.post('/moderation', requireAuth, controller.applyAdminModerationAction)
 adminRouter.get('/audit-logs', requireAuth, controller.listAdminAuditLogs)
+adminRouter.get('/audit-logs/export', requireAuth, controller.exportAdminAuditLogs)
 adminRouter.get('/settings', requireAuth, controller.getAdminSystemSettings)
 adminRouter.patch('/settings', requireAuth, controller.updateAdminSystemSetting)
 adminRouter.put('/settings', requireAuth, controller.updateAdminSystemSetting)
@@ -433,5 +453,11 @@ adminRouter.get('/announcements', requireAuth, controller.listAdminAnnouncements
 
 apiRouter.use('/v1/admin', adminRouter)
 apiRouter.use('/admin', adminRouter)
+
+// General resource listing (communities and campus events)
+apiRouter.get('/communities', optionalAuth, controller.listCommunities)
+apiRouter.get('/v1/communities', optionalAuth, controller.listCommunities)
+apiRouter.get('/events', optionalAuth, controller.listEvents)
+apiRouter.get('/v1/events', optionalAuth, controller.listEvents)
 
 export default apiRouter

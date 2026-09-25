@@ -1252,11 +1252,32 @@ export const updateApplicationStatus = (req: Request, res: Response) =>
     api.updateApplicationStatus(userId(req), String(req.params.applicationId), req.body)
   )
 
+export const uploadResume = async (req: Request, res: Response) => {
+  try {
+    const { user } = req as AuthenticatedRequest
+    if (!req.file) {
+      return res.status(400).json({ message: 'Resume file is required.' })
+    }
+    const result = await api.uploadResume(user.id, req.file)
+    return res.status(200).json(result)
+  } catch (err) {
+    if (err && typeof err === 'object' && 'status' in err) {
+      return sendError(res, err)
+    }
+    return res.status(500).json({
+      message: 'Failed to upload resume.',
+    })
+  }
+}
+
 export const upsertAlumniProfile = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.upsertAlumniProfile(userId(req), req.body))
 
 export const getAlumniProfile = (req: Request, res: Response) =>
-  respond(req, res, 200, () => api.getAlumniProfile(String(req.params.userId)))
+  respond(req, res, 200, () => {
+    const target = req.params.userId === 'me' ? userId(req) : String(req.params.userId)
+    return api.getAlumniProfile(target)
+  })
 
 export const searchAlumniDirectory = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.searchAlumniDirectory(req.query))
@@ -1300,6 +1321,11 @@ export const listAlumniEvents = (_req: Request, res: Response) =>
 
 export const listNotifications = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listNotifications(userId(req), req.query))
+
+export const getNotificationById = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.getNotificationById(userId(req), String(req.params.notificationId))
+  )
 
 export const getNotificationUnreadCount = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.getNotificationUnreadCount(userId(req)))
@@ -1349,6 +1375,26 @@ export const updateAdminUserRoleStatus = (req: Request, res: Response) =>
 export const listAdminVerificationQueue = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listAdminVerificationQueue(userId(req)))
 
+export const approveAdminVerificationById = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.approveAdminVerificationById(
+      userId(req),
+      String(req.params.verificationId),
+      true,
+      req.body?.notes
+    )
+  )
+
+export const rejectAdminVerificationById = (req: Request, res: Response) =>
+  respond(req, res, 200, () =>
+    api.approveAdminVerificationById(
+      userId(req),
+      String(req.params.verificationId),
+      false,
+      req.body?.notes
+    )
+  )
+
 export const listAdminReportsQueue = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listAdminReportsQueue(userId(req)))
 
@@ -1357,6 +1403,9 @@ export const applyAdminModerationAction = (req: Request, res: Response) =>
 
 export const listAdminAuditLogs = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listAdminAuditLogs(userId(req), req.query))
+
+export const exportAdminAuditLogs = (req: Request, res: Response) =>
+  respond(req, res, 200, () => api.exportAdminAuditLogs(userId(req), req.query))
 
 export const getAdminSystemSettings = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.getAdminSystemSettings(userId(req)))
@@ -1369,3 +1418,9 @@ export const createAdminAnnouncement = (req: Request, res: Response) =>
 
 export const listAdminAnnouncements = (req: Request, res: Response) =>
   respond(req, res, 200, () => api.listAdminAnnouncements(userId(req)))
+
+export const listCommunities = (_req: Request, res: Response) =>
+  respond(_req, res, 200, () => api.listCommunities())
+
+export const listEvents = (_req: Request, res: Response) =>
+  respond(_req, res, 200, () => api.listEvents())
